@@ -9,13 +9,16 @@ class JudgeScoreSheet(models.Model):
     team_entry = models.ForeignKey(TeamEntry, on_delete=models.CASCADE, related_name="score_sheets")
     division = models.CharField(max_length=10, choices=Division.choices)
     
-    ##  SKILLS / KICKS
+    ##  JAZZ Skills
     skills_turns = models.PositiveSmallIntegerField(null=True, blank=True)
     skills_leaps_jumps = models.PositiveSmallIntegerField(null=True, blank=True)
     
+    ##  KICK Skills
     kicks_technique = models.PositiveSmallIntegerField(null=True, blank=True)
     kicks_height = models.PositiveSmallIntegerField(null=True, blank=True)
     
+    
+    #####  SHARED CATEGORIES  #####
     ##  CHOREOGRAPHY
     choreo_creativity = models.PositiveSmallIntegerField()
     choreo_visual_effect = models.PositiveSmallIntegerField()
@@ -37,16 +40,21 @@ class JudgeScoreSheet(models.Model):
     kick_deduction = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     other_deduction = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     
+    ##  Computed
     subtotal = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     total = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     rank = models.PositiveSmallIntegerField(null=True, blank=True)
     
     def compute_subtotal(self):
         fields = [
-            "choreo_creativity", "choreo_visual_effect", 
-            "diff_routine", "diff_formations", "diff_skills_or_kicks", 
-            "exec_placement_control", "exec_accuracy",
-            "routine_effectiveness"
+            "choreo_creativity", 
+            "choreo_visual_effect", 
+            "diff_routine", 
+            "diff_formations", 
+            "diff_skills_or_kicks", 
+            "exec_placement_control", 
+            "exec_accuracy",
+            "routine_effectiveness",
         ]
         
         if self.division == Division.JAZZ:
@@ -62,6 +70,10 @@ class JudgeScoreSheet(models.Model):
             self.time_deduction + self.kick_deduction + self.other_deduction
         )
         
+    def save(self, *args, **kwargs):
+        self.compute_total()
+        super().save(*args, **kwargs)
+        
         
 #####  KICK COUNTER/TIMER MODEL  #####
 class KCTEntry(models.Model):
@@ -69,7 +81,6 @@ class KCTEntry(models.Model):
     kct = models.ForeignKey(User, on_delete=models.CASCADE)
     
     num_competitors = models.PositiveIntegerField()
-    
     routine_time_seconds = models.PositiveIntegerField()
     kick_count = models.PositiveIntegerField(null=True, blank=True)
     
