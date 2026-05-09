@@ -68,6 +68,8 @@ class KCTEntry(models.Model):
     team_entry = models.ForeignKey(TeamEntry, on_delete=models.CASCADE, related_name="kct_entries")
     kct = models.ForeignKey(User, on_delete=models.CASCADE)
     
+    num_competitors = models.PositiveIntegerField()
+    
     routine_time_seconds = models.PositiveIntegerField()
     kick_count = models.PositiveIntegerField(null=True, blank=True)
     
