@@ -1,6 +1,7 @@
 from decimal import Decimal
 from .models import JudgeScoreSheet, KCTEntry
 from meets.models import Division
+from deductions.models import RoutineDeduction
 
 #####  CENTRAL SCORING SERVICE - ALL RULES IN ONE PLACE  #####
 
@@ -73,6 +74,33 @@ class ScoringEngine:
             scoresheet.team_entry
         )
 
+        scoresheet.other_deduction = ScoringEngine.compute_deductions(scoresheet)
         scoresheet.compute_total()
 
         
+@staticmethod
+def compute_deductions(scoresheet):
+    deductions = RoutineDeduction.objects.filter(team_entry=scoresheet.team_entry)
+    
+    total = Decimal("0.0")
+    
+    for d in deductions:
+        rule = d.deduction_type
+        
+        if rule.penalty_type == "DQ":
+            return "DQ"
+        
+        pts = rule.points or 0
+        
+        if rule.per_occurance:
+            pts *= d.count
+            
+        if rule.per_judge:
+            pts *= 1 # each judge applies individually
+            
+        if rule.max_points:
+            pts = min(pts, rule.max_points)
+            
+        total += pts
+        
+    return total
