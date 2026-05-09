@@ -1,20 +1,13 @@
+from django import forms 
 from django.contrib import admin
 from .models import JudgeScoreSheet, KCTEntry
+from .scoring import ScoringEngine
+from .forms import TimeMMSSField
 
-class KCTEntryInline(admin.TabularInline):
-    model = KCTEntry
-    extra = 1
-    fields = (
-        "kct",
-        "num_competitors",
-        "routine_time_seconds",
-        "kick_count",
-        "jazz_team_turn_performed",
-        "jazz_team_leap_jump_performed",
-        "falls_observed",
-        "dangerous_move_observed",
-    )
-
+##  Anytime a scoresheet is saved (admin or in app):
+##  • Subtotal and total are recomputed,
+##  • Kick deductions are pulled from KCT,
+##  • Time deductions can be automated later.
 
 class JudgeScoreSheetInline(admin.TabularInline):
     model = JudgeScoreSheet
@@ -43,7 +36,6 @@ class JudgeScoreSheetInline(admin.TabularInline):
         "rank",
     )
 
-
 @admin.register(JudgeScoreSheet)
 class JudgeScoreSheetAdmin(admin.ModelAdmin):
     list_display = ("team_entry", "judge", "division", "total", "rank")
@@ -51,9 +43,24 @@ class JudgeScoreSheetAdmin(admin.ModelAdmin):
     search_fields = ("team_entry__school__name", "judge__username")
     readonly_fields = ("subtotal", "total")
 
+    def save_model(self, request, obj, form, change):
+        ScoringEngine.apply_to_scoresheet(obj)
+        super().save_model(request, obj, form, change)
+        
+        
+        
+class KCTEntryForm(forms.ModelForm):
+    routine_time_seconds = TimeMMSSField()
+
+    class Meta:
+        model = KCTEntry
+        fields = "__all__"
+
 
 @admin.register(KCTEntry)
 class KCTEntryAdmin(admin.ModelAdmin):
+    form = KCTEntryForm
+
     list_display = (
         "team_entry",
         "kct",
@@ -65,3 +72,6 @@ class KCTEntryAdmin(admin.ModelAdmin):
     )
     list_filter = ("team_entry__meet", "kct")
     search_fields = ("team_entry__school__name",)
+
+
+

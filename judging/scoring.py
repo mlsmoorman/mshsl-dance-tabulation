@@ -2,6 +2,9 @@ from decimal import Decimal
 from .models import JudgeScoreSheet, KCTEntry
 from meets.models import Division
 
+#####  CENTRAL SCORING SERVICE - ALL RULES IN ONE PLACE  #####
+
+#####  KICK COUNT DEDUCTION  #####
 KICK_MIN = 35
 KICK_MAX = 55
 
@@ -28,6 +31,7 @@ class ScoringEngine:
 
         return Decimal(diff)  # 1 point per kick outside range
 
+#####  To come - automatic time deductions  #####
     @staticmethod
     def compute_time_deduction(team_entry):
         # Placeholder: you can wire exact MSHSL timing rules here.
