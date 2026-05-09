@@ -12,6 +12,12 @@ class User(AbstractUser):
     roles = models.ManyToManyField(Role, related_name="users", blank=True)
 
 
+class School(models.Model):
+    name = models.CharField(max_length=255)
+    abbreviation = models.CharField(max_length=10)
+    
+    def __str__(self):
+        return self.name
 #####  • A user can now have any combination of roles
 #####  • Roles are stored in a separate table
 #####  • You can add more roles later (Coach, Admin, Coordinator, etc.)

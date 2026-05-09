@@ -7,7 +7,9 @@ from meets.models import Division
 #####  KICK COUNT DEDUCTION  #####
 KICK_MIN = 35
 KICK_MAX = 55
-
+MIN_TIME = 120  # 2:00
+MAX_TIME = 150  # 2:30
+    
 class ScoringEngine:
     @staticmethod
     def compute_kick_deduction(division, team_entry):
@@ -31,13 +33,33 @@ class ScoringEngine:
 
         return Decimal(diff)  # 1 point per kick outside range
 
-#####  To come - automatic time deductions  #####
+#####  TIME DEDUCTION  #####
+
     @staticmethod
     def compute_time_deduction(team_entry):
-        # Placeholder: you can wire exact MSHSL timing rules here.
-        # For now, no automatic time deduction.
+        kct = (
+            KCTEntry.objects.filter(team_entry-team_entry)
+            .order_by("-id")
+            .first()
+        )
+
+        if not kct:
+            return Decimal("0.0")
+        
+        time = kct.routine_time_seconds
+        
+        # Under time
+        if time < MIN_TIME:
+            return Decimal("1.0")
+        
+        # Over time
+        if time > MAX_TIME:
+            return Decimal("1.0")
         return Decimal("0.0")
 
+        # Otherwise no deduction
+        return Decimal("0.0")
+    
     @staticmethod
     def apply_to_scoresheet(scoresheet: JudgeScoreSheet):
         # Kick deduction from KCT
@@ -46,10 +68,10 @@ class ScoringEngine:
             scoresheet.team_entry,
         )
 
-        # Time deduction (if you want it automatic)
-        auto_time = ScoringEngine.compute_time_deduction(scoresheet.team_entry)
-        # If you want KCT to enter time_deduction manually, skip this line:
-        scoresheet.time_deduction = auto_time
+        # Time deduction from KCT
+        scoresheet.time_deduction = ScoringEngine.compute_time_deduction(
+            scoresheet.team_entry
+        )
 
         scoresheet.compute_total()
 
