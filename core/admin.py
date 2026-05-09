@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import User, School
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-##  Registering Apps  ##
+#####  Registering Models  #####
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
