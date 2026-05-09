@@ -1,22 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-#####  USER MODEL - SELECTS USER WHICH DETERMINES VIEW  #####
-class User(AbstractUser):
-    ROLE_CHOICES = [
-		("JUDGE", "Judge"),
-		("KCT", "Kick Counter/Timer"),
-		("TABULATOR", "Tabulator"),
-		("COACH", "Coach"),
-		("ADMIN", "Admin"),
-	]
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+class Role(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
-#####  SCHOOL MODEL - SELECTS SCHOOL  #####
-class School(models.Model):
-    name = models.CharField(max_length=255)
-    abbreviation = models.CharField(max_length=20, blank=True)
-    
     def __str__(self):
         return self.name
 
+
+class User(AbstractUser):
+    roles = models.ManyToManyField(Role, related_name="users", blank=True)
+
+
+#####  • A user can now have any combination of roles
+#####  • Roles are stored in a separate table
+#####  • You can add more roles later (Coach, Admin, Coordinator, etc.)

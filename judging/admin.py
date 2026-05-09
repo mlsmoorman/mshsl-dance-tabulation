@@ -1,38 +1,25 @@
 from django.contrib import admin
 from .models import JudgeScoreSheet, KCTEntry
 
-#####  Registering Models  #####
-@admin.register(JudgeScoreSheet)
-class JudgeScoreSheetAdmin(admin.ModelAdmin):
-    list_display = (
-		"team_entry",
-		"judge",
-		"division",
-		"total",
-		"rank",
-	)
-    list_filter = ("division", "judge", "team_entry__meet")
-    search_fields = ("team_entry__school__name", "judge__username")
-    readonly_fields = ("subtotal", "total")
-    
-@admin.register(KCTEntry)
-class KCTEntryAdmin(admin.ModelAdmin):
-    list_display = (
-		"team_entry",
-		"kct",
-		"num_competitors"
-		"routine_time_seconds",
-		"kick_count",
-		"falls_observed",
-		"dangerous_move_observed",
-	)
-    list_filter = ("team_entry__meet", "kct")
-    search_fields = ("team_entry__school__name",)
-    
+class KCTEntryInline(admin.TabularInline):
+    model = KCTEntry
+    extra = 1
+    fields = (
+        "kct",
+        "num_competitors",
+        "routine_time_seconds",
+        "kick_count",
+        "jazz_team_turn_performed",
+        "jazz_team_leap_jump_performed",
+        "falls_observed",
+        "dangerous_move_observed",
+    )
+
 
 class JudgeScoreSheetInline(admin.TabularInline):
     model = JudgeScoreSheet
     extra = 0
+    readonly_fields = ("subtotal", "total", "rank")
     fields = (
         "judge",
         "division",
@@ -55,20 +42,26 @@ class JudgeScoreSheetInline(admin.TabularInline):
         "total",
         "rank",
     )
-    readonly_fields = ("subtotal", "total", "rank")
-    
-    
-class KCTEntryInLine(admin.TabularInline):
-    model = KCTEntry
-    extra = 1
-    fields = (
-		"kct",
-		"num_competitors",
-		"routine_time_seconds",
-		"kick_count",
-		"jazz_team_turn_performed",
-		"jazz_team_leap_jump_performed",
-		"fall_observed",
-		"dangerous_move_observed",
-	)
-    
+
+
+@admin.register(JudgeScoreSheet)
+class JudgeScoreSheetAdmin(admin.ModelAdmin):
+    list_display = ("team_entry", "judge", "division", "total", "rank")
+    list_filter = ("division", "judge", "team_entry__meet")
+    search_fields = ("team_entry__school__name", "judge__username")
+    readonly_fields = ("subtotal", "total")
+
+
+@admin.register(KCTEntry)
+class KCTEntryAdmin(admin.ModelAdmin):
+    list_display = (
+        "team_entry",
+        "kct",
+        "num_competitors",
+        "routine_time_seconds",
+        "kick_count",
+        "falls_observed",
+        "dangerous_move_observed",
+    )
+    list_filter = ("team_entry__meet", "kct")
+    search_fields = ("team_entry__school__name",)
