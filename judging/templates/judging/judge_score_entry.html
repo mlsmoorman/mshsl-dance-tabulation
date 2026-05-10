@@ -1,0 +1,53 @@
+<h2>Judge Scoring - {{  team_entry.team.name  }} ({{  team_entry.division  }})</h2>
+
+<form method="POST">
+	{% csrf_token %}
+
+	<div class="card mb-3">
+		<div class="card-header">Performance</div>
+		<div class="card-body">
+			<input type="number" name="performance" class="form-control" 
+				value="{{  sheet.performance  }}" min="1" max="10" required>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">Choreography</div>
+		<div class="card-body">
+			<input type="number" name="choreography" class="form-control" 
+				value="{{  sheet.choreography  }}" min="1" max="10" required>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">Execution</div>
+		<div class="card-body">
+			<input type="number" name="excecution" class="form-control" 
+				value="{{  sheet.excecution  }}" min="1" max="10" required>
+		</div>
+	</div>
+	<div class="card mb-3">
+		<div class="card-body">Presentation</div>
+		<div class="card-holder">
+			<input type="number" name="presentation" class="form-control" 
+				value="{{  sheet.presentation  }}" min="1" max="10" required>
+		</div>
+	</div>
+	<div class="card mb-3">
+		<div class="card-header">Comments (optional)</div>
+		<div class="card-body">
+			<textarea name="comments" class="form-control">{{  sheet.comments  }}</textarea>
+		</div>
+	</div>
+	
+	<button class="btn btn-primary">Save Scores</button>
+</form>
+
+<hr>
+
+<h3>Current Totals</h3>
+<ul>
+	<li>Subtotal: {{  sheet.subtotal  }}</li>
+	<li>Deductions: {{  sheet.other_deduction  }}</li>
+	<li><strong>Total Score: {{  sheet.total_score  }}</strong></li>
+</ul>

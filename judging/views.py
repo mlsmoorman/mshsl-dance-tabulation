@@ -6,6 +6,7 @@ from meets.models import TeamEntry
 from judging.models import JudgeScoreSheet, KCTEntry
 from deductions.models import DeductionType, RoutineDeduction
 from core.models import Role
+from judging.scoring import ScoringEngine
 
 
 #####  SUPERIOR JUDGE VIEW  #####
@@ -90,7 +91,7 @@ def tabulator_verify(request, team_entry_id):
     # Compute Totals
     subtotal_by_judge = {sheet.judge_number: sheet.compute_subtotal() for sheet in judge_sheets}
     deduction_total_by_judge = {sheet.judge_number: sheet.other_deduction for sheet in judge_sheets}
-    total_by_judge = {sheet.judge_number: sheet.total_score in judge_sheets}
+    total_by_judge = {sheet.judge_number: sheet.total_score for sheet in judge_sheets}
     
     if request.method == "POST":
         team_entry.verified_by_tabulator = True
@@ -106,4 +107,44 @@ def tabulator_verify(request, team_entry_id):
         "subtotal_by_judge": subtotal_by_judge,
         "deduction_total_by_judge": deduction_total_by_judge,
         "total_by_judge": total_by_judge,
+    })
+    
+#####  JUDGES VIEW  #####
+def user_is_judge(user):
+    return user.roles.filter(name="Judge").exists()
+
+@login_required
+def judge_score_entry(request, team_entry_id):
+    if not user_is_judge(request.user):
+        messages.error(request, "You do not have permission to access this page.")
+        return redirect("/")
+    
+    team_entry = get_object_or_404(TeamEntry, id=team_entry_id)
+    
+    # Get or create the Judges' Scoresheet
+    sheet, created = JudgeScoreSheet.objects.get_or_create(
+        team_entry=team_entry,
+        judge=request.user,
+        defaults={"judge_number": request.user.judge_number},
+    )
+    
+    if request.method == "POST":
+        # Update scoring categories
+        sheet.performance = request.POST.get("performance")
+        sheet.choreography = request.POST.get("choreography")
+        sheet.execution = request.POST.get("execution")
+        sheet.presentation = request.POST.get("presentation")
+        sheet.comments = request.POST.get("comments", "")
+        
+        sheet.save()
+        
+        # Recompute Totals
+        ScoringEngine.apply_to_scoresheet(sheet, user=request.user)
+        
+        messages.success(request, "Scores saved.")
+        return redirect("judge_score_entry", team_entry_id=team_entry_id)
+    
+    return render(request, "judging/judge_score_entry.html", {
+        "team_entry": team_entry,
+        "sheet": sheet,
     })
