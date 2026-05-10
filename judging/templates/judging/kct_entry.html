@@ -1,0 +1,31 @@
+<h2>KCT Entry - {{  team_entry.team.name  }} ({{  team_entry.division  }})</h2>
+
+<form method="POST">
+	{% csrf_token %}
+
+	<div class="card mb-3">
+		<div class="card-header">Kick Count</div>
+		<div class="card-body">
+			<input type="number" name="kick_count" class="form-control"
+				value="{{  kct.kick_count  }}" min="0" max="200">
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div class="card-header">Routine Time (seconds)</div>
+		<div class="card-body">
+			<input type="number" name="routine_time_seconds" class="form-control"
+				value="{{  kct.routine_time_seconds  }}" min="0" max="600">
+		</div>
+	</div>
+	
+	<div class="card mb-3">
+		<div class="card-header">Competitor Count</div>
+		<div class="card-body">
+			<input type="number" name="num_competitors" class="form-control"
+				value="{{  kct.num_competitors  }}" min="0" max="50">
+		</div>
+	</div>
+
+	<button class="btn btn-primary">Save KCT Data</button>
+</form>

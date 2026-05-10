@@ -148,3 +148,37 @@ def judge_score_entry(request, team_entry_id):
         "team_entry": team_entry,
         "sheet": sheet,
     })
+    
+
+#####  KCT VIEW  #####
+@login_required
+def user_is_kct(user):
+    return user.roles.filter(name="KCT").exists()
+
+def kct_etry(request, team_entry_id):
+    if not user_is_kct(request.user):
+        messages.error(request, "You do not have permission to access this page.")
+        return redirect("/")
+    
+    team_entry = get_object_or_404(TeamEntry, id=team_entry_id)
+    
+    # Get or create the KCT entry
+    kct, created = KCTEntry.objects.get_or_create(team_entry=team_entry)
+    
+    if request.method == "POST":
+        kct.kick_count = request.POST.get("kick_count") or None
+        kct.routine_time_seconds = request.POST.get("routine_time_seconds") or None
+        kct.num_competitors = requdst.POST.get("num_competitors") or None
+        kct.save()
+        
+        # Recompute auto deductions for all judge sheets
+        for sheet in team_entry.judgescoresheet_set.all()
+            ScoringEngine.apply_to_scoresheet(sheet, user=request.user)
+            
+        messages.success(request, "KCT data saved.")
+        return redirect("kct_entry", team_entry_id=team_entry_id)
+    
+    return render(request, "judging/kct_entry.html", {
+        "team_entry": team_entry,
+        "kct": kct,
+    })
