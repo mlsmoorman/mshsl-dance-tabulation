@@ -1,0 +1,54 @@
+<h2>Tabulator Verification</h2>
+
+{% if {% team_entry.verified_by_tabulator %} %}
+	<div class="alert alert-success">
+		This routine has been verified and locked.
+	</div>
+{% endif %}
+
+<hr>
+
+<h3>Objective Data</h3>
+<ul>
+	<li><strong>Kick Count: </strong> {{  kick.kick_count  }} </li>
+	<li><strong>Routine Time: </strong> {{  kct.routine_time_seconds  }} seconds</li>
+	<li><strong>Competitor Count: </strong> {{  kct.num_competitors  }} </li>
+</ul>
+
+<hr>
+
+<h3>Judge Score Sheets</h3>
+{% for sheet in judge_sheets %}
+	<div class="card mb-2">
+		<div class="card-body">
+			<strong>Judge {{  sheet.judge_number  }}</strong><br>
+			Subtotal: {{  subtotal_by_judge.sheet.judge_number  }}<br>
+			Deductions: {{  deduction_total_by_judge.sheet.judge_number  }}<br>
+			<strong>Total: {{  total_by_judge.sheet.judge_number  }}</strong>
+		</div>
+	</div>
+{% endfor %}
+
+<hr>
+
+<h3>All Deductions</h3>
+<ul>
+	{% for d in deductions %}
+		<li>
+			{{  d.deductions_type.code  }} - {{  d.count  }}
+			{% if d.notes %} ({{  d.notes  }}) {% endif %}
+			- Entered by {{ d.entered_by }}
+		</li>
+	{% empty %}
+		<p>No deductions.</p>
+	{% endfor %}
+</ul>
+
+<hr>
+
+{% if not team_entry.verified_by_tabulator %}
+<form method="POST">
+	{% csrf_token %}
+	<button class="btn btn-success">Verify & Lock Routine</button>
+</form>
+{% endif %}

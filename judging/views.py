@@ -8,10 +8,10 @@ from deductions.models import DeductionType, RoutineDeduction
 from core.models import Role
 
 
+#####  SUPERIOR JUDGE VIEW  #####
 def user_is_superior_judge(user):
     return user.roles.filter(name="Superior Judge").exists()
-
-
+    
 @login_required
 def superior_judge_review(request, team_entry_id):
     if not user_is_superior_judge(request.user):
@@ -66,4 +66,44 @@ def superior_judge_review(request, team_entry_id):
         "auto_deductions": auto_deductions,
         "manual_deductions": manual_deductions,
         "deduction_types": deduction_types,
+    })
+
+#####  TABULATOR VIEW  #####
+def user_is_tabulator(user):
+    return user.roles.filter(name="Tabulator").exists()
+
+@login_required
+def tabulator_verify(request, team_entry_id):
+    if not user_is_tabulator(request.user):
+        messages.error(request, "You do not have permission to access this page.")
+        return redirect("/")
+
+    team_entry = get_object_or_404(TeamEntry, id=team_entry_id)
+    kct = KCTEntry.objects.filter(team_entry=team_entry).order_by("-id").first()
+    judge_sheets = JudgeScoreSheet.objects.filter(team_entry=team_entry)
+    
+    # All deductions (auto + manual)
+    deductions = RoutineDeduction.objects.filter(team_entry=team_entry).order_by(
+        "deduction_type__penalty_type", "deduction_type__code"
+    )
+    
+    # Compute Totals
+    subtotal_by_judge = {sheet.judge_number: sheet.compute_subtotal() for sheet in judge_sheets}
+    deduction_total_by_judge = {sheet.judge_number: sheet.other_deduction for sheet in judge_sheets}
+    total_by_judge = {sheet.judge_number: sheet.total_score in judge_sheets}
+    
+    if request.method == "POST":
+        team_entry.verified_by_tabulator = True
+        team_entry.save()
+        messages.success(request, "Routine verified and locked.")
+        return redirect("tabulator_verify", team_entry_id=team_entry_id)
+    
+    return render(request, "judging/tabulator_verify.html", {
+        "team_entry": team_entry,
+        "kct": kct,
+        "judge_sheets": judge_sheets,
+        "deductions": deductions,
+        "subtotal_by_judge": subtotal_by_judge,
+        "deduction_total_by_judge": deduction_total_by_judge,
+        "total_by_judge": total_by_judge,
     })

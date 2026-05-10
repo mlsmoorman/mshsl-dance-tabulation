@@ -35,6 +35,8 @@ class TeamEntry(models.Model):
     meet = models.ForeignKey(Meet, on_delete=models.CASCADE, related_name="teams")
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     performance_order = models.PositiveBigIntegerField()
+    verified_by_tabulator = models.BooleanField(default=False)
     
     def __str__(self):
         return f"{self.school} @ ({self.meet})"
+    
