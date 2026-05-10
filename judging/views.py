@@ -7,6 +7,7 @@ from judging.models import JudgeScoreSheet, KCTEntry
 from deductions.models import DeductionType, RoutineDeduction
 from core.models import Role
 from judging.scoring import ScoringEngine
+from judging.helpers import get_possible_issues
 
 
 #####  SUPERIOR JUDGE VIEW  #####
@@ -15,6 +16,8 @@ def user_is_superior_judge(user):
     
 @login_required
 def superior_judge_review(request, team_entry_id):
+    issues = get_possible_issues()
+    
     if not user_is_superior_judge(request.user):
         messages.error(request, "You do not have permission to access this page.")
         return redirect("/")
@@ -67,6 +70,7 @@ def superior_judge_review(request, team_entry_id):
         "auto_deductions": auto_deductions,
         "manual_deductions": manual_deductions,
         "deduction_types": deduction_types,
+        "issues": issues,
     })
 
 #####  TABULATOR VIEW  #####
@@ -75,6 +79,8 @@ def user_is_tabulator(user):
 
 @login_required
 def tabulator_verify(request, team_entry_id):
+    issues = get_possible_issues()
+    
     if not user_is_tabulator(request.user):
         messages.error(request, "You do not have permission to access this page.")
         return redirect("/")
@@ -107,6 +113,7 @@ def tabulator_verify(request, team_entry_id):
         "subtotal_by_judge": subtotal_by_judge,
         "deduction_total_by_judge": deduction_total_by_judge,
         "total_by_judge": total_by_judge,
+        "issues": issues,
     })
     
 #####  JUDGES VIEW  #####
