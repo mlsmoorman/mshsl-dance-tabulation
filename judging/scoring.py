@@ -1,7 +1,7 @@
 from decimal import Decimal
 from .models import JudgeScoreSheet, KCTEntry
 from meets.models import Division
-from deductions.models import RoutineDeduction
+from deductions.models import RoutineDeduction, DeductionType
 
 #####  CENTRAL SCORING SERVICE - ALL RULES IN ONE PLACE  #####
 
@@ -12,6 +12,8 @@ MIN_TIME = 120  # 2:00
 MAX_TIME = 150  # 2:30
     
 class ScoringEngine:
+    
+    #####  KICK DEDUCTION  #####
     @staticmethod
     def compute_kick_deduction(division, team_entry):
         if division != Division.KICK:
@@ -34,52 +36,73 @@ class ScoringEngine:
 
         return Decimal(diff)  # 1 point per kick outside range
 
-#####  TIME DEDUCTION  #####
-
-    @staticmethod
-    def compute_time_deduction(team_entry):
-        kct = (
-            KCTEntry.objects.filter(team_entry-team_entry)
-            .order_by("-id")
-            .first()
-        )
-
-        if not kct:
-            return Decimal("0.0")
-        
-        time = kct.routine_time_seconds
-        
-        # Under time
-        if time < MIN_TIME:
-            return Decimal("1.0")
-        
-        # Over time
-        if time > MAX_TIME:
-            return Decimal("1.0")
-        return Decimal("0.0")
-
-        # Otherwise no deduction
-        return Decimal("0.0")
     
+    #####  TIME DEDUCTION - COMPUTES # SECONDS OFF  #####
     @staticmethod
-    def apply_to_scoresheet(scoresheet: JudgeScoreSheet):
-        # Kick deduction from KCT
-        scoresheet.kick_deduction = ScoringEngine.compute_kick_deduction(
-            scoresheet.division,
-            scoresheet.team_entry,
+    def get_seconds_off(scoresheet):
+        kct = scoresheet.team_entry.kctentry_set.order_by("-id").first()
+        if not kct:
+            return 0
+        
+        actual = kct.routine_time_seconds
+        
+        if scoresheet.division == "JAZZ":
+            min_time = 120    # 2:00
+            max_time = 150    # 2:30
+        else:
+            min_time = 135    # 2:15
+            max_time = 165    # 2:45
+        
+        if actual < min_time:
+            return min_time - actual
+        if actual > max_time:
+            return actual - max_time
+        
+        return 0   
+    
+    #####  TIME DEDUCTION - CALCULATES THE PENALTY  ######
+    @staticmethod
+    def compute_time_deduction(seconds_off: int) -> Decimal:
+        if seconds_off <= 0:
+            return Decimal("0.0")
+        if seconds_off <= 10:
+            return Decimal("1.0")
+        if seconds_off <= 20:
+            return Decimal("2.0")
+        if seconds_off <= 30:
+            return Decimal("3.0")
+        return Decimal("5.0")
+    
+    #####  TIME DEDUCTION - APPLIES THE DEDUCTION  #####
+    @staticmethod
+    def apply_time_deduction(scoresheet, user):
+        seconds_off = ScoringEngine.get_seconds_off(scoresheet)
+        points = ScoringEngine.compute_time_deduction(seconds_off)
+
+        # No violation → remove any existing time deductions
+        if points == 0:
+            RoutineDeduction.objects.filter(
+                team_entry=scoresheet.team_entry,
+                deduction_type__code="TIME_REQUIREMENTS"
+            ).delete()
+            return
+
+        rule = DeductionType.objects.get(code="TIME_REQUIREMENTS")
+
+        RoutineDeduction.objects.update_or_create(
+            team_entry=scoresheet.team_entry,
+            deduction_type=rule,
+            defaults={
+                "entered_by": user,
+                "count": 1,
+                "judges_reporting": 1,
+                "minor": False,
+                "flagrant": False,
+                "notes": f"{seconds_off} seconds outside allowed range",
+            }
         )
-
-        # Time deduction from KCT
-        scoresheet.time_deduction = ScoringEngine.compute_time_deduction(
-            scoresheet.team_entry
-        )
-
-        scoresheet.other_deduction = ScoringEngine.compute_deductions_for_scoresheet(scoresheet)
-        scoresheet.compute_total()
-
-
-class ScoringEngine:
-
+        
+    #####  COMPUTES TOTAL DEDUCTIONS  #####
     @staticmethod
     def compute_deductions_for_scoresheet(scoresheet):
         deductions = RoutineDeduction.objects.filter(team_entry=scoresheet.team_entry)
@@ -100,3 +123,30 @@ class ScoringEngine:
             total += pts
 
         return total
+    
+    #####  APPLIES DEDUCTIONS TO SCORESHEET  #####
+    @staticmethod
+    def apply_to_scoresheet(scoresheet: JudgeScoreSheet, user=None):
+        # 1. Auto-apply time deduction (creates/updates RoutineDeduction)
+        ScoringEngine.apply_time_deduction(scoresheet, user)
+
+        # 2. Kick deduction (your existing logic)
+        scoresheet.kick_deduction = ScoringEngine.compute_kick_deduction(
+            scoresheet.division,
+            scoresheet.team_entry,
+        )
+
+        # 3. Compute all deductions (including time)
+        deduction_total = ScoringEngine.compute_deductions_for_scoresheet(scoresheet)
+
+        # 4. Compute subtotal (your existing method)
+        subtotal = scoresheet.compute_subtotal()
+
+        # 5. Handle DQ
+        if deduction_total == "DQ":
+            scoresheet.total_score = "DQ"
+        else:
+            scoresheet.total_score = subtotal - deduction_total
+
+        scoresheet.save()
+
