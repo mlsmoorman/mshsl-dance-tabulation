@@ -36,6 +36,49 @@ class ScoringEngine:
 
         return Decimal(diff)  # 1 point per kick outside range
 
+    #####  KICK DEDUCTION - APPLY DEDUCTION  #####
+    @staticmethod    
+    def apply_kick_deduction(scoresheet, user):
+        #only applies to High Kick
+        if scoresheet.division != Division.KICK:
+            RoutineDeduction.objects.filter(
+                team_entry=scoresheet.team_entry,
+                deduction_type__code="KICK REQUIREMENTS"
+            ).delete()
+            return
+        kct = KCTEntry.objects.filter(team_entry=scoresheet.team_entry).order_by("-id").first()
+        if not kct or kct.kick_count is None:
+            return
+        
+        # Compute how many kicks off
+        if kct.kick_count < KICK_MIN:
+            diff = KICK_MIN - kct.kick_count
+        elif kct.kick_count > KICK_MAX:
+            diff = kct.kick_count - KICK_MAX
+        else: 
+            # No violation -> remove any existing deduction
+            RoutineDeduction.objects.filter(
+                team_entry=scoresheet.team_entry,
+                deduction_type__code="KICK REQUIREMENTS"
+            ).delete()
+            
+        # Cap at 10 points
+        points = min(diff, 10)
+        
+        rule = DeductionType.objects.get(code="KICK REQUIREMENTS")
+        
+        RoutineDeduction.objects.update_or_create(
+            team_entry=scoresheet.team_entry,
+            deduction_type=rule,
+            default={
+                "entered_by": user,
+                "count": diff,
+                "judges_reporting": 1,
+                "minor": False,
+                "flagrant": False,
+                "notes": f"{diff} kicks outside allowed range"
+            }
+        )
     
     #####  TIME DEDUCTION - COMPUTES # SECONDS OFF  #####
     @staticmethod
@@ -130,17 +173,14 @@ class ScoringEngine:
         # 1. Auto-apply time deduction (creates/updates RoutineDeduction)
         ScoringEngine.apply_time_deduction(scoresheet, user)
 
-        # 2. Kick deduction (your existing logic)
-        scoresheet.kick_deduction = ScoringEngine.compute_kick_deduction(
-            scoresheet.division,
-            scoresheet.team_entry,
-        )
+        # 2. Auto-apply kick deduction (creates/updates RoutineDeduction
+        ScoringEngine.apply_kick_deduction(scoresheet, user)
 
-        # 3. Compute all deductions (including time)
-        deduction_total = ScoringEngine.compute_deductions_for_scoresheet(scoresheet)
-
-        # 4. Compute subtotal (your existing method)
+        # 3. Compute Subtotal
         subtotal = scoresheet.compute_subtotal()
+        
+        # 4. Compute all deductions (including time + kick)
+        deduction_total = ScoringEngine.compute_deductions_for_scoresheet(scoresheet)
 
         # 5. Handle DQ
         if deduction_total == "DQ":
