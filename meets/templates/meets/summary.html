@@ -1,0 +1,45 @@
+<h2>{{  meet.name  }} - Final Results</h2>
+
+<h3>Jazz</h3>
+<table class="table">
+	<tr>
+		<th>Place</th>
+		<th>Team</th>
+		<th>Rank Points</th>
+		<th>Judge Ranks</th>
+	</tr>
+
+	{% for row in jazz_rankings %}
+	<tr>
+		<td>{{  forloop.counter  }}</td>
+		<td>{{  row.entry.team.name  }}</td>
+		<td>{{  row.rank_points  }}</td>
+		<td>
+			{% for j, r in row.judge_ranks.items %}
+				J{{  j  }}: {{  r  }}
+			{% endfor %}
+		</td>
+	</tr>
+</table>
+
+<h3>Kick</h3>
+<table class="table">
+	<tr>
+		<th>{{  Place  }}</th>
+		<th>{{  Team  }}</th>
+		<th>{{  Rank Points }}</th>
+		<th>{{  Judge Ranks }}</th>
+	</tr>
+
+	{% for row in kick_rankings %}
+	<tr>
+		<td>{{  forloop.counter  }}</td>
+		<td>{{  row.entry.team.name  }}</td>
+		<td>{{  row.rank_points  }}</td>
+		<td>
+			{% for j, r in row.judge_ranks.items %}
+				J{{  j  }}: {{  r  }}
+			{% endfor %}
+		</td>
+	</tr>
+</table>
