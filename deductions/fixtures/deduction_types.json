@@ -1,0 +1,322 @@
+[
+  {
+    "model": "deductions.deductiontype",
+    "pk": 1,
+    "fields": {
+      "code": "COMPETITOR_COUNT",
+      "rule_reference": "Rule 1, Sec 1, Art 1",
+      "description": "# of competitors violation (min/max on floor)",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 2,
+    "fields": {
+      "code": "MUSICAL_ACCOMPANIMENT",
+      "rule_reference": "Rule 1, Sec 1, Art 4",
+      "description": "Recorded musical accompaniment required",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 3,
+    "fields": {
+      "code": "KICK_REQUIREMENTS",
+      "rule_reference": "Rule 1, Sec 1, Art 5a, 6a",
+      "description": "Kick requirements violated (35–55 kicks in High Kick; ≤5 linked kicks in Jazz)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "1.0",
+      "max_points": "10.0",
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 4,
+    "fields": {
+      "code": "JAZZ_REQUIRED_TURN_LEAP",
+      "rule_reference": "Rule 1, Sec 1, Art 6d, 6e",
+      "description": "Jazz routine missing required team turn or leap/jump",
+      "division": "JAZZ",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 5,
+    "fields": {
+      "code": "TIME_REQUIREMENTS",
+      "rule_reference": "Rule 1, Sec 1, Art 7",
+      "description": "Routine outside allowed time range (2:15–2:45 HK, 2:00–2:30 Jazz)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": true,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 6,
+    "fields": {
+      "code": "UNIFORM_VIOLATION",
+      "rule_reference": "Rule 1, Sec 3, Arts 1, 2, 3a-d",
+      "description": "Uniform violation (contest report filed)",
+      "division": "BOTH",
+      "penalty_type": "WARNING",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 7,
+    "fields": {
+      "code": "PROP_USE",
+      "rule_reference": "Rule 1, Sec 3, Art 3e",
+      "description": "Illegal use of props or removed uniform piece becomes prop",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 8,
+    "fields": {
+      "code": "CHOREOGRAPHED_ENTRANCE",
+      "rule_reference": "Rule 3, Sec 3, Art 1",
+      "description": "Choreographed entrance performed",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "2.0",
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": true,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 9,
+    "fields": {
+      "code": "FALL",
+      "rule_reference": "Rule 3, Sec 4, Art 1",
+      "description": "Uncontrolled or unchoreographed fall",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "1.0",
+      "max_points": null,
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": false
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 10,
+    "fields": {
+      "code": "LIFT_MOUNT_MINOR",
+      "rule_reference": "Rule 3, Sec 4, Art 2a",
+      "description": "Illegal lift or mount (minor)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "1.0",
+      "max_points": "5.0",
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 11,
+    "fields": {
+      "code": "LIFT_MOUNT_FLAGRANT",
+      "rule_reference": "Rule 3, Sec 4, Art 2a",
+      "description": "Illegal lift or mount (flagrant)",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 12,
+    "fields": {
+      "code": "DROP_MINOR",
+      "rule_reference": "Rule 3, Sec 4, Art 2b",
+      "description": "Illegal drop to knee/seat/thigh (minor)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "1.0",
+      "max_points": "5.0",
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 13,
+    "fields": {
+      "code": "DROP_FLAGRANT",
+      "rule_reference": "Rule 3, Sec 4, Art 2b",
+      "description": "Illegal drop to knee/seat/thigh (flagrant)",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 14,
+    "fields": {
+      "code": "FRONT_DROP_MINOR",
+      "rule_reference": "Rule 3, Sec 4, Art 2c",
+      "description": "Illegal front drop (minor)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "1.0",
+      "max_points": "5.0",
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 15,
+    "fields": {
+      "code": "FRONT_DROP_FLAGRANT",
+      "rule_reference": "Rule 3, Sec 4, Art 2c",
+      "description": "Illegal front drop (flagrant)",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 16,
+    "fields": {
+      "code": "SPLIT_DROP_MINOR",
+      "rule_reference": "Rule 3, Sec 4, Art 2d",
+      "description": "Illegal split drop (minor)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "1.0",
+      "max_points": "5.0",
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 17,
+    "fields": {
+      "code": "SPLIT_DROP_FLAGRANT",
+      "rule_reference": "Rule 3, Sec 4, Art 2d",
+      "description": "Illegal split drop (flagrant)",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 18,
+    "fields": {
+      "code": "STUNT_MINOR",
+      "rule_reference": "Rule 3, Sec 4, Art 2e",
+      "description": "Illegal stunt/inversion (minor)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "1.0",
+      "max_points": "5.0",
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 19,
+    "fields": {
+      "code": "STUNT_FLAGRANT",
+      "rule_reference": "Rule 3, Sec 4, Art 2e",
+      "description": "Illegal stunt/inversion (flagrant)",
+      "division": "BOTH",
+      "penalty_type": "DQ",
+      "points": null,
+      "max_points": null,
+      "per_occurrence": false,
+      "per_judge": false,
+      "minor_or_flagrant": true
+    }
+  },
+  {
+    "model": "deductions.deductiontype",
+    "pk": 20,
+    "fields": {
+      "code": "CONDUCT",
+      "rule_reference": "Rule 6, Sec 1, Art 3-4; Rule 6, Sec 2, Art 2-4",
+      "description": "Conduct of coaches/athletes (delay, taunting, profanity, etc.)",
+      "division": "BOTH",
+      "penalty_type": "POINT",
+      "points": "2.0",
+      "max_points": null,
+      "per_occurrence": true,
+      "per_judge": true,
+      "minor_or_flagrant": false
+    }
+  }
+]

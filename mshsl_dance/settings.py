@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'meets',
     'judging',
     'tabulation',
+    'deductions.apps.DeductionsConfig',
 ]
 ## SuperUser:  admin. Password: dance5678
 

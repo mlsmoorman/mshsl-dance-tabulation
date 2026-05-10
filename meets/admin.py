@@ -17,21 +17,22 @@ class MeetAdmin(admin.ModelAdmin):
         if db_field.name == "kcts":
             kwargs["queryset"] = User.objects.filter(roles__name="KCT")
         return super().formfield_for_manytomany(db_field, request, **kwargs)
+    
 
-
-class RoutineDeductionsInline(admin.ModelAdmin):
+class RoutineDeductionsInline(admin.TabularInline):
     model = RoutineDeduction
     extra = 0
     readonly_fields = ("entered_by", "timestamp")
-    
+
     def has_add_permission(self, request, obj=None):
         return request.user.roles.filter(name="Superior Judge").exists()
-    
-    def has_change_permission(self, request, obj = None):
+
+    def has_change_permission(self, request, obj=None):
         return request.user.roles.filter(name="Superior Judge").exists()
-    
-    def has_delete_permission(self, request, obj = None):
+
+    def has_delete_permission(self, request, obj=None):
         return request.user.roles.filter(name="Superior Judge").exists()
+
 
 @admin.register(TeamEntry)
 class TeamEntryAdmin(admin.ModelAdmin):
