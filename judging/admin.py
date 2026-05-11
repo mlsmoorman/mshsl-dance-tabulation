@@ -88,32 +88,3 @@ class KCTEntryInline(admin.TabularInline):
         "dangerous_move_observed",
     )
 
-
-class JudgeScoreSheetInline(admin.TabularInline):
-    model = JudgeScoreSheet
-    extra = 0
-    readonly_fields = ("subtotal", "total", "rank")
-    fields = (
-        "judge",
-        "division",
-        "skills_turns",
-        "skills_leaps_jumps",
-        "kicks_technique",
-        "kicks_height",
-        "choreo_creativity",
-        "choreo_visual_effect",
-        "diff_routine",
-        "diff_formations",
-        "diff_skills_or_kicks",
-        "exec_placement_control",
-        "exec_accuracy",
-        "routine_effectiveness",
-        "time_deduction",
-        "kick_deduction",
-        "other_deduction",
-        "subtotal",
-        "total",
-        "rank",
-    )
-
-

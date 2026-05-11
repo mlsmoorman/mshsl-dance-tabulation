@@ -36,9 +36,9 @@ class RoutineDeductionsInline(admin.TabularInline):
 
 @admin.register(TeamEntry)
 class TeamEntryAdmin(admin.ModelAdmin):
-    list_display = ("school", "meet", "performance_order")
-    list_filter = ("meet", "school")
-    search_fields = ("school__name",)
+    list_display = ("team", "meet", "performance_order")
+    list_filter = ("meet", "team")
+    search_fields = ("team__name",)
     ordering = ("meet", "performance_order")
 
     inlines = [

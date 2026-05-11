@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import School, User
+from core.models import School, User, Team
 
 
 ##### DIVISION MODEL #####
@@ -34,13 +34,12 @@ class Meet(models.Model):
 ##### TEAM MODEL #####
 class TeamEntry(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    meet = models.ForeignKey(Meet, on_delete=models.CASCADE, related_name="teams")
-    school = models.ForeignKey(School, on_delete=models.CASCADE)
+    meet = models.ForeignKey(Meet, on_delete=models.CASCADE)
     division = models.CharField(max_length=10, choices=Division.choices)
-    performance_order = models.PositiveBigIntegerField()
+    performance_order = models.PositiveSmallIntegerField()
     verified_by_tabulator = models.BooleanField(default=False)
     is_finalist = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.school} @ ({self.meet})"
+        return f"{self.team} @ ({self.meet})"
     
