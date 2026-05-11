@@ -33,13 +33,18 @@ class Meet(models.Model):
 
 ##### TEAM MODEL #####
 class TeamEntry(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     meet = models.ForeignKey(Meet, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     division = models.CharField(max_length=10, choices=Division.choices)
     performance_order = models.PositiveSmallIntegerField()
+
+    prelim_rank = models.IntegerField(null=True, blank=True)
+    final_rank = models.IntegerField(null=True, blank=True)
+    placement = models.IntegerField(null=True, blank=True)
+
     verified_by_tabulator = models.BooleanField(default=False)
     is_finalist = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return f"{self.team} @ ({self.meet})"
     

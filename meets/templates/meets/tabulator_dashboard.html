@@ -1,0 +1,53 @@
+<h1>{{ meet.name }} — {{ division }} Tabulation</h1>
+
+<h2>Judge Submission Status</h2>
+<table>
+    <tr>
+        <th>Judge</th>
+        <th>Submitted</th>
+        <th>Missing</th>
+        <th>Status</th>
+    </tr>
+    {% for row in judge_status %}
+    <tr>
+        <td>{{ row.judge.username }}</td>
+        <td>{{ row.submitted }}</td>
+        <td>{{ row.missing }}</td>
+        <td>
+            {% if row.complete %}
+                ✔ Complete
+            {% else %}
+                ⚠ Missing
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<h2>Actions</h2>
+
+<a href="{% url 'run_prelims_ranking' meet.id division %}">Run Prelims Ranking</a><br>
+<a href="{% url 'advance_finalists' meet.id division %}">Advance Finalists</a><br>
+<a href="{% url 'run_finals_ranking' meet.id division %}">Run Finals Ranking</a><br>
+
+<hr>
+
+<h2>Finalists</h2>
+{% if finalists %}
+<table>
+    <tr>
+        <th>Team</th>
+        <th>Prelim Rank</th>
+    </tr>
+    {% for entry in finalists %}
+    <tr>
+        <td>{{ entry.team }}</td>
+        <td>{{ entry.prelim_rank }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No finalists selected yet.</p>
+{% endif %}
