@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import Meet, TeamEntry
 from core.models import User
-from judging.admin import KCTEntryInline, JudgeScoreSheetInline
+from judging.admin import JudgeScoreSheetInline
+from kct.admin import KCTEntryInline
 from deductions.models import RoutineDeduction
 
 @admin.register(Meet)

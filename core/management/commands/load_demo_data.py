@@ -4,14 +4,14 @@ from django.apps import apps
 from core.models import Team, Role, User
 from meets.models import Meet, TeamEntry
 from judging.models import JudgeScoreSheet
-from deductions.models import RoutineDeduction
+from deductions.models import RoutineDeduction, DeductionType
 from datetime import date, timedelta
 import random
 
 
 class Command(BaseCommand):
     help = "Loads demo data: teams (with levels), meets, entries, scores, KCT, deductions."
-
+    
     TEAM_LEVELS = ["Varsity", "JV", "B-Squad"]
 
     def add_arguments(self, parser):
@@ -147,9 +147,14 @@ class Command(BaseCommand):
                         KCTEntry.objects.get_or_create(
                             team_entry=entry,
                             defaults={
+                                "kct": kct_user,  # or assign a random KCT user if you prefer
                                 "kick_count": random.randint(20, 60),
-                                "time_seconds": random.randint(90, 150),
-                                "competitor_count": random.randint(10, 25),
+                                "routine_time_seconds": random.randint(90, 150),
+                                "num_competitors": random.randint(10, 25),
+                                "jazz_team_turn_performed": True,
+                                "jazz_team_leap_jump_performed": True,
+                                "falls_observed": False,
+                                "dangerous_move_observed": False,
                             },
                         )
 
@@ -166,13 +171,22 @@ class Command(BaseCommand):
                                     setattr(sheet, field, value)
                                 sheet.save()
 
+                    deduction_types = {dt.code: dt for dt in DeductionType.objects.all()}
+                    deduction_codes = list(deduction_types.keys())
+                    
                     # Routine-level deductions
                     if gen_deductions and random.random() < 0.2:
+                        code = random.choice(deduction_codes)
+
                         RoutineDeduction.objects.create(
                             team_entry=entry,
-                            deduction_type="ILLEGAL_MOVE",
-                            points=5,
-                            judge="Superior Judge",
+                            deduction_type=deduction_types[code],
+                            entered_by=random.choice(judges),   # or your Superior Judge user
+                            count=1,
+                            judges_reporting=1,
+                            minor=False,
+                            flagrant=False,
+                            notes=f"Auto‑generated demo deduction ({code})",
                         )
 
         self.stdout.write(self.style.SUCCESS("✔ Demo data loaded successfully!"))

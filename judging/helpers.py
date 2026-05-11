@@ -1,4 +1,5 @@
-from judging.models import JudgeScoreSheet, KCTEntry
+from judging.models import JudgeScoreSheet
+from kct.models import KCTEntry
 
 def get_possible_issues(team_entry):
     issues = []

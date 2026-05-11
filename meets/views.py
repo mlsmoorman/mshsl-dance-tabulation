@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from meets.ranking import compute_rankings, advance_to_finals
 from meets.models import Meet, TeamEntry
-from judging.models import JudgeScoreSheet
 from meets.ranking import compute_rankings
 from core.permissions import user_is_tabulator
+
 
 def meet_summary(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
@@ -31,36 +31,6 @@ def advance_to_finals_view(request, meet_id, division):
     messages.success(request, f"{len(finalists)} teams advance to finals for {division}.")
     return redirect("meet_summary", meet_id=meet.id)
 
-def tabulator_dashboard(request, meet_id, division):
-    meet = get_object_or_404(Meet, id=meet_id)
-    entries = TeamEntry.objects.filter(meet=meet, division=division).order_by("performance_order")
-    
-    judges = meet.judges.all() if hasattr(meet, "judges") else []
-    
-    judge_status = []
-    for judge in judges:
-        total = entries.count()
-        submitted = JudgeScoreSheet.objects.filter(team_entry__in=entries, judge=judge).count()
-        missing = total - submitted
-        judge_status.append({
-            "judge": judge,
-            "submitted": submitted,
-            "missing": missing,
-            "complete": missing == 0,
-        })
-    
-    finalists = entries.filter(is_finalist=True).order_by("prelim_rank")
-    finals_done = entries.filter(final_rank__isnull=False).exists()
-    
-    context = {
-        "meet": meet,
-        "division": division,
-        "entries": entries,
-        "judge_status": judge_status,
-        "finalists": finalists,
-        "finals_done": finals_done,
-    }
-    return render(request, "meets/tabulator_dashboard.html", context)
 
 def run_prelims_ranking(request, meet_id, division):
     meet = get_object_or_404(Meet, id=meet_id)

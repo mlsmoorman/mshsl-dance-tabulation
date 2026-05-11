@@ -3,17 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from meets.models import TeamEntry
-from judging.models import JudgeScoreSheet, KCTEntry
+from judging.models import JudgeScoreSheet
+from kct.models import KCTEntry
 from deductions.models import DeductionType, RoutineDeduction
-from core.models import Role
 from judging.scoring import ScoringEngine
 from judging.helpers import get_possible_issues
 
 from core.permissions import (
     user_is_judge,
     user_is_superior_judge,
-    user_is_tabulator,
-    user_is_kct,
 )
 
 #####  SUPERIOR JUDGE VIEW  #####    
@@ -76,45 +74,6 @@ def superior_judge_review(request, team_entry_id):
         "issues": issues,
     })
 
-#####  TABULATOR VIEW  #####
-@login_required
-def tabulator_verify(request, team_entry_id):
-    issues = get_possible_issues()
-    
-    if not user_is_tabulator(request.user):
-        messages.error(request, "You do not have permission to access this page.")
-        return redirect("/")
-
-    team_entry = get_object_or_404(TeamEntry, id=team_entry_id)
-    kct = KCTEntry.objects.filter(team_entry=team_entry).order_by("-id").first()
-    judge_sheets = JudgeScoreSheet.objects.filter(team_entry=team_entry)
-    
-    # All deductions (auto + manual)
-    deductions = RoutineDeduction.objects.filter(team_entry=team_entry).order_by(
-        "deduction_type__penalty_type", "deduction_type__code"
-    )
-    
-    # Compute Totals
-    subtotal_by_judge = {sheet.judge_number: sheet.compute_subtotal() for sheet in judge_sheets}
-    deduction_total_by_judge = {sheet.judge_number: sheet.other_deduction for sheet in judge_sheets}
-    total_by_judge = {sheet.judge_number: sheet.total_score for sheet in judge_sheets}
-    
-    if request.method == "POST":
-        team_entry.verified_by_tabulator = True
-        team_entry.save()
-        messages.success(request, "Routine verified and locked.")
-        return redirect("tabulator_verify", team_entry_id=team_entry_id)
-    
-    return render(request, "judging/tabulator_verify.html", {
-        "team_entry": team_entry,
-        "kct": kct,
-        "judge_sheets": judge_sheets,
-        "deductions": deductions,
-        "subtotal_by_judge": subtotal_by_judge,
-        "deduction_total_by_judge": deduction_total_by_judge,
-        "total_by_judge": total_by_judge,
-        "issues": issues,
-    })
     
 #####  JUDGES VIEW  #####
 @login_required
@@ -153,32 +112,3 @@ def judge_score_entry(request, team_entry_id):
         "sheet": sheet,
     })
     
-
-#####  KCT VIEW  #####
-def kct_etry(request, team_entry_id):
-    if not user_is_kct(request.user):
-        messages.error(request, "You do not have permission to access this page.")
-        return redirect("/")
-    
-    team_entry = get_object_or_404(TeamEntry, id=team_entry_id)
-    
-    # Get or create the KCT entry
-    kct, created = KCTEntry.objects.get_or_create(team_entry=team_entry)
-    
-    if request.method == "POST":
-        kct.kick_count = request.POST.get("kick_count") or None
-        kct.routine_time_seconds = request.POST.get("routine_time_seconds") or None
-        kct.num_competitors = requdst.POST.get("num_competitors") or None
-        kct.save()
-        
-        # Recompute auto deductions for all judge sheets
-        for sheet in team_entry.judgescoresheet_set.all()
-            ScoringEngine.apply_to_scoresheet(sheet, user=request.user)
-            
-        messages.success(request, "KCT data saved.")
-        return redirect("kct_entry", team_entry_id=team_entry_id)
-    
-    return render(request, "judging/kct_entry.html", {
-        "team_entry": team_entry,
-        "kct": kct,
-    })

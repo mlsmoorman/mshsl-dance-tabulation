@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'meets',
+    'kct',
     'judging',
     'tabulation',
     'deductions.apps.DeductionsConfig',

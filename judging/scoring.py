@@ -1,5 +1,6 @@
 from decimal import Decimal
-from .models import JudgeScoreSheet, KCTEntry
+from .models import JudgeScoreSheet
+from kct.models import KCTEntry
 from meets.models import Division
 from deductions.models import RoutineDeduction, DeductionType
 
