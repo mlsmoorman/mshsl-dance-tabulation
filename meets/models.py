@@ -23,6 +23,7 @@ class Meet(models.Model):
     site = models.CharField(max_length=255)
     class_level = models.CharField(max_length=10, choices=ClassLevel.choices)
     division = models.CharField(max_length=10, choices=Division.choices)
+    num_finalists = models.IntegerField(default=6) # default MSHSL standard
     
     judges = models.ManyToManyField(User, related_name="judged_meets")
     kcts = models.ManyToManyField(User, related_name="kct_meets")
@@ -32,10 +33,13 @@ class Meet(models.Model):
 
 ##### TEAM MODEL #####
 class TeamEntry(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     meet = models.ForeignKey(Meet, on_delete=models.CASCADE, related_name="teams")
     school = models.ForeignKey(School, on_delete=models.CASCADE)
+    division = models.CharField(max_length=10, choices=Division.choices)
     performance_order = models.PositiveBigIntegerField()
     verified_by_tabulator = models.BooleanField(default=False)
+    is_finalist = models.BooleanField(default=False)
     
     def __str__(self):
         return f"{self.school} @ ({self.meet})"

@@ -84,3 +84,26 @@ def apply_tiebreakers(final_list):
         i += 1
 
     return final_list
+
+def advance_to_finals(meet, division):
+    rankings = compute_rankings(meet, division)
+    finalists = []
+    cutoff = meet.num_finalists
+    
+    # Select top X teams
+    for i, row in enumerate(rankings):
+        if i < cutoff:
+            finalists.append(row["entry"])
+        else:
+            # Check for tie at cutoff boundary
+            if row["rank_points"] == rankings[cutoff - 1]["rank_points"]:
+                finalists.append(row["entry"])
+            else:
+                break
+    
+    # Mark finalists
+    for entry in meet.teamentry_set.filter(division=division):
+        entry.is_finalist = entry in finalists
+        entry.save()
+    
+    return finalists

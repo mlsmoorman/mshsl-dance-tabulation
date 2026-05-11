@@ -9,11 +9,14 @@ from core.models import Role
 from judging.scoring import ScoringEngine
 from judging.helpers import get_possible_issues
 
+from core.permissions import (
+    user_is_judge,
+    user_is_superior_judge,
+    user_is_tabulator,
+    user_is_kct,
+)
 
-#####  SUPERIOR JUDGE VIEW  #####
-def user_is_superior_judge(user):
-    return user.roles.filter(name="Superior Judge").exists()
-    
+#####  SUPERIOR JUDGE VIEW  #####    
 @login_required
 def superior_judge_review(request, team_entry_id):
     issues = get_possible_issues()
@@ -74,9 +77,6 @@ def superior_judge_review(request, team_entry_id):
     })
 
 #####  TABULATOR VIEW  #####
-def user_is_tabulator(user):
-    return user.roles.filter(name="Tabulator").exists()
-
 @login_required
 def tabulator_verify(request, team_entry_id):
     issues = get_possible_issues()
@@ -117,9 +117,6 @@ def tabulator_verify(request, team_entry_id):
     })
     
 #####  JUDGES VIEW  #####
-def user_is_judge(user):
-    return user.roles.filter(name="Judge").exists()
-
 @login_required
 def judge_score_entry(request, team_entry_id):
     if not user_is_judge(request.user):
@@ -158,10 +155,6 @@ def judge_score_entry(request, team_entry_id):
     
 
 #####  KCT VIEW  #####
-@login_required
-def user_is_kct(user):
-    return user.roles.filter(name="KCT").exists()
-
 def kct_etry(request, team_entry_id):
     if not user_is_kct(request.user):
         messages.error(request, "You do not have permission to access this page.")
