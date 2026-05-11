@@ -13,13 +13,15 @@ from core.permissions import user_is_superior_judge
 #####  SUPERIOR JUDGE VIEW  #####    
 @login_required
 def superior_judge_review(request, team_entry_id):
-    issues = get_possible_issues()
-    
+
     if not user_is_superior_judge(request.user):
         messages.error(request, "You do not have permission to access this page.")
         return redirect("/")
 
     team_entry = get_object_or_404(TeamEntry, id=team_entry_id)
+
+    issues = get_possible_issues(team_entry)
+
     kct = KCTEntry.objects.filter(team_entry=team_entry).order_by("-id").first()
     judge_sheets = JudgeScoreSheet.objects.filter(team_entry=team_entry)
 

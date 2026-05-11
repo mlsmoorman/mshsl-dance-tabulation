@@ -18,7 +18,10 @@ def tabulator_verify(request, team_entry_id):
     issues = get_possible_issues()
     
     if not user_is_tabulator(request.user):
-        messages.error(request, "You do not have permission to access this page.")
+        if user_is_superuser(request.user):
+            return True,
+        else: 
+            messages.error(request, "You do not have permission to access this page.")
         return redirect("/")
 
     team_entry = get_object_or_404(TeamEntry, id=team_entry_id)
