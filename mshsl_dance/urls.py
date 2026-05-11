@@ -22,6 +22,8 @@ urlpatterns = [
     path('', include("core.urls")),                 # Home Page
     path("judge/", include("judging.urls")),        # Judge UI
     path("kct/", include("kct.urls")),              # KCT UI
-    path("tabulator", include("tabulation.urls")),  # Tabulation Dashboard
-    path("superior", include("superior.urls"))      # Superior Dashboard
+    path("tabulator/", include("tabulation.urls")), # Tabulation Dashboard
+    path("superior/", include("superior.urls")),    # Superior Dashboard
+    path("accounts/", include("django.contrib.auth.urls")),
+
 ]

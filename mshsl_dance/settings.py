@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'kct',
     'judging',
     'tabulation',
+    'superior',
     'deductions.apps.DeductionsConfig',
 ]
 ## SuperUser:  admin. Password: dance5678
@@ -62,7 +63,7 @@ ROOT_URLCONF = 'mshsl_dance.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
