@@ -93,3 +93,20 @@
     <li>Leap Completed: {{ entry.kctentry.leap_completed }}</li>
   {% endif %}
 </ul>
+
+{% if not entry.disqualified %}
+  <a href="{% url 'judging:dq_review' entry.id %}">
+    <button class="btn btn-danger btn-sm">DQ Review</button>
+  </a>
+{% else %}
+  <span class="badge bg-danger">DQ’d</span>
+{% endif %}
+
+{% if entry.disqualified %}
+  <div class="alert alert-danger">
+    <strong>DISQUALIFIED</strong><br>
+    Reason: {{ entry.dq_reason }}<br>
+    By: {{ entry.dq_by }} at {{ entry.dq_timestamp }}
+  </div>
+{% endif %}
+

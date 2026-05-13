@@ -6,6 +6,7 @@ from .models import Meet, TeamEntry, Division
 from judging.models import JudgeScoreSheet
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~ TABULATOR DASHBOARD ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def tabulator_dashboard(request, pk):
     # Only tabulators can access this page
@@ -49,7 +50,7 @@ def tabulator_dashboard(request, pk):
     })
 
 
-# Verify Entry
+#~.~.~.~.~.~.~.~.~.~.~.~.~ VERIFY ENTRY ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def verify_entry(request, entry_id):
     entry = get_object_or_404(TeamEntry, id=entry_id)
@@ -57,11 +58,14 @@ def verify_entry(request, entry_id):
     entry.save()
     return redirect(request, "meets:tabulator_dashboard", pk=entry.meet.id)
 
-# Finalize Meet
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ FINALIZE MEET ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def finalize_meet(request, pk):
     meet = get_object_or_404(Meet, id=pk)
     entries = TeamEntry.objects.filter(meet=meet)
+    
+    entries = entries.filter(disqualified=False)
     
     # Compute Totals
     scored = []
@@ -90,7 +94,8 @@ def finalize_meet(request, pk):
     
     return redirect(request, "meets.tabulator_dashboard", pk=pk)
 
-# Select Finalists
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ SELECT FINALISTS ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def select_finalists(request, pk):
     meet = get_object_or_404(Meet, id=pk)

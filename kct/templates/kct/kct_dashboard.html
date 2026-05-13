@@ -18,6 +18,9 @@
         <td>{{ entry.team.school.name }} {{ entry.team.name }}</td>
         <td>{{ entry.get_division_display }}</td>
         <td>{{ entry.team.level }}</td>
+		<a href="{% url 'kct:report_dangerous_move' entry.id %}">
+		  <button class="btn btn-danger btn-sm">Dangerous Move</button>
+		</a>
         <td>
           <a href="{% url 'kct:kct_entry' entry.id %}">
             <button class="btn btn-primary btn-sm">Enter</button>

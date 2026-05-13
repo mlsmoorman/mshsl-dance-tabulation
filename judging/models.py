@@ -83,6 +83,8 @@ class IssueType(models.TextChoices):
     SCORE_OUTLIER = "SCORE_OUTLIER", "Score Outlier"
     MISSING_SHEET = "MISSING_SHEET", "Missing Judge Sheet"
     MANUAL = "MANUAL", "Manual Issue"
+    DANGEROUS_MOVE = "dangerous_move"
+
 
 class Issue(models.Model):
     team_entry = models.ForeignKey(

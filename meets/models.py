@@ -2,13 +2,13 @@ from django.db import models
 from core.models import School, Team, User
 
 
-##### DIVISION ENUM #####
+#~.~.~.~.~.~.~.~.~.~.~.~.~ DIVISION ENUM ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class Division(models.TextChoices):
     JAZZ = "JAZZ", "Jazz"
     KICK = "KICK", "Kick"
 
 
-##### CLASS LEVEL ENUM #####
+#~.~.~.~.~.~.~.~.~.~.~.~.~ CLASS LEVEL ENUM ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class ClassLevel(models.TextChoices):
     A = "A", "A"
     AA = "AA", "AA"
@@ -16,7 +16,7 @@ class ClassLevel(models.TextChoices):
     CONF = "CONF", "Conference"
 
 
-##### MEET MODEL #####
+#~.~.~.~.~.~.~.~.~.~.~.~.~ MEET MODEL ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class Meet(models.Model):
     name = models.CharField(max_length=255)
     date = models.DateField()
@@ -28,11 +28,19 @@ class Meet(models.Model):
     judges = models.ManyToManyField(User, related_name="judged_meets")
     kcts = models.ManyToManyField(User, related_name="kct_meets")
 
+    disqualified = models.BooleanField(default=False)
+    dq_reason = models.TextField(blank=True, null=True)
+    dq_timestamp = models.DateTimeField(blank=True, null=True)
+    dq_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="dq_actions"
+    )
+    
     def __str__(self):
         return f"{self.name} ({self.date})"
 
 
-##### TEAM ENTRY MODEL #####
+#~.~.~.~.~.~.~.~.~.~.~.~.~ TEAM ENTRY MODEL ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class TeamEntry(models.Model):
     meet = models.ForeignKey(Meet, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -49,3 +57,6 @@ class TeamEntry(models.Model):
 
     def __str__(self):
         return f"{self.team} – {self.get_division_display()} @ {self.meet}"
+
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#

@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, 
 from django.db.models import Sum
+from django.utils import timezone
 
 from meets.models import Meet, TeamEntry, Division
 from .models import JudgeScoreSheet, Issue, IssueType
@@ -150,3 +151,34 @@ def flag_issue(request, entry_id):
 
     return redirect("judging:superior_judge_review", meet_id=entry.meet.id)
 
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ DQ REVIEW ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def dq_review(request, entry_id):
+    entry = get_object_or_404(TeamEntry, id=entry_id)
+
+    if not request.user.has_role("SUPERIOR"):
+        return redirect("/")
+
+    issues = entry.issues.filter(issue_type=IssueType.DANGEROUS_MOVE, resolved=False)
+
+    if request.method == "POST":
+        reason = request.POST.get("reason")
+        entry.disqualified = True
+        entry.dq_reason = reason
+        entry.dq_timestamp = timezone.now()
+        entry.dq_by = request.user
+        entry.save()
+
+        # Resolve dangerous move issues
+        issues.update(resolved=True)
+
+        return redirect("judging:superior_judge_review", meet_id=entry.meet.id)
+
+    return render(request, "judging/dq_review.html", {
+        "entry": entry,
+        "issues": issues,
+    })
+    
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#

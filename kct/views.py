@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import KCTEntryForm
 from meets.models import TeamEntry, Meet
-from judging.services.issue_detection import run_all_issue_detectors, get_active_rules
+from judging.services.issue_detection import run_all_issue_detectors, get_active_rules, Issue, IssueType
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~ KCT ENTRY ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
@@ -35,7 +35,6 @@ def kct_entry(request, entry_id):
     })
 
 
-
 #~.~.~.~.~.~.~.~.~.~.~.~.~ KCT DASHBOARD ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def kct_dashboard(request, meet_id):
@@ -56,6 +55,24 @@ def kct_dashboard(request, meet_id):
         "entries": entries,
     })
 
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ REPORT DANGEROUS MOVE ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def report_dangerous_move(request, entry_id):
+    entry = get_object_or_404(TeamEntry, id=entry_id)
+
+    if not request.user.has_role("KCT"):
+        return redirect("/")
+
+    Issue.objects.create(
+        team_entry=entry,
+        issue_type=IssueType.DANGEROUS_MOVE,
+        auto_generated=False,
+        flagged_by=request.user,
+        message="KCT observed a dangerous move."
+    )
+
+    return redirect("kct:kct_dashboard", meet_id=entry.meet.id)
 
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#
