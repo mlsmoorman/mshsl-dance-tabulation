@@ -4,6 +4,7 @@ from django.db.models import Sum
 
 from meets.models import Meet, TeamEntry, Division
 from .models import JudgeScoreSheet, Issue, IssueType
+from .services.issue_detection import run_all_issue_detectors
 from .forms import JudgeScoreSheetForm
 
 
@@ -60,6 +61,8 @@ def superior_judge_review(request, meet_id):
     # Build data rows
     data = []
     for entry in entries:
+        run_all_issue_detectors(entry)
+
         total = (
             entry.score_sheets.aggregate(total=Sum("total")).get("total") or 0
         )
@@ -96,15 +99,21 @@ def issues_dashboard(request, meet_id):
     if not request.user.has_role("SUPERIOR"):
         return redirect("/")
 
-    entries = TeamEntry.objects.filter(meet=meet).select_related("team", "team__school")
+    entries = (
+        TeamEntry.objects
+        .filter(meet=meet)
+        .select_related("team", "team__school")
+        .prefetch_related("issues")
+    )
 
-    # Group issues by entry
-    issues_by_entry = {}
+    issues_by_entry = []
     for entry in entries:
-        issues_by_entry[entry.id] = {
-            "entry": entry,
-            "issues": entry.issues.filter(resolved=False).order_by("-created_at")
-        }
+        unresolved = entry.issues.filter(resolved=False).order_by("-created_at")
+        if unresolved.exists():
+            issues_by_entry.append({
+                "entry": entry,
+                "issues": unresolved
+            })
 
     return render(request, "judging/issues_dashboard.html", {
         "meet": meet,
@@ -125,6 +134,7 @@ def resolve_issue(request, issue_id):
 
     return redirect("judging:issues_dashboard", meet_id=issue.team_entry.meet.id)
 
+
 #~.~.~.~.~.~.~.~.~.~.~.~.~ FLAG ISSUES ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def flag_issue(request, entry_id):
@@ -134,8 +144,9 @@ def flag_issue(request, entry_id):
         team_entry=entry,
         flagged_by=request.user,
         issue_type=IssueType.MANUAL,
-        message=f"Flagged manually by {request.user.username}",
+        message=f"Manual issue flagged by {request.user.username}",
         auto_generated=False,
     )
 
     return redirect("judging:superior_judge_review", meet_id=entry.meet.id)
+

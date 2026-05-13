@@ -18,16 +18,20 @@
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
         <td>
-          {% if row.entry.issues.filter(resolved=False).exists %}
-            ⚠ {{ row.entry.issues.filter(resolved=False).count }} issue(s)
-            <a href="{% url 'judging:issues_dashboard' meet.id %}">View</a>
-          {% else %}
-            ✓
-          {% endif %}
+          {% with issues=row.entry.issues.filter(resolved=False) %}
+            {% if issues.exists %}
+              <span style="color: red; font-weight: bold;">
+                ⚠ {{ issues.count }} issue{{ issues.count|pluralize }}
+              </span>
+              <a href="{% url 'judging:issues_dashboard' meet.id %}">View</a>
+            {% else %}
+              <span style="color: green;">✓</span>
+            {% endif %}
+          {% endwith %}
         </td>
         <td>
           <a href="{% url 'judging:flag_issue' row.entry.id %}">
-            <button>Flag Issue</button>
+            <button class="btn btn-warning btn-sm">Flag Issue</button>
           </a>
         </td>
       </tr>
@@ -54,16 +58,20 @@
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
         <td>
-          {% if row.entry.issues.filter(resolved=False).exists %}
-            ⚠ {{ row.entry.issues.filter(resolved=False).count }} issue(s)
-            <a href="{% url 'judging:issues_dashboard' meet.id %}">View</a>
-          {% else %}
-            ✓
-          {% endif %}
+          {% with issues=row.entry.issues.filter(resolved=False) %}
+            {% if issues.exists %}
+              <span style="color: red; font-weight: bold;">
+                ⚠ {{ issues.count }} issue{{ issues.count|pluralize }}
+              </span>
+              <a href="{% url 'judging:issues_dashboard' meet.id %}">View</a>
+            {% else %}
+              <span style="color: green;">✓</span>
+            {% endif %}
+          {% endwith %}
         </td>
         <td>
           <a href="{% url 'judging:flag_issue' row.entry.id %}">
-            <button>Flag Issue</button>
+            <button class="btn btn-warning btn-sm">Flag Issue</button>
           </a>
         </td>
       </tr>
