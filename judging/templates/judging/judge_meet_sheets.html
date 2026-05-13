@@ -1,6 +1,6 @@
 <h1>{{ meet.name }} – My Score Sheets</h1>
 
-<table>
+<table border="1" cellpadding="6">
   <thead>
     <tr>
       <th>Team</th>
@@ -11,11 +11,12 @@
       <th>Edit</th>
     </tr>
   </thead>
+
   <tbody>
     {% for sheet in sheets %}
       <tr>
         <td>{{ sheet.team_entry.team.school.name }} {{ sheet.team_entry.team.name }}</td>
-        <td>{{ sheet.get_division_display }}</td>
+        <td>{{ sheet.division }}</td>
         <td>{{ sheet.team_entry.performance_order }}</td>
         <td>{{ sheet.subtotal }}</td>
         <td>{{ sheet.total }}</td>
