@@ -5,12 +5,9 @@ from .models import JudgeScoreSheet
 @admin.register(JudgeScoreSheet)
 class JudgeScoreSheetAdmin(admin.ModelAdmin):
     list_display = (
-        "judge",
         "team_entry",
-        "division",
-        "subtotal",
+        "judge",
         "total",
         "rank",
     )
-    list_filter = ("team_entry__division", "judge", "team_entry__meet")
-    search_fields = ("judge__username", "team_entry__team__school__name")
+    list_filter = ("judge",)

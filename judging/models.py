@@ -2,29 +2,28 @@ from django.db import models
 from core.models import User
 from meets.models.entry import TeamEntry, Division
 
-#~.~.~.~.~.~.~.~.~.~.~.~.~ JUDGE SCORE SHEET MODEL ~.~.~.~.~.~.~.~.~.~.~.~.~#
+
 class JudgeScoreSheet(models.Model):
     judge = models.ForeignKey(User, on_delete=models.CASCADE)
     team_entry = models.ForeignKey(
         TeamEntry,
         on_delete=models.CASCADE,
-        related_name="score_sheets"
+        related_name="score_sheets",
     )
 
-    # Remove division field — always use team_entry.division
     @property
     def division(self):
         return self.team_entry.division
 
-    ## Jazz Skills
+    # Jazz Skills
     skills_turns = models.PositiveSmallIntegerField(null=True, blank=True)
     skills_leaps_jumps = models.PositiveSmallIntegerField(null=True, blank=True)
 
-    ## Kick Skills
+    # Kick Skills
     kicks_technique = models.PositiveSmallIntegerField(null=True, blank=True)
     kicks_height = models.PositiveSmallIntegerField(null=True, blank=True)
 
-    ## Shared Categories
+    # Shared Categories
     choreo_creativity = models.PositiveSmallIntegerField()
     choreo_visual_effect = models.PositiveSmallIntegerField()
     diff_routine = models.PositiveSmallIntegerField()
@@ -34,15 +33,18 @@ class JudgeScoreSheet(models.Model):
     exec_accuracy = models.PositiveSmallIntegerField()
     routine_effectiveness = models.PositiveSmallIntegerField()
 
-    ## Deductions
+    # Deductions
     time_deduction = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     kick_deduction = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     other_deduction = models.DecimalField(max_digits=4, decimal_places=1, default=0)
 
-    ## Computed
+    # Computed
     subtotal = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     total = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     rank = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("judge", "team_entry")
 
     def compute_subtotal(self):
         fields = [
@@ -73,41 +75,5 @@ class JudgeScoreSheet(models.Model):
         self.compute_total()
         super().save(*args, **kwargs)
 
-#~.~.~.~.~.~.~.~.~.~.~.~.~ ISSUES MODEL ~.~.~.~.~.~.~.~.~.~.~.~.~#
-class IssueType(models.TextChoices):
-    TIME = "TIME", "Timing Violation"
-    KICK = "KICK", "Kick Count Issue"
-    COMPETITOR = "COMPETITOR", "Competitor Count Issue"
-    SAFETY = "SAFETY", "Safety / Illegal Skill"
-    COMMENT = "COMMENT", "Judge Comment Flag"
-    SCORE_OUTLIER = "SCORE_OUTLIER", "Score Outlier"
-    MISSING_SHEET = "MISSING_SHEET", "Missing Judge Sheet"
-    MANUAL = "MANUAL", "Manual Issue"
-    DANGEROUS_MOVE = "dangerous_move"
-    MANUAL_JUDGE = "manual_judge"
-
-
-class Issue(models.Model):
-    team_entry = models.ForeignKey(
-        TeamEntry,
-        on_delete=models.CASCADE,
-        related_name="issues"
-    )
-
-    flagged_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-
-    issue_type = models.CharField(max_length=50, choices=IssueType.choices)
-    message = models.TextField(blank=True)
-
-    auto_generated = models.BooleanField(default=False)
-    resolved = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
-        return f"{self.get_issue_type_display()} – {self.team_entry}"
+        return f"{self.judge} — {self.team_entry}"

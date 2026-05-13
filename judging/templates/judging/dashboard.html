@@ -1,0 +1,7 @@
+<h2>Score Sheet — {{ team_entry.team.name }} ({{ team_entry.division }})</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-success">Save</button>
+</form>
