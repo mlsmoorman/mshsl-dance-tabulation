@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Meet, TeamEntry
+from .models.entry import Meet, TeamEntry
 
 
 class TeamEntryInline(admin.TabularInline):

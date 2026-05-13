@@ -1,47 +1,22 @@
-<h1>KCT Entry – {{ entry.team.school.name }} {{ entry.team.name }}</h1>
+<h2>KCT Entry — {{ team_entry.team.name }}</h2>
 
 <form method="post">
   {% csrf_token %}
-
-  <div class="mb-3">
-    <label>Routine Time (seconds)</label>
-    {{ form.actual_time_seconds }}
-    <small class="text-muted">
-      Allowed:
-      {% if entry.division == "JAZZ" %}
-        {{ rules.jazz_min_time }}–{{ rules.jazz_max_time }}
-      {% else %}
-        {{ rules.kick_min_time }}–{{ rules.kick_max_time }}
-      {% endif %}
-    </small>
-  </div>
-
-  {% if entry.division == "KICK" %}
-    <div class="mb-3">
-      <label>Kick Count</label>
-      {{ form.kick_count }}
-      <small class="text-muted">
-        Allowed: {{ rules.kick_min_count }}–{{ rules.kick_max_count }}
-      </small>
-    </div>
-  {% endif %}
-
-  {% if entry.division == "JAZZ" %}
-    <div class="mb-3">
-      <label>Turn Completed?</label>
-      {{ form.turn_completed }}
-    </div>
-
-    <div class="mb-3">
-      <label>Leap/Jump Completed?</label>
-      {{ form.leap_completed }}
-    </div>
-  {% endif %}
-
-  <div class="mb-3">
-    <label>Competitor Count</label>
-    {{ form.competitor_count }}
-  </div>
+  {{ form.as_p }}
 
   <button class="btn btn-success">Save</button>
 </form>
+
+{% if other_entry %}
+  <hr>
+  <h4>Other KCT Entry (Read‑Only)</h4>
+  <ul>
+    <li>Competitors: {{ other_entry.num_competitors }}</li>
+    <li>Time: {{ other_entry.routine_time_seconds }} sec</li>
+    <li>Kicks: {{ other_entry.kick_count }}</li>
+    <li>Turn: {{ other_entry.jazz_team_turn_performed }}</li>
+    <li>Leap: {{ other_entry.jazz_team_leap_jump_performed }}</li>
+    <li>Falls: {{ other_entry.falls_observed }}</li>
+    <li>Dangerous Move: {{ other_entry.dangerous_move_observed }}</li>
+  </ul>
+{% endif %}

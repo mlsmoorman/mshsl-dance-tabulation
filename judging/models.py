@@ -1,6 +1,6 @@
 from django.db import models
 from core.models import User
-from meets.models import TeamEntry, Division
+from meets.models.entry import TeamEntry, Division
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~ JUDGE SCORE SHEET MODEL ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class JudgeScoreSheet(models.Model):

@@ -1,7 +1,7 @@
 from django.db import models
 from decimal import Decimal
 
-from meets.models import TeamEntry
+from meets.models.entry import TeamEntry
 from core.models import User
 
 

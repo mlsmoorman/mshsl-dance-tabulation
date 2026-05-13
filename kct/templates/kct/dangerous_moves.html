@@ -1,0 +1,8 @@
+<h2>Mark Dangerous Move</h2>
+
+<p>Are you sure you want to mark this routine as having a dangerous move?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button class="btn btn-danger">Confirm</button>
+</form>

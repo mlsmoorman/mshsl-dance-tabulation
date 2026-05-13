@@ -1,105 +1,44 @@
 from django import forms
-import re
-
 from .models import KCTEntry
-from judging.models import Division
-from judging.services.issue_detection import get_active_rules
 
 
- #~.~.~.~.~.~.~.~.~.~.~.~.~ TIME MMSS FIELD ~.~.~.~.~.~.~.~.~.~.~.~.~#
-class TimeMMSSField(forms.Field):
-    def to_python(self, value):
-        if not value:
-            return None
-        
-        # Accept only MM:SS 
-        if not re.match(r"^\d{1,2}:\d{2}$", value):
-            raise forms.ValidationError("Enter time as MM:SS")
-        
-        minutes, seconds = value.split(":")
-        minutes = int(minutes)
-        seconds = int(seconds)
-        
-        # Convert MM:SS to seconds for use in python calculations
-        if seconds >= 60:
-            raise forms.ValidationError("Seconds must be < 60")
-        
-        return minutes * 60 + seconds
-    
-	# Converts back to MM:SS for display purposes
-    def prepare_value(self, value):
-        if value is None:
-            return ""
-        minutes = value // 60
-        seconds = value % 60
-        
-        return f"{minutes:02d}:{seconds:02d}"
-    
-    
-#~.~.~.~.~.~.~.~.~.~.~.~.~ KCT ENTRY FORM ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class KCTEntryForm(forms.ModelForm):
     class Meta:
         model = KCTEntry
         fields = [
-            "actual_time_seconds",
+            "num_competitors",
+            "routine_time_seconds",
             "kick_count",
-            "turn_completed",
-            "leap_completed",
-            "competitor_count",
+            "jazz_team_turn_performed",
+            "jazz_team_leap_jump_performed",
+            "falls_observed",
+            "dangerous_move_observed",
         ]
-        widgets = {
-            "actual_time_seconds": forms.NumberInput(attrs={"class": "form-control"}),
-            "kick_count": forms.NumberInput(attrs={"class": "form-control"}),
-            "competitor_count": forms.NumberInput(attrs={"class": "form-control"}),
-        }
+
+    def __init__(self, *args, **kwargs):
+        self.team_entry = kwargs.pop("team_entry")
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned = super().clean()
-        entry = self.instance.entry
-        rules = get_active_rules()
+        division = self.team_entry.division
 
-        time = cleaned.get("actual_time_seconds")
-        kicks = cleaned.get("kick_count")
-        competitors = cleaned.get("competitor_count")
+        # Kick division → kick_count required
+        if division == "KICK":
+            if cleaned.get("kick_count") is None:
+                self.add_error("kick_count", "Kick count is required for Kick routines.")
 
-        # Timing validation
-        if entry.division == Division.JAZZ:
-            if time and not (rules.jazz_min_time <= time <= rules.jazz_max_time):
-                self.add_error("actual_time_seconds",
-                    f"Jazz time must be between {rules.jazz_min_time} and {rules.jazz_max_time} seconds."
-                )
-        else:
-            if time and not (rules.kick_min_time <= time <= rules.kick_max_time):
-                self.add_error("actual_time_seconds",
-                    f"Kick time must be between {rules.kick_min_time} and {rules.kick_max_time} seconds."
-                )
+        # Jazz division → kick_count optional, but >5 is a warning
+        if division == "JAZZ":
+            kc = cleaned.get("kick_count")
+            if kc is not None and kc > 5:
+                self.add_error("kick_count", "Jazz routines should not exceed 5 kicks.")
 
-        # Kick count validation
-        if entry.division == Division.KICK:
-            if kicks and not (rules.kick_min_count <= kicks <= rules.kick_max_count):
-                self.add_error("kick_count",
-                    f"Kick count must be between {rules.kick_min_count} and {rules.kick_max_count}."
-                )
+        # Jazz turn/leap required
+        if division == "JAZZ":
+            if not cleaned.get("jazz_team_turn_performed"):
+                self.add_error("jazz_team_turn_performed", "Jazz turn must be performed.")
+            if not cleaned.get("jazz_team_leap_jump_performed"):
+                self.add_error("jazz_team_leap_jump_performed", "Jazz leap/jump must be performed.")
 
-        # Competitor count validation (Varsity only)
-        if entry.team.level == "Varsity":
-            if competitors < rules.varsity_min_competitors:
-                self.add_error("competitor_count",
-                    f"Varsity teams must have at least {rules.varsity_min_competitors} competitors."
-                )
-
-            if entry.division == Division.JAZZ:
-                if competitors > rules.varsity_jazz_max_competitors:
-                    self.add_error("competitor_count",
-                        f"Jazz Varsity max competitors is {rules.varsity_jazz_max_competitors}."
-                    )
-            else:
-                if competitors > rules.varsity_kick_max_competitors:
-                    self.add_error("competitor_count",
-                        f"Kick Varsity max competitors is {rules.varsity_kick_max_competitors}."
-                    )
-
-        return cleaned
-
-
-    #~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#
+        # Competitor count minimum

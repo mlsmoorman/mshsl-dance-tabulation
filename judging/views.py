@@ -9,6 +9,55 @@ from .services.issue_detection import run_all_issue_detectors
 from .forms import JudgeScoreSheetForm
 
 
+#*****************************************************************************UPDATES:
+#~.~.~.~.~.~.~.~.~.~.~.~.~ JUDGE SCORING VIEW ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def judge_scoring(request, entry_id):
+    entry = get_object_or_404(TeamEntry, id=entry_id)
+    if not request.user.has_role("JUDGE"):
+        return redirect("/")
+
+    sheet = get_or_create_judge_sheet(entry, request.user)
+
+    if request.method == "POST":
+        form = JudgeScoreForm(request.POST, instance=sheet)
+        if form.is_valid():
+            form.save()
+            return redirect("judging:next_entry_for_judge", meet_id=entry.meet.id)
+    else:
+        form = JudgeScoreForm(instance=sheet)
+
+    return render(request, "judging/scoring.html", {
+        "entry": entry,
+        "form": form,
+    })
+
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ JUDGE FLAG ISSUE VIEW ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def judge_flag_issue(request, entry_id):
+    entry = get_object_or_404(TeamEntry, id=entry_id)
+    if not request.user.has_role("JUDGE"):
+        return redirect("/")
+
+    if request.method == "POST":
+        message = request.POST.get("message")
+        Issue.objects.create(
+            team_entry=entry,
+            issue_type=IssueType.MANUAL_JUDGE,
+            auto_generated=False,
+            flagged_by=request.user,
+            message=message,
+        )
+        return redirect("judging:judge_scoring", entry_id=entry.id)
+
+    return render(request, "judging/judge_flag_issue.html", {"entry": entry})
+
+
+#*****************************************************************************END UPDATES.
+
+
+
 #~.~.~.~.~.~.~.~.~.~.~.~.~ JUDGE MEET SHEETS ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def judge_meet_sheets(request, meet_id):
@@ -207,4 +256,4 @@ def judge_flag_issue(request, entry_id):
     })
 
 
-#~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#
+#~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.

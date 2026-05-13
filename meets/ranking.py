@@ -1,5 +1,5 @@
 from collections import defaultdict
-from meets.models import TeamEntry
+from meets.models import TeamEntry, Division
 
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~ COMPUTE RANKINGS ~.~.~.~.~.~.~.~.~.~.~.~.~#
@@ -111,6 +111,18 @@ def apply_tiebreakers(final_list):
     return final_list
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~ SAVE FINAL RESULTS ~.~.~.~.~.~.~.~.~.~.~.~.~#
+def save_final_results(meet):
+    for division in Division.values:
+        ranking = compute_rankings(meet, division)
+        for item in ranking:
+            entry = item["entry"]
+            entry.final_placement = item["placement"]
+            entry.final_rank_points = sum(item["rank_points"].values())
+            entry.final_total_score = item["total_score"]
+            entry.save()
+
+
 #~.~.~.~.~.~.~.~.~.~.~.~.~ ADVANCE TO FINALS ~.~.~.~.~.~.~.~.~.~.~.~.~#
 def advance_to_finals(meet, division):
     rankings = compute_rankings(meet, division)
@@ -134,3 +146,23 @@ def advance_to_finals(meet, division):
         entry.save()
     
     return finalists
+
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ COMPUTE RANK RECAP ~.~.~.~.~.~.~.~.~.~.~.~.~#
+def compute_rank_recap(meet, division):
+    ranking = compute_rankings(meet, division)
+
+    judges = sorted(next(iter(ranking))["rank_points"].keys()) if ranking else []
+
+    rows = []
+    for item in ranking:
+        entry = item["entry"]
+        rows.append({
+            "entry": entry,
+            "placement": item["placement"],
+            "rank_points": item["rank_points"],  # per judge
+            "total_rank_points": sum(item["rank_points"].values()),
+            "total_score": item["total_score"],
+        })
+
+    return judges, rows

@@ -6,6 +6,19 @@ from .models import Meet, TeamEntry, Division
 from judging.models import JudgeScoreSheet
 
 
+#***********************************************************************CHANGES BEGIN:
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ MEET SETUP VIEW ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def meet_setup(request, meet_id=None):
+    # create/edit meet, add entries, assign judges, etc.
+    ...
+
+
+
+#***********************************************************************CHANGES END.
+
+
 #~.~.~.~.~.~.~.~.~.~.~.~.~ TABULATOR DASHBOARD ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def tabulator_dashboard(request, pk):

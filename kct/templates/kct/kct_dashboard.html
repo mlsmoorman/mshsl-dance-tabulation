@@ -1,32 +1,44 @@
-<h1>KCT Dashboard – {{ meet.name }}</h1>
+<h2>KCT Dashboard — {{ meet.name }}</h2>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Order</th>
-      <th>Team</th>
-      <th>Division</th>
-      <th>Level</th>
-      <th>KCT Entry</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    {% for entry in entries %}
+{% for division, entries in divisions.items %}
+  <h3>{{ division }}</h3>
+  <table class="table table-bordered">
+    <thead>
       <tr>
-        <td>{{ entry.performance_order }}</td>
-        <td>{{ entry.team.school.name }} {{ entry.team.name }}</td>
-        <td>{{ entry.get_division_display }}</td>
-        <td>{{ entry.team.level }}</td>
-		<a href="{% url 'kct:report_dangerous_move' entry.id %}">
-		  <button class="btn btn-danger btn-sm">Dangerous Move</button>
-		</a>
-        <td>
-          <a href="{% url 'kct:kct_entry' entry.id %}">
-            <button class="btn btn-primary btn-sm">Enter</button>
-          </a>
-        </td>
+        <th>Team</th>
+        <th>Your Entry</th>
+        <th>Other KCT</th>
+        <th>Actions</th>
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {% for entry in entries %}
+        <tr>
+          <td>{{ entry.team.name }}</td>
+
+          <td>
+            {% for k in entry.kct_entries_list %}
+              {% if k.kct == user %}
+                ✔ Entered
+              {% endif %}
+            {% endfor %}
+          </td>
+
+          <td>
+            {% for k in entry.kct_entries_list %}
+              {% if k.kct != user %}
+                ✔ {{ k.kct }}
+              {% endif %}
+            {% endfor %}
+          </td>
+
+          <td>
+            <a href="{% url 'kct:entry_form' entry.id %}" class="btn btn-primary btn-sm">
+              Enter / Edit
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}

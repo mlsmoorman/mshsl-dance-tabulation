@@ -1,0 +1,11 @@
+<h1>Announcer Results – {{ meet.name }}</h1>
+
+{% for division, entries in divisions.items %}
+  <h2>{{ entries.0.get_division_display }}</h2>
+  <ol>
+    {% for entry in entries %}
+      <li>{{ entry.team.school.name }} {{ entry.team.name }}</li>
+    {% endfor %}
+  </ol>
+{% endfor %}
+
