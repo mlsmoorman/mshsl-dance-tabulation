@@ -1,0 +1,46 @@
+<h1>Superior Judge Review – {{ meet.name }}</h1>
+
+<h2>Jazz Division</h2>
+<table border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Order</th>
+      <th>Team</th>
+      <th>Total Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in jazz_entries %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ row.order }}</td>
+        <td>{{ row.school.name }} {{ row.team.name }}</td>
+        <td>{{ row.total }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<h2>Kick Division</h2>
+<table border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Order</th>
+      <th>Team</th>
+      <th>Total Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in kick_entries %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ row.order }}</td>
+        <td>{{ row.school.name }} {{ row.team.name }}</td>
+        <td>{{ row.total }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
