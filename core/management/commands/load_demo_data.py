@@ -10,20 +10,26 @@ from core.models import (
     Role,
     User,
 )
+
 from meets.models import (
     Meet,
     TeamEntry,
     Division,
     ClassLevel,
 )
+
 from judging.models import JudgeScoreSheet
 
 
 PASSWORD = "demo1234"
 
 
+# ---------------------------------------------------------
+# Wipe all data
+# ---------------------------------------------------------
 def wipe_all():
     print("Wiping all data...")
+
     JudgeScoreSheet.objects.all().delete()
     TeamEntry.objects.all().delete()
     Meet.objects.all().delete()
@@ -31,11 +37,15 @@ def wipe_all():
     School.objects.all().delete()
     User.objects.all().delete()
     Role.objects.all().delete()
+
     print("✓ All data wiped.")
 
 
+# ---------------------------------------------------------
+# Seed roles
+# ---------------------------------------------------------
 def seed_roles():
-    print("Seeding base data...")
+    print("Seeding base roles...")
 
     roles = [
         ("JUDGE", "Judge"),
@@ -47,10 +57,15 @@ def seed_roles():
     for code, name in roles:
         Role.objects.get_or_create(code=code, defaults={"name": name})
 
-    print("✓ Base data seeded.")
+    print("✓ Roles seeded.")
 
 
-def create_schools():
+# ---------------------------------------------------------
+# Seed schools
+# ---------------------------------------------------------
+def seed_schools():
+    print("Creating schools...")
+
     names = [
         "Wayzata High School",
         "Maple Grove High School",
@@ -70,22 +85,27 @@ def create_schools():
     for name in names:
         school, _ = School.objects.get_or_create(name=name)
         schools.append(school)
+
+    print(f"✓ Created {len(schools)} schools.")
     return schools
 
 
-def create_teams(schools, num_teams=12):
+# ---------------------------------------------------------
+# Seed teams
+# ---------------------------------------------------------
+def seed_teams(schools, num_teams=12):
     print("Creating teams...")
+
     levels = [TeamLevel.VARSITY, TeamLevel.JV, TeamLevel.BSQUAD]
     teams = []
 
     for i in range(num_teams):
         school = random.choice(schools)
         level = random.choice(levels)
-        team_name = "Dance Team"
 
         team, _ = Team.objects.get_or_create(
             school=school,
-            name=team_name,
+            name="Dance Team",
             defaults={"level": level},
         )
         teams.append(team)
@@ -94,8 +114,11 @@ def create_teams(schools, num_teams=12):
     return teams
 
 
-def create_users_and_roles(num_judges=7, num_kcts=4, num_tab=2, num_sup=2):
-    print("Creating users (judges, KCT, tabulators, superior judges)...")
+# ---------------------------------------------------------
+# Seed users
+# ---------------------------------------------------------
+def seed_users(num_judges=7, num_kcts=4, num_tabs=2, num_sup=2):
+    print("Creating users...")
 
     judge_role = Role.objects.get(code="JUDGE")
     kct_role = Role.objects.get(code="KCT")
@@ -106,7 +129,7 @@ def create_users_and_roles(num_judges=7, num_kcts=4, num_tab=2, num_sup=2):
     for i in range(1, num_judges + 1):
         user, _ = User.objects.get_or_create(
             username=f"judge{i}",
-            defaults={"first_name": f"Judge {i}", "password": PASSWORD},
+            defaults={"first_name": f"Judge {i}"},
         )
         user.set_password(PASSWORD)
         user.save()
@@ -117,47 +140,52 @@ def create_users_and_roles(num_judges=7, num_kcts=4, num_tab=2, num_sup=2):
     for i in range(1, num_kcts + 1):
         user, _ = User.objects.get_or_create(
             username=f"kct{i}",
-            defaults={"first_name": f"KCT {i}", "password": PASSWORD},
+            defaults={"first_name": f"KCT {i}"},
         )
         user.set_password(PASSWORD)
         user.save()
         user.roles.add(kct_role)
         kcts.append(user)
 
-    tabulators = []
-    for i in range(1, num_tab + 1):
+    tabs = []
+    for i in range(1, num_tabs + 1):
         user, _ = User.objects.get_or_create(
             username=f"tab{i}",
-            defaults={"first_name": f"Tabulator {i}", "password": PASSWORD},
+            defaults={"first_name": f"Tabulator {i}"},
         )
         user.set_password(PASSWORD)
         user.save()
         user.roles.add(tab_role)
-        tabulators.append(user)
+        tabs.append(user)
 
-    superiors = []
+    sups = []
     for i in range(1, num_sup + 1):
         user, _ = User.objects.get_or_create(
             username=f"sup{i}",
-            defaults={"first_name": f"Superior {i}", "password": PASSWORD},
+            defaults={"first_name": f"Superior {i}"},
         )
         user.set_password(PASSWORD)
         user.save()
         user.roles.add(sup_role)
-        superiors.append(user)
+        sups.append(user)
 
     print("✓ Users created.")
-    return judges, kcts, tabulators, superiors
+    return judges, kcts, tabs, sups
 
 
-def create_meets(num_meets=6, judges=None, kcts=None):
+# ---------------------------------------------------------
+# Seed meets
+# ---------------------------------------------------------
+def seed_meets(num_meets, judges, kcts):
     print("Creating meets...")
+
+    meets = []
     today = date.today()
     class_levels = [ClassLevel.A, ClassLevel.AA, ClassLevel.AAA, ClassLevel.CONF]
-    meets = []
 
     for i in range(1, num_meets + 1):
         meet_date = today + timedelta(days=7 * i)
+
         meet, _ = Meet.objects.get_or_create(
             name=f"2026 Invitational #{i}",
             defaults={
@@ -171,8 +199,7 @@ def create_meets(num_meets=6, judges=None, kcts=None):
         for j in judges:
             meet.judges.add(j)
 
-        assigned_kcts = random.sample(kcts, min(2, len(kcts)))
-        for k in assigned_kcts:
+        for k in random.sample(kcts, min(2, len(kcts))):
             meet.kcts.add(k)
 
         meets.append(meet)
@@ -181,8 +208,12 @@ def create_meets(num_meets=6, judges=None, kcts=None):
     return meets
 
 
-def create_team_entries(meets, teams):
+# ---------------------------------------------------------
+# Seed team entries
+# ---------------------------------------------------------
+def seed_team_entries(meets, teams):
     print("Creating team entries...")
+
     divisions = [Division.JAZZ, Division.KICK]
 
     for meet in meets:
@@ -200,7 +231,10 @@ def create_team_entries(meets, teams):
     print("✓ Team entries created.")
 
 
-def create_scores(meets):
+# ---------------------------------------------------------
+# Seed judge score sheets
+# ---------------------------------------------------------
+def seed_scores(meets):
     print("Creating judge score sheets...")
 
     for meet in meets:
@@ -212,8 +246,8 @@ def create_scores(meets):
                 sheet, created = JudgeScoreSheet.objects.get_or_create(
                     judge=judge,
                     team_entry=entry,
-                    defaults={"division": entry.division},
                 )
+
                 if created:
                     # Shared categories
                     sheet.choreo_creativity = random.randint(7, 10)
@@ -225,6 +259,7 @@ def create_scores(meets):
                     sheet.exec_accuracy = random.randint(7, 10)
                     sheet.routine_effectiveness = random.randint(7, 10)
 
+                    # Division-specific
                     if entry.division == Division.JAZZ:
                         sheet.skills_turns = random.randint(7, 10)
                         sheet.skills_leaps_jumps = random.randint(7, 10)
@@ -235,13 +270,17 @@ def create_scores(meets):
                     sheet.time_deduction = 0
                     sheet.kick_deduction = 0
                     sheet.other_deduction = 0
+
                     sheet.save()
 
     print("✓ Judge score sheets created.")
 
 
+# ---------------------------------------------------------
+# Command
+# ---------------------------------------------------------
 class Command(BaseCommand):
-    help = "Load demo data for dance scoring system"
+    help = "Load demo data for the dance scoring system"
 
     def add_arguments(self, parser):
         parser.add_argument("--wipe", action="store_true")
@@ -255,18 +294,14 @@ class Command(BaseCommand):
             wipe_all()
 
         seed_roles()
-        schools = create_schools()
-        teams = create_teams(schools, num_teams=options["teams"])
-        judges, kcts, tabs, sups = create_users_and_roles(
-            num_judges=options["judges"]
-        )
-        meets = create_meets(num_meets=options["meets"], judges=judges, kcts=kcts)
-        create_team_entries(meets, teams)
+        schools = seed_schools()
+        teams = seed_teams(schools, num_teams=options["teams"])
+        judges, kcts, tabs, sups = seed_users(num_judges=options["judges"])
+        meets = seed_meets(options["meets"], judges, kcts)
+        seed_team_entries(meets, teams)
 
         if options["scores"]:
-            create_scores(meets)
+            seed_scores(meets)
 
-        self.stdout.write(self.style.SUCCESS("Demo data loaded."))
-
-
+        self.stdout.write(self.style.SUCCESS("Demo data loaded successfully."))
 
