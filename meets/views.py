@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 
@@ -50,3 +50,45 @@ def tabulator_dashboard(request, pk):
         "jazz_entries": jazz,
         "kick_entries": kick,
     })
+
+# Verify Entry
+@login_required
+def verify_entry(request, entry_id):
+    entry = get_object_or_404(TeamEntry, id=entry_id)
+    entry.verified_by_tabulator = True
+    entry.save()
+    return redirect("meets:tabulator_dashboard", pk=entry.meet.id)
+
+# Finalize Meet
+@login_required
+def finalize_meet(request, pk):
+    meet = get_object_or_404(Meet, id=pk)
+    entries = TeamEntry.objects.filter(meet=meet)
+    
+    # Compute Totals
+    scored = []
+    for entry in entries:
+        total = (
+            entry.score_sheets.aggregate(total=Sum("total")).get("total") or 0
+        )
+        scored.append((entry, total))
+        
+    # Split by Division
+    jazz = [x for x in scored if x[0].division == Division.JAZZ]
+    kick = [x for x in scored if x[0].division == Division.KICK]
+    
+    # Sort Descending
+    jazz.sort(key=lambda x: x[1], reverse=True)
+    kick.sort(key=lambda x: x[1], reverse=True)
+    
+    # Assign Ranks
+    for rank, (entry, total) in enumerate(jazz, start=1):
+        entry.final_rank = rank
+        entry.save()
+    
+    for rank, (entry, total) in enumerate(kick, start=1):
+        entry.final_rank = rank
+        entry.save()
+    
+    return redirect("meets.tabulator_dashboard", pk=pk)
+
