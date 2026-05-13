@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import School, Team, Role, User, TeamLevel
+from .models import School, Team, Role, User
 
 
 @admin.register(School)

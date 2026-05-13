@@ -12,5 +12,5 @@ class JudgeScoreSheetAdmin(admin.ModelAdmin):
         "total",
         "rank",
     )
-    list_filter = ("division", "judge", "team_entry__meet")
+    list_filter = ("team_entry__division", "judge", "team_entry__meet")
     search_fields = ("judge__username", "team_entry__team__school__name")
