@@ -41,4 +41,8 @@ class KCTEntryForm(forms.ModelForm):
             if not cleaned.get("jazz_team_leap_jump_performed"):
                 self.add_error("jazz_team_leap_jump_performed", "Jazz leap/jump must be performed.")
 
-        # Competitor count minimum
+        # Competitor count minimums
+        if cleaned.get("num_competitors") < 5:
+            self.add_error("num_competitors", "Minimum of 5 competitors required.")
+
+        return cleaned
