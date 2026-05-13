@@ -9,8 +9,7 @@ from judging.services.issue_detection import run_all_issue_detectors, get_active
 def kct_entry(request, entry_id):
     entry = get_object_or_404(TeamEntry, id=entry_id)
 
-    # Only KCT, Superior Judge, or Tabulator should access
-    if not request.user.has_role("KCT") and not request.user.has_role("SUPERIOR"):
+    if not request.user.has_role("KCT"):
         return redirect("/")
 
     kct = getattr(entry, "kctentry", None)
@@ -36,6 +35,7 @@ def kct_entry(request, entry_id):
     })
 
 
+
 #~.~.~.~.~.~.~.~.~.~.~.~.~ KCT DASHBOARD ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def kct_dashboard(request, meet_id):
@@ -43,12 +43,19 @@ def kct_dashboard(request, meet_id):
         return redirect("/")
 
     meet = get_object_or_404(Meet, id=meet_id)
-    entries = meet.entries.select_related("team").all()
+
+    entries = (
+        TeamEntry.objects
+        .filter(meet=meet)
+        .select_related("team", "team__school")
+        .order_by("performance_order")
+    )
 
     return render(request, "kct/kct_dashboard.html", {
         "meet": meet,
         "entries": entries,
     })
+
 
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#

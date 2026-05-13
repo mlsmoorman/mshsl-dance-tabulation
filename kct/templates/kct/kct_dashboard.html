@@ -1,8 +1,9 @@
 <h1>KCT Dashboard – {{ meet.name }}</h1>
 
-<table class="table">
+<table class="table table-striped">
   <thead>
     <tr>
+      <th>Order</th>
       <th>Team</th>
       <th>Division</th>
       <th>Level</th>
@@ -13,12 +14,13 @@
   <tbody>
     {% for entry in entries %}
       <tr>
+        <td>{{ entry.performance_order }}</td>
         <td>{{ entry.team.school.name }} {{ entry.team.name }}</td>
         <td>{{ entry.get_division_display }}</td>
         <td>{{ entry.team.level }}</td>
         <td>
           <a href="{% url 'kct:kct_entry' entry.id %}">
-            <button class="btn btn-primary btn-sm">Enter KCT Data</button>
+            <button class="btn btn-primary btn-sm">Enter</button>
           </a>
         </td>
       </tr>

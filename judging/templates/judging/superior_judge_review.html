@@ -82,12 +82,14 @@
 <h3>KCT Data</h3>
 <ul>
   <li>Time: {{ entry.kctentry.actual_time_seconds }} seconds</li>
+  <li>Competitors: {{ entry.kctentry.competitor_count }}</li>
+
   {% if entry.division == "KICK" %}
     <li>Kicks: {{ entry.kctentry.kick_count }}</li>
   {% endif %}
+
   {% if entry.division == "JAZZ" %}
     <li>Turn Completed: {{ entry.kctentry.turn_completed }}</li>
     <li>Leap Completed: {{ entry.kctentry.leap_completed }}</li>
   {% endif %}
-  <li>Competitors: {{ entry.kctentry.competitor_count }}</li>
 </ul>

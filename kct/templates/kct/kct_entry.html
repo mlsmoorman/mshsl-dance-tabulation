@@ -1,7 +1,5 @@
 <h1>KCT Entry – {{ entry.team.school.name }} {{ entry.team.name }}</h1>
 
-<h3>{{ entry.get_division_display }} – {{ entry.team.level }}</h3>
-
 <form method="post">
   {% csrf_token %}
 
@@ -9,11 +7,11 @@
     <label>Routine Time (seconds)</label>
     {{ form.actual_time_seconds }}
     <small class="text-muted">
-      Allowed: 
+      Allowed:
       {% if entry.division == "JAZZ" %}
-        {{ rules.jazz_min_time }}–{{ rules.jazz_max_time }} seconds
+        {{ rules.jazz_min_time }}–{{ rules.jazz_max_time }}
       {% else %}
-        {{ rules.kick_min_time }}–{{ rules.kick_max_time }} seconds
+        {{ rules.kick_min_time }}–{{ rules.kick_max_time }}
       {% endif %}
     </small>
   </div>
@@ -23,7 +21,7 @@
       <label>Kick Count</label>
       {{ form.kick_count }}
       <small class="text-muted">
-        Allowed: {{ rules.kick_min_count }}–{{ rules.kick_max_count }} kicks
+        Allowed: {{ rules.kick_min_count }}–{{ rules.kick_max_count }}
       </small>
     </div>
   {% endif %}
@@ -40,5 +38,10 @@
     </div>
   {% endif %}
 
-  <button class="btn btn-primary">Save</button>
+  <div class="mb-3">
+    <label>Competitor Count</label>
+    {{ form.competitor_count }}
+  </div>
+
+  <button class="btn btn-success">Save</button>
 </form>

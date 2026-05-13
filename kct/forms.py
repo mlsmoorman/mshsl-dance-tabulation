@@ -45,10 +45,12 @@ class KCTEntryForm(forms.ModelForm):
             "kick_count",
             "turn_completed",
             "leap_completed",
+            "competitor_count",
         ]
         widgets = {
             "actual_time_seconds": forms.NumberInput(attrs={"class": "form-control"}),
             "kick_count": forms.NumberInput(attrs={"class": "form-control"}),
+            "competitor_count": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
     def clean(self):
@@ -58,6 +60,7 @@ class KCTEntryForm(forms.ModelForm):
 
         time = cleaned.get("actual_time_seconds")
         kicks = cleaned.get("kick_count")
+        competitors = cleaned.get("competitor_count")
 
         # Timing validation
         if entry.division == Division.JAZZ:
@@ -71,13 +74,32 @@ class KCTEntryForm(forms.ModelForm):
                     f"Kick time must be between {rules.kick_min_time} and {rules.kick_max_time} seconds."
                 )
 
-        # Kick count validation (Kick only)
+        # Kick count validation
         if entry.division == Division.KICK:
             if kicks and not (rules.kick_min_count <= kicks <= rules.kick_max_count):
                 self.add_error("kick_count",
                     f"Kick count must be between {rules.kick_min_count} and {rules.kick_max_count}."
                 )
 
+        # Competitor count validation (Varsity only)
+        if entry.team.level == "Varsity":
+            if competitors < rules.varsity_min_competitors:
+                self.add_error("competitor_count",
+                    f"Varsity teams must have at least {rules.varsity_min_competitors} competitors."
+                )
+
+            if entry.division == Division.JAZZ:
+                if competitors > rules.varsity_jazz_max_competitors:
+                    self.add_error("competitor_count",
+                        f"Jazz Varsity max competitors is {rules.varsity_jazz_max_competitors}."
+                    )
+            else:
+                if competitors > rules.varsity_kick_max_competitors:
+                    self.add_error("competitor_count",
+                        f"Kick Varsity max competitors is {rules.varsity_kick_max_competitors}."
+                    )
+
         return cleaned
+
 
     #~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#
