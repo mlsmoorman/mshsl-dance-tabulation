@@ -92,3 +92,22 @@ def finalize_meet(request, pk):
     
     return redirect("meets.tabulator_dashboard", pk=pk)
 
+# Select Finalists
+@login_required
+def select_finalists(request, pk):
+    meet = get_object_or_404(Meet, id=pk)
+    finalists = meet.num_finalists
+    
+    entries = TeamEntry.objects.filter(meet=meet).order_by("final_rank")
+    
+    # Reset All
+    entries.update(is_finalist=False)
+    
+    # Select Finalists per Division
+    for division in [Division.JAZZ, Division.KICK]:
+        division_entries = entries.filter(division=division).order_by("final_rank")
+        for entry in division_entries[:finalists]:
+            entry.is_finalist = True
+            entry.save()
+            
+    return redirect("meets:tabulator_dashboard", pk=pk)
