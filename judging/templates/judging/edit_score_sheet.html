@@ -1,7 +1,19 @@
-<h1>Edit Score Sheet – {{ sheet.team_entry.team.school.name }} {{ sheet.team_entry.team.name }} ({{ sheet.get_division_display }})</h1>
+<h1>
+  Edit Score Sheet –
+  {{ sheet.team_entry.team.school.name }}
+  {{ sheet.team_entry.team.name }}
+  ({{ sheet.division }})
+</h1>
 
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
+
   <button type="submit">Save</button>
 </form>
+
+<p>
+  <a href="{% url 'judging:judge_meet_sheets' sheet.team_entry.meet.id %}">
+    Back to sheets
+  </a>
+</p>
