@@ -7,10 +7,15 @@ class JudgeScoreSheetForm(forms.ModelForm):
     class Meta:
         model = JudgeScoreSheet
         fields = [
+            # Jazz
             "skills_turns",
             "skills_leaps_jumps",
+
+            # Kick
             "kicks_technique",
             "kicks_height",
+
+            # Shared
             "choreo_creativity",
             "choreo_visual_effect",
             "diff_routine",
@@ -19,6 +24,8 @@ class JudgeScoreSheetForm(forms.ModelForm):
             "exec_placement_control",
             "exec_accuracy",
             "routine_effectiveness",
+
+            # Deductions
             "time_deduction",
             "kick_deduction",
             "other_deduction",
@@ -27,6 +34,8 @@ class JudgeScoreSheetForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         sheet = self.instance
+
+        # Hide irrelevant fields based on division
         if sheet.division == Division.JAZZ:
             self.fields["kicks_technique"].widget = forms.HiddenInput()
             self.fields["kicks_height"].widget = forms.HiddenInput()
