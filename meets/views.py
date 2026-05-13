@@ -8,23 +8,22 @@ from judging.models import JudgeScoreSheet
 
 @login_required
 def tabulator_dashboard(request, pk):
+    # Only tabulators can access this page
+    if not request.user.has_role("TABULATOR"):
+        return redirect("/")  # or a 403 page
+
     meet = get_object_or_404(Meet, id=pk)
 
-    # All entries for this meet
     entries = (
         TeamEntry.objects
         .filter(meet=meet)
         .select_related("team", "team__school")
     )
 
-    # Build data rows
     data = []
     for entry in entries:
         total = (
-            JudgeScoreSheet.objects
-            .filter(team_entry=entry)
-            .aggregate(total=Sum("total"))
-            .get("total") or 0
+            entry.score_sheets.aggregate(total=Sum("total")).get("total") or 0
         )
 
         data.append({
@@ -37,11 +36,9 @@ def tabulator_dashboard(request, pk):
             "total": total,
         })
 
-    # Split by division
     jazz = [d for d in data if d["division"] == Division.JAZZ]
     kick = [d for d in data if d["division"] == Division.KICK]
 
-    # Sort by total descending
     jazz.sort(key=lambda d: d["total"], reverse=True)
     kick.sort(key=lambda d: d["total"], reverse=True)
 
@@ -51,13 +48,14 @@ def tabulator_dashboard(request, pk):
         "kick_entries": kick,
     })
 
+
 # Verify Entry
 @login_required
 def verify_entry(request, entry_id):
     entry = get_object_or_404(TeamEntry, id=entry_id)
     entry.verified_by_tabulator = True
     entry.save()
-    return redirect("meets:tabulator_dashboard", pk=entry.meet.id)
+    return redirect(request, "meets:tabulator_dashboard", pk=entry.meet.id)
 
 # Finalize Meet
 @login_required
@@ -90,7 +88,7 @@ def finalize_meet(request, pk):
         entry.final_rank = rank
         entry.save()
     
-    return redirect("meets.tabulator_dashboard", pk=pk)
+    return redirect(request, "meets.tabulator_dashboard", pk=pk)
 
 # Select Finalists
 @login_required
@@ -110,4 +108,4 @@ def select_finalists(request, pk):
             entry.is_finalist = True
             entry.save()
             
-    return redirect("meets:tabulator_dashboard", pk=pk)
+    return redirect(request, "meets:tabulator_dashboard", pk=pk)
