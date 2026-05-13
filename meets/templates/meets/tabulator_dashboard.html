@@ -1,5 +1,15 @@
 <h1>Tabulator Dashboard – {{ meet.name }}</h1>
 
+<p>
+  <a href="{% url 'meets:finalize_meet' meet.id %}">
+    <button>Finalize Rankings</button>
+  </a>
+
+  <a href="{% url 'meets:select_finalists' meet.id %}">
+    <button>Select Finalists</button>
+  </a>
+</p>
+
 <h2>Jazz Division</h2>
 <table border="1" cellpadding="6">
   <thead>
@@ -19,6 +29,15 @@
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
         <td>{{ row.verified }}</td>
+        <td>
+          {% if not row.verified %}
+            <a href="{% url 'meets:verify_entry' row.entry.id %}">
+              <button>Verify</button>
+            </a>
+          {% else %}
+            ✓
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </tbody>
@@ -44,6 +63,15 @@
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
         <td>{{ row.verified }}</td>
+        <td>
+          {% if not row.verified %}
+            <a href="{% url 'meets:verify_entry' row.entry.id %}">
+              <button>Verify</button>
+            </a>
+          {% else %}
+            ✓
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </tbody>
