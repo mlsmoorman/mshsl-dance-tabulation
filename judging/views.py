@@ -9,7 +9,7 @@ from .models import JudgeScoreSheet
 from .forms import JudgeScoreSheetForm
 
 
-
+# Judge Meet Sheets
 @login_required
 def judge_meet_sheets(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
@@ -25,7 +25,7 @@ def judge_meet_sheets(request, meet_id):
         "sheets": sheets,
     })
 
-
+# Edit Score Sheet
 @login_required
 def edit_score_sheet(request, pk):
     sheet = get_object_or_404(JudgeScoreSheet, id=pk, judge=request.user)
@@ -44,26 +44,46 @@ def edit_score_sheet(request, pk):
     })
 
 
-
+# Superior Review
 @login_required
-def superior_review(request, meet_id):
+def superior_judge_review(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
 
-    entries = TeamEntry.objects.filter(meet=meet).select_related("team", "team__school")
+    # Only superior judges allowed
+    if not request.user.has_role("SUPERIOR"):
+        return redirect("/")
 
-    jazz = (
-        entries.filter(division=Division.JAZZ)
-        .annotate(total_score=Sum("score_sheets__total"))
-        .order_by("-total_score")
+    entries = (
+        TeamEntry.objects
+        .filter(meet=meet)
+        .select_related("team", "team__school")
     )
 
-    kick = (
-        entries.filter(division=Division.KICK)
-        .annotate(total_score=Sum("score_sheets__total"))
-        .order_by("-total_score")
-    )
+    # Build data rows
+    data = []
+    for entry in entries:
+        total = (
+            entry.score_sheets.aggregate(total=Sum("total")).get("total") or 0
+        )
 
-    return render(request, "judging/superior_review.html", {
+        data.append({
+            "entry": entry,
+            "team": entry.team,
+            "school": entry.team.school,
+            "division": entry.division,
+            "order": entry.performance_order,
+            "total": total,
+        })
+
+    # Split by division
+    jazz = [d for d in data if d["division"] == Division.JAZZ]
+    kick = [d for d in data if d["division"] == Division.KICK]
+
+    # Sort by total descending
+    jazz.sort(key=lambda d: d["total"], reverse=True)
+    kick.sort(key=lambda d: d["total"], reverse=True)
+
+    return render(request, "judging/superior_judge_review.html", {
         "meet": meet,
         "jazz_entries": jazz,
         "kick_entries": kick,
