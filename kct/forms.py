@@ -1,7 +1,12 @@
 from django import forms
 import re
 
+from .models import KCTEntry
+from judging.models import Division
+from judging.services.issue_detection import get_active_rules
 
+
+ #~.~.~.~.~.~.~.~.~.~.~.~.~ TIME MMSS FIELD ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class TimeMMSSField(forms.Field):
     def to_python(self, value):
         if not value:
@@ -29,3 +34,50 @@ class TimeMMSSField(forms.Field):
         seconds = value % 60
         
         return f"{minutes:02d}:{seconds:02d}"
+    
+    
+#~.~.~.~.~.~.~.~.~.~.~.~.~ KCT ENTRY FORM ~.~.~.~.~.~.~.~.~.~.~.~.~#
+class KCTEntryForm(forms.ModelForm):
+    class Meta:
+        model = KCTEntry
+        fields = [
+            "actual_time_seconds",
+            "kick_count",
+            "turn_completed",
+            "leap_completed",
+        ]
+        widgets = {
+            "actual_time_seconds": forms.NumberInput(attrs={"class": "form-control"}),
+            "kick_count": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        entry = self.instance.entry
+        rules = get_active_rules()
+
+        time = cleaned.get("actual_time_seconds")
+        kicks = cleaned.get("kick_count")
+
+        # Timing validation
+        if entry.division == Division.JAZZ:
+            if time and not (rules.jazz_min_time <= time <= rules.jazz_max_time):
+                self.add_error("actual_time_seconds",
+                    f"Jazz time must be between {rules.jazz_min_time} and {rules.jazz_max_time} seconds."
+                )
+        else:
+            if time and not (rules.kick_min_time <= time <= rules.kick_max_time):
+                self.add_error("actual_time_seconds",
+                    f"Kick time must be between {rules.kick_min_time} and {rules.kick_max_time} seconds."
+                )
+
+        # Kick count validation (Kick only)
+        if entry.division == Division.KICK:
+            if kicks and not (rules.kick_min_count <= kicks <= rules.kick_max_count):
+                self.add_error("kick_count",
+                    f"Kick count must be between {rules.kick_min_count} and {rules.kick_max_count}."
+                )
+
+        return cleaned
+
+    #~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#

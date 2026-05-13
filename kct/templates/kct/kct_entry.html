@@ -1,31 +1,44 @@
-<h2>KCT Entry - {{  team_entry.team.name  }} ({{  team_entry.division  }})</h2>
+<h1>KCT Entry – {{ entry.team.school.name }} {{ entry.team.name }}</h1>
 
-<form method="POST">
-	{% csrf_token %}
+<h3>{{ entry.get_division_display }} – {{ entry.team.level }}</h3>
 
-	<div class="card mb-3">
-		<div class="card-header">Kick Count</div>
-		<div class="card-body">
-			<input type="number" name="kick_count" class="form-control"
-				value="{{  kct.kick_count  }}" min="0" max="200">
-		</div>
-	</div>
+<form method="post">
+  {% csrf_token %}
 
-	<div class="card mb-3">
-		<div class="card-header">Routine Time (seconds)</div>
-		<div class="card-body">
-			<input type="number" name="routine_time_seconds" class="form-control"
-				value="{{  kct.routine_time_seconds  }}" min="0" max="600">
-		</div>
-	</div>
-	
-	<div class="card mb-3">
-		<div class="card-header">Competitor Count</div>
-		<div class="card-body">
-			<input type="number" name="num_competitors" class="form-control"
-				value="{{  kct.num_competitors  }}" min="0" max="50">
-		</div>
-	</div>
+  <div class="mb-3">
+    <label>Routine Time (seconds)</label>
+    {{ form.actual_time_seconds }}
+    <small class="text-muted">
+      Allowed: 
+      {% if entry.division == "JAZZ" %}
+        {{ rules.jazz_min_time }}–{{ rules.jazz_max_time }} seconds
+      {% else %}
+        {{ rules.kick_min_time }}–{{ rules.kick_max_time }} seconds
+      {% endif %}
+    </small>
+  </div>
 
-	<button class="btn btn-primary">Save KCT Data</button>
+  {% if entry.division == "KICK" %}
+    <div class="mb-3">
+      <label>Kick Count</label>
+      {{ form.kick_count }}
+      <small class="text-muted">
+        Allowed: {{ rules.kick_min_count }}–{{ rules.kick_max_count }} kicks
+      </small>
+    </div>
+  {% endif %}
+
+  {% if entry.division == "JAZZ" %}
+    <div class="mb-3">
+      <label>Turn Completed?</label>
+      {{ form.turn_completed }}
+    </div>
+
+    <div class="mb-3">
+      <label>Leap/Jump Completed?</label>
+      {{ form.leap_completed }}
+    </div>
+  {% endif %}
+
+  <button class="btn btn-primary">Save</button>
 </form>
