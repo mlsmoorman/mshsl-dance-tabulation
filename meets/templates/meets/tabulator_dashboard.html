@@ -1,44 +1,49 @@
 <h1>Tabulator Dashboard – {{ meet.name }}</h1>
 
-<h2>Jazz</h2>
-<table>
+<h2>Jazz Division</h2>
+<table border="1" cellpadding="6">
   <thead>
     <tr>
+      <th>Rank</th>
       <th>Order</th>
       <th>Team</th>
-      <th>Total</th>
+      <th>Total Score</th>
       <th>Verified</th>
     </tr>
   </thead>
   <tbody>
     {% for row in jazz_entries %}
       <tr>
-        <td>{{ row.entry.performance_order }}</td>
-        <td>{{ row.entry.team.school.name }} {{ row.entry.team.name }}</td>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ row.order }}</td>
+        <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
-        <td>{{ row.entry.verified_by_tabulator }}</td>
+        <td>{{ row.verified }}</td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
 
-<h2>Kick</h2>
-<table>
+
+<h2>Kick Division</h2>
+<table border="1" cellpadding="6">
   <thead>
     <tr>
+      <th>Rank</th>
       <th>Order</th>
       <th>Team</th>
-      <th>Total</th>
+      <th>Total Score</th>
       <th>Verified</th>
     </tr>
   </thead>
   <tbody>
     {% for row in kick_entries %}
       <tr>
-        <td>{{ row.entry.performance_order }}</td>
-        <td>{{ row.entry.team.school.name }} {{ row.entry.team.name }}</td>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ row.order }}</td>
+        <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
-        <td>{{ row.entry.verified_by_tabulator }}</td>
+        <td>{{ row.verified }}</td>
       </tr>
     {% endfor %}
   </tbody>
