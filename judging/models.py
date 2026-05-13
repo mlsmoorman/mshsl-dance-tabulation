@@ -2,7 +2,7 @@ from django.db import models
 from core.models import User
 from meets.models import TeamEntry, Division
 
-
+#~.~.~.~.~.~.~.~.~.~.~.~.~ JUDGE SCORE SHEET MODEL ~.~.~.~.~.~.~.~.~.~.~.~.~#
 class JudgeScoreSheet(models.Model):
     judge = models.ForeignKey(User, on_delete=models.CASCADE)
     team_entry = models.ForeignKey(
@@ -72,3 +72,39 @@ class JudgeScoreSheet(models.Model):
     def save(self, *args, **kwargs):
         self.compute_total()
         super().save(*args, **kwargs)
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ ISSUES MODEL ~.~.~.~.~.~.~.~.~.~.~.~.~#
+class IssueType(models.TextChoices):
+    TIME = "TIME", "Timing Violation"
+    KICK = "KICK", "Kick Count Issue"
+    COMPETITOR = "COMPETITOR", "Competitor Count Issue"
+    SAFETY = "SAFETY", "Safety / Illegal Skill"
+    COMMENT = "COMMENT", "Judge Comment Flag"
+    SCORE_OUTLIER = "SCORE_OUTLIER", "Score Outlier"
+    MISSING_SHEET = "MISSING_SHEET", "Missing Judge Sheet"
+    MANUAL = "MANUAL", "Manual Issue"
+
+class Issue(models.Model):
+    team_entry = models.ForeignKey(
+        TeamEntry,
+        on_delete=models.CASCADE,
+        related_name="issues"
+    )
+
+    flagged_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    issue_type = models.CharField(max_length=50, choices=IssueType.choices)
+    message = models.TextField(blank=True)
+
+    auto_generated = models.BooleanField(default=False)
+    resolved = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_issue_type_display()} – {self.team_entry}"
