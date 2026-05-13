@@ -20,10 +20,9 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("core.urls")),                 # Home Page
-    path("judge/", include("judging.urls")),        # Judge UI
+    path("judge/", include("judging.urls")),        # Judge / Superior Judge UI
     path("kct/", include("kct.urls")),              # KCT UI
     path("tabulator/", include("tabulation.urls")), # Tabulation Dashboard
-    path("superior/", include("superior.urls")),    # Superior Dashboard
     path("accounts/", include("django.contrib.auth.urls")),
 
 ]

@@ -17,6 +17,19 @@
         <td>{{ row.order }}</td>
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
+        <td>
+          {% if row.entry.issues.filter(resolved=False).exists %}
+            ⚠ {{ row.entry.issues.filter(resolved=False).count }} issue(s)
+            <a href="{% url 'judging:issues_dashboard' meet.id %}">View</a>
+          {% else %}
+            ✓
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'judging:flag_issue' row.entry.id %}">
+            <button>Flag Issue</button>
+          </a>
+        </td>
       </tr>
     {% endfor %}
   </tbody>
@@ -40,6 +53,19 @@
         <td>{{ row.order }}</td>
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
+        <td>
+          {% if row.entry.issues.filter(resolved=False).exists %}
+            ⚠ {{ row.entry.issues.filter(resolved=False).count }} issue(s)
+            <a href="{% url 'judging:issues_dashboard' meet.id %}">View</a>
+          {% else %}
+            ✓
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'judging:flag_issue' row.entry.id %}">
+            <button>Flag Issue</button>
+          </a>
+        </td>
       </tr>
     {% endfor %}
   </tbody>

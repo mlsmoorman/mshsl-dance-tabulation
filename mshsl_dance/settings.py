@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'kct',
     'judging',
     'tabulation',
-    'superior',
     'deductions.apps.DeductionsConfig',
 ]
 ## SuperUser:  admin. Password: dance5678
@@ -84,8 +83,12 @@ WSGI_APPLICATION = 'mshsl_dance.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mshsl_dance',
+        'USER': '',
+        "PASSWORD": '',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

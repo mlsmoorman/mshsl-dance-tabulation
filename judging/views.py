@@ -1,15 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 
 from meets.models import Meet, TeamEntry, Division
-from .models import JudgeScoreSheet
+from .models import JudgeScoreSheet, Issue, IssueType
 from .forms import JudgeScoreSheetForm
 
 
-# Judge Meet Sheets
+#~.~.~.~.~.~.~.~.~.~.~.~.~ JUDGE MEET SHEETS ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def judge_meet_sheets(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
@@ -25,7 +23,7 @@ def judge_meet_sheets(request, meet_id):
         "sheets": sheets,
     })
 
-# Edit Score Sheet
+#~.~.~.~.~.~.~.~.~.~.~.~.~ EDIT SCORE SHEET ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def edit_score_sheet(request, pk):
     sheet = get_object_or_404(JudgeScoreSheet, id=pk, judge=request.user)
@@ -44,7 +42,7 @@ def edit_score_sheet(request, pk):
     })
 
 
-# Superior Review
+#~.~.~.~.~.~.~.~.~.~.~.~.~ SUPERIOR JUDGE REVIEW ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @login_required
 def superior_judge_review(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
@@ -89,3 +87,55 @@ def superior_judge_review(request, meet_id):
         "kick_entries": kick,
     })
 
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ ISSUES DASHBOARD ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def issues_dashboard(request, meet_id):
+    meet = get_object_or_404(Meet, id=meet_id)
+
+    if not request.user.has_role("SUPERIOR"):
+        return redirect("/")
+
+    entries = TeamEntry.objects.filter(meet=meet).select_related("team", "team__school")
+
+    # Group issues by entry
+    issues_by_entry = {}
+    for entry in entries:
+        issues_by_entry[entry.id] = {
+            "entry": entry,
+            "issues": entry.issues.filter(resolved=False).order_by("-created_at")
+        }
+
+    return render(request, "judging/issues_dashboard.html", {
+        "meet": meet,
+        "issues_by_entry": issues_by_entry,
+    })
+
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ RESOLVE ISSUES ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def resolve_issue(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if not request.user.has_role("SUPERIOR"):
+        return redirect("/")
+
+    issue.resolved = True
+    issue.save()
+
+    return redirect("judging:issues_dashboard", meet_id=issue.team_entry.meet.id)
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ FLAG ISSUES ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@login_required
+def flag_issue(request, entry_id):
+    entry = get_object_or_404(TeamEntry, id=entry_id)
+
+    Issue.objects.create(
+        team_entry=entry,
+        flagged_by=request.user,
+        issue_type=IssueType.MANUAL,
+        message=f"Flagged manually by {request.user.username}",
+        auto_generated=False,
+    )
+
+    return redirect("judging:superior_judge_review", meet_id=entry.meet.id)
