@@ -1,0 +1,45 @@
+<h1>Tabulator Dashboard – {{ meet.name }}</h1>
+
+<h2>Jazz</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>Team</th>
+      <th>Total</th>
+      <th>Verified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in jazz_entries %}
+      <tr>
+        <td>{{ row.entry.performance_order }}</td>
+        <td>{{ row.entry.team.school.name }} {{ row.entry.team.name }}</td>
+        <td>{{ row.total }}</td>
+        <td>{{ row.entry.verified_by_tabulator }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Kick</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>Team</th>
+      <th>Total</th>
+      <th>Verified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in kick_entries %}
+      <tr>
+        <td>{{ row.entry.performance_order }}</td>
+        <td>{{ row.entry.team.school.name }} {{ row.entry.team.name }}</td>
+        <td>{{ row.total }}</td>
+        <td>{{ row.entry.verified_by_tabulator }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

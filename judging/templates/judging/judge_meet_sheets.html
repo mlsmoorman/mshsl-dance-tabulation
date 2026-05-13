@@ -1,0 +1,28 @@
+<h1>{{ meet.name }} – My Score Sheets</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Team</th>
+      <th>Division</th>
+      <th>Order</th>
+      <th>Subtotal</th>
+      <th>Total</th>
+      <th>Edit</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sheet in sheets %}
+      <tr>
+        <td>{{ sheet.team_entry.team.school.name }} {{ sheet.team_entry.team.name }}</td>
+        <td>{{ sheet.get_division_display }}</td>
+        <td>{{ sheet.team_entry.performance_order }}</td>
+        <td>{{ sheet.subtotal }}</td>
+        <td>{{ sheet.total }}</td>
+        <td>
+          <a href="{% url 'judging:edit_score_sheet' sheet.id %}">Edit</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

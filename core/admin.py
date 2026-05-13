@@ -1,24 +1,27 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Role, School
-
-@admin.register(Role)
-class RoleAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
-
-
-@admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    fieldsets = BaseUserAdmin.fieldsets + (
-        ("Roles", {"fields": ("roles",)}),
-    )
-    filter_horizontal = ("roles",)
-    list_display = ("username", "email", "is_staff")
-    search_fields = ("username", "email")
+from .models import School, Team, Role, User, TeamLevel
 
 
 @admin.register(School)
 class SchoolAdmin(admin.ModelAdmin):
-    list_display = ("name", "abbreviation")
-    search_fields = ("name", "abbreviation")
+    list_display = ("name", "city", "mascot")
+    search_fields = ("name", "city")
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ("school", "name", "level")
+    list_filter = ("level", "school")
+    search_fields = ("school__name", "name")
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ("code", "name")
+    search_fields = ("code", "name")
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ("username", "first_name", "last_name")
+    filter_horizontal = ("roles",)

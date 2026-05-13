@@ -1,0 +1,7 @@
+<h1>Edit Score Sheet – {{ sheet.team_entry.team.school.name }} {{ sheet.team_entry.team.name }} ({{ sheet.get_division_display }})</h1>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save</button>
+</form>

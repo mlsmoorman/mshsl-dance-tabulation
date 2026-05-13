@@ -1,239 +1,272 @@
-from django.core.management.base import BaseCommand
-from django.db import connection
-from django.apps import apps
-from core.models import Team, Role, User
-from meets.models import Meet, TeamEntry
-from judging.models import JudgeScoreSheet
-from deductions.models import RoutineDeduction, DeductionType
-from datetime import date, timedelta
 import random
+from datetime import date, timedelta
+
+from django.core.management.base import BaseCommand
+
+from core.models import (
+    School,
+    Team,
+    TeamLevel,
+    Role,
+    User,
+)
+from meets.models import (
+    Meet,
+    TeamEntry,
+    Division,
+    ClassLevel,
+)
+from judging.models import JudgeScoreSheet
+
+
+PASSWORD = "demo1234"
+
+
+def wipe_all():
+    print("Wiping all data...")
+    JudgeScoreSheet.objects.all().delete()
+    TeamEntry.objects.all().delete()
+    Meet.objects.all().delete()
+    Team.objects.all().delete()
+    School.objects.all().delete()
+    User.objects.all().delete()
+    Role.objects.all().delete()
+    print("✓ All data wiped.")
+
+
+def seed_roles():
+    print("Seeding base data...")
+
+    roles = [
+        ("JUDGE", "Judge"),
+        ("KCT", "KCT Operator"),
+        ("TABULATOR", "Tabulator"),
+        ("SUPERIOR", "Superior Judge"),
+    ]
+
+    for code, name in roles:
+        Role.objects.get_or_create(code=code, defaults={"name": name})
+
+    print("✓ Base data seeded.")
+
+
+def create_schools():
+    names = [
+        "Wayzata High School",
+        "Maple Grove High School",
+        "Edina High School",
+        "Minnetonka High School",
+        "Prior Lake High School",
+        "Lakeville North High School",
+        "Lakeville South High School",
+        "Eden Prairie High School",
+        "Blaine High School",
+        "Rogers High School",
+        "Chaska High School",
+        "Chanhassen High School",
+    ]
+
+    schools = []
+    for name in names:
+        school, _ = School.objects.get_or_create(name=name)
+        schools.append(school)
+    return schools
+
+
+def create_teams(schools, num_teams=12):
+    print("Creating teams...")
+    levels = [TeamLevel.VARSITY, TeamLevel.JV, TeamLevel.BSQUAD]
+    teams = []
+
+    for i in range(num_teams):
+        school = random.choice(schools)
+        level = random.choice(levels)
+        team_name = "Dance Team"
+
+        team, _ = Team.objects.get_or_create(
+            school=school,
+            name=team_name,
+            defaults={"level": level},
+        )
+        teams.append(team)
+
+    print(f"✓ Created {len(teams)} teams.")
+    return teams
+
+
+def create_users_and_roles(num_judges=7, num_kcts=4, num_tab=2, num_sup=2):
+    print("Creating users (judges, KCT, tabulators, superior judges)...")
+
+    judge_role = Role.objects.get(code="JUDGE")
+    kct_role = Role.objects.get(code="KCT")
+    tab_role = Role.objects.get(code="TABULATOR")
+    sup_role = Role.objects.get(code="SUPERIOR")
+
+    judges = []
+    for i in range(1, num_judges + 1):
+        user, _ = User.objects.get_or_create(
+            username=f"judge{i}",
+            defaults={"first_name": f"Judge {i}", "password": PASSWORD},
+        )
+        user.set_password(PASSWORD)
+        user.save()
+        user.roles.add(judge_role)
+        judges.append(user)
+
+    kcts = []
+    for i in range(1, num_kcts + 1):
+        user, _ = User.objects.get_or_create(
+            username=f"kct{i}",
+            defaults={"first_name": f"KCT {i}", "password": PASSWORD},
+        )
+        user.set_password(PASSWORD)
+        user.save()
+        user.roles.add(kct_role)
+        kcts.append(user)
+
+    tabulators = []
+    for i in range(1, num_tab + 1):
+        user, _ = User.objects.get_or_create(
+            username=f"tab{i}",
+            defaults={"first_name": f"Tabulator {i}", "password": PASSWORD},
+        )
+        user.set_password(PASSWORD)
+        user.save()
+        user.roles.add(tab_role)
+        tabulators.append(user)
+
+    superiors = []
+    for i in range(1, num_sup + 1):
+        user, _ = User.objects.get_or_create(
+            username=f"sup{i}",
+            defaults={"first_name": f"Superior {i}", "password": PASSWORD},
+        )
+        user.set_password(PASSWORD)
+        user.save()
+        user.roles.add(sup_role)
+        superiors.append(user)
+
+    print("✓ Users created.")
+    return judges, kcts, tabulators, superiors
+
+
+def create_meets(num_meets=6, judges=None, kcts=None):
+    print("Creating meets...")
+    today = date.today()
+    class_levels = [ClassLevel.A, ClassLevel.AA, ClassLevel.AAA, ClassLevel.CONF]
+    meets = []
+
+    for i in range(1, num_meets + 1):
+        meet_date = today + timedelta(days=7 * i)
+        meet, _ = Meet.objects.get_or_create(
+            name=f"2026 Invitational #{i}",
+            defaults={
+                "date": meet_date,
+                "site": f"High School Gym #{i}",
+                "class_level": random.choice(class_levels),
+                "num_finalists": 6,
+            },
+        )
+
+        for j in judges:
+            meet.judges.add(j)
+
+        assigned_kcts = random.sample(kcts, min(2, len(kcts)))
+        for k in assigned_kcts:
+            meet.kcts.add(k)
+
+        meets.append(meet)
+
+    print(f"✓ Created {len(meets)} meets.")
+    return meets
+
+
+def create_team_entries(meets, teams):
+    print("Creating team entries...")
+    divisions = [Division.JAZZ, Division.KICK]
+
+    for meet in meets:
+        order = 1
+        for team in teams:
+            for div in divisions:
+                TeamEntry.objects.get_or_create(
+                    meet=meet,
+                    team=team,
+                    division=div,
+                    defaults={"performance_order": order},
+                )
+                order += 1
+
+    print("✓ Team entries created.")
+
+
+def create_scores(meets):
+    print("Creating judge score sheets...")
+
+    for meet in meets:
+        entries = TeamEntry.objects.filter(meet=meet)
+        judges = meet.judges.all()
+
+        for entry in entries:
+            for judge in judges:
+                sheet, created = JudgeScoreSheet.objects.get_or_create(
+                    judge=judge,
+                    team_entry=entry,
+                    defaults={"division": entry.division},
+                )
+                if created:
+                    # Shared categories
+                    sheet.choreo_creativity = random.randint(7, 10)
+                    sheet.choreo_visual_effect = random.randint(7, 10)
+                    sheet.diff_routine = random.randint(7, 10)
+                    sheet.diff_formations = random.randint(7, 10)
+                    sheet.diff_skills_or_kicks = random.randint(7, 10)
+                    sheet.exec_placement_control = random.randint(7, 10)
+                    sheet.exec_accuracy = random.randint(7, 10)
+                    sheet.routine_effectiveness = random.randint(7, 10)
+
+                    if entry.division == Division.JAZZ:
+                        sheet.skills_turns = random.randint(7, 10)
+                        sheet.skills_leaps_jumps = random.randint(7, 10)
+                    else:
+                        sheet.kicks_technique = random.randint(7, 10)
+                        sheet.kicks_height = random.randint(7, 10)
+
+                    sheet.time_deduction = 0
+                    sheet.kick_deduction = 0
+                    sheet.other_deduction = 0
+                    sheet.save()
+
+    print("✓ Judge score sheets created.")
 
 
 class Command(BaseCommand):
-    help = "Loads demo data: teams (with levels), meets, entries, scores, KCT, deductions."
-    
-    TEAM_LEVELS = ["Varsity", "JV", "B-Squad"]
+    help = "Load demo data for dance scoring system"
 
     def add_arguments(self, parser):
-        parser.add_argument("--teams", type=int, default=7)
-        parser.add_argument("--judges", type=int, default=5)
-        parser.add_argument("--meets", type=int, default=3)
-        parser.add_argument("--divisions", type=str, default="JAZZ,KICK")
-        parser.add_argument("--finalists", type=int, default=6)
         parser.add_argument("--wipe", action="store_true")
+        parser.add_argument("--teams", type=int, default=12)
+        parser.add_argument("--judges", type=int, default=7)
+        parser.add_argument("--meets", type=int, default=6)
         parser.add_argument("--scores", action="store_true")
-        parser.add_argument("--kct", action="store_true")
-        parser.add_argument("--deductions", action="store_true")
 
     def handle(self, *args, **options):
-        num_teams = options["teams"]
-        num_judges = options["judges"]
-        num_meets = options["meets"]
-        divisions = [d.strip().upper() for d in options["divisions"].split(",")]
-        finalists = options["finalists"]
-        wipe = options["wipe"]
-        gen_scores = options["scores"]
-        gen_kct = options["kct"]
-        gen_deductions = options["deductions"]
+        if options["wipe"]:
+            wipe_all()
 
-        # Try to resolve KCTEntry dynamically
-        KCTEntry = None
-        try:
-            KCTEntry = apps.get_model("judging", "KCTEntry")
-        except LookupError:
-            try:
-                KCTEntry = apps.get_model("meets", "KCTEntry")
-            except LookupError:
-                KCTEntry = None
+        seed_roles()
+        schools = create_schools()
+        teams = create_teams(schools, num_teams=options["teams"])
+        judges, kcts, tabs, sups = create_users_and_roles(
+            num_judges=options["judges"]
+        )
+        meets = create_meets(num_meets=options["meets"], judges=judges, kcts=kcts)
+        create_team_entries(meets, teams)
 
-        # -----------------------------
-        # WIPE DATABASE IF REQUESTED
-        # -----------------------------
-        if wipe:
-            self.stdout.write("Wiping all data...")
-            with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM deductions_routinededuction;")
-                cursor.execute("DELETE FROM judging_judgescoresheet;")
-                if KCTEntry:
-                    cursor.execute(f"DELETE FROM {KCTEntry._meta.db_table};")
-                cursor.execute("DELETE FROM meets_teamentry;")
-                cursor.execute("DELETE FROM meets_meet;")
-                cursor.execute("DELETE FROM core_team;")
-                cursor.execute("DELETE FROM core_user_roles;")
-                cursor.execute("DELETE FROM core_user;")
-                cursor.execute("DELETE FROM core_role;")
+        if options["scores"]:
+            create_scores(meets)
 
-        # -----------------------------
-        # ROLES
-        # -----------------------------
-        self.stdout.write("Creating roles...")
-        roles = ["Judge", "Superior Judge", "Tabulator", "KCT"]
-        role_objs = {r: Role.objects.get_or_create(name=r)[0] for r in roles}
-
-        # -----------------------------
-        # USERS
-        # -----------------------------
-        self.stdout.write("Creating users...")
-
-        def create_user(username, role_name):
-            user, _ = User.objects.get_or_create(username=username)
-            user.set_password("test1234")
-            user.save()
-            user.roles.add(role_objs[role_name])
-            return user
-
-        judges = [create_user(f"judge{i}", "Judge") for i in range(1, num_judges + 1)]
-        superior = create_user("superior", "Superior Judge")
-        tabulator = create_user("tabulator", "Tabulator")
-        kct_user = create_user("kct", "KCT")
-
-        # -----------------------------
-        # TEAMS (School = Team.name)
-        # -----------------------------
-        self.stdout.write("Creating teams (school + level)...")
-
-        base_team_names = [
-            "Wayzata", "Eastview", "Maple Grove", "Chaska",
-            "Edina", "Lakeville North", "Buffalo", "Minnetonka",
-            "Prior Lake", "Eden Prairie", "Rogers", "Shakopee",
-        ]
-
-        teams = []
-        for i in range(num_teams):
-            team_name = base_team_names[i % len(base_team_names)]
-            for level in self.TEAM_LEVELS:
-                t, _ = Team.objects.get_or_create(name=team_name, level=level)
-                teams.append(t)
+        self.stdout.write(self.style.SUCCESS("Demo data loaded."))
 
 
-        # -----------------------------
-        # MEETS
-        # -----------------------------
-        self.stdout.write(f"Creating {num_meets} meets with random dates...")
 
-        season_start = date(2026, 1, 1)
-        season_end = date(2026, 3, 15)
-        delta_days = (season_end - season_start).days
-
-        for i in range(num_meets):
-            meet_date = season_start + timedelta(days=random.randint(0, delta_days))
-            meet, _ = Meet.objects.get_or_create(
-                name=f"2026 Invitational #{i+1}",
-                date=meet_date,
-                num_finalists=finalists,
-            )
-            self.stdout.write(f"  → {meet.name} ({meet.date})")
-
-            # Randomly assign judges to this meet
-            meet_judges = random.sample(judges, k=min(len(judges), num_judges))
-
-            # -----------------------------
-            # TEAM ENTRIES + SCORES/KCT/DEDUCTIONS
-            # -----------------------------
-            for division in divisions:
-                order = list(range(1, len(teams) + 1))
-                random.shuffle(order)
-
-                for team, perf_order in zip(teams, order):
-                    entry, _ = TeamEntry.objects.get_or_create(
-                        meet=meet,
-                        team=team,
-                        division=division,
-                        performance_order=perf_order,
-                    )
-
-                    # KCT entry
-                    if gen_kct and KCTEntry:
-                        KCTEntry.objects.get_or_create(
-                            team_entry=entry,
-                            defaults={
-                                "kct": kct_user,  # or assign a random KCT user if you prefer
-                                "kick_count": random.randint(20, 60),
-                                "routine_time_seconds": random.randint(90, 150),
-                                "num_competitors": random.randint(10, 25),
-                                "jazz_team_turn_performed": True,
-                                "jazz_team_leap_jump_performed": True,
-                                "falls_observed": False,
-                                "dangerous_move_observed": False,
-                            },
-                        )
-
-                    # Judge score sheets
-                    if gen_scores:
-                        for judge in meet_judges:
-                            sheet, created = JudgeScoreSheet.objects.get_or_create(
-                                team_entry=entry,
-                                judge=judge,
-                                defaults=self._random_scores_for_division(division),
-                            )
-                            if not created:
-                                for field, value in self._random_scores_for_division(division).items():
-                                    setattr(sheet, field, value)
-                                sheet.save()
-
-                    deduction_types = {dt.code: dt for dt in DeductionType.objects.all()}
-                    deduction_codes = list(deduction_types.keys())
-                    
-                    # Routine-level deductions
-                    if gen_deductions and random.random() < 0.2:
-                        code = random.choice(deduction_codes)
-
-                        RoutineDeduction.objects.create(
-                            team_entry=entry,
-                            deduction_type=deduction_types[code],
-                            entered_by=random.choice(judges),   # or your Superior Judge user
-                            count=1,
-                            judges_reporting=1,
-                            minor=False,
-                            flagrant=False,
-                            notes=f"Auto‑generated demo deduction ({code})",
-                        )
-
-        self.stdout.write(self.style.SUCCESS("✔ Demo data loaded successfully!"))
-        self.stdout.write(self.style.SUCCESS(f"✔ {num_teams} schools * 3 levels = {len(teams)} teams"))
-        self.stdout.write(self.style.SUCCESS(f"✔ {num_judges} judges"))
-        self.stdout.write(self.style.SUCCESS(f"✔ {num_meets} meets"))
-        self.stdout.write(self.style.SUCCESS(f"✔ Divisions: {', '.join(divisions)}"))
-        if gen_scores:
-            self.stdout.write(self.style.SUCCESS("✔ Random judge scores generated"))
-        if gen_kct and KCTEntry:
-            self.stdout.write(self.style.SUCCESS("✔ Random KCT entries generated"))
-        if gen_deductions:
-            self.stdout.write(self.style.SUCCESS("✔ Random routine deductions generated"))
-
-    def _random_scores_for_division(self, division: str) -> dict:
-        """
-        Build a dict of field -> value for JudgeScoreSheet,
-        including category scores and deductions.
-        """
-        data = {
-            "choreo_creativity": random.randint(6, 10),
-            "choreo_visual_effect": random.randint(6, 10),
-            "diff_routine": random.randint(6, 10),
-            "diff_formations": random.randint(6, 10),
-            "diff_skills_or_kicks": random.randint(6, 10),
-            "exec_placement_control": random.randint(6, 10),
-            "exec_accuracy": random.randint(6, 10),
-            "routine_effectiveness": random.randint(6, 10),
-            "time_deduction": random.choice([0, 0, 0, 1, 2]),
-            "kick_deduction": random.choice([0, 0, 0, 1, 2]),
-            "other_deduction": random.choice([0, 0, 0, 1, 3]),
-        }
-
-        if division == "JAZZ":
-            data["skills_turns"] = random.randint(6, 10)
-            data["skills_leaps_jumps"] = random.randint(6, 10)
-            data["kicks_technique"] = 0
-            data["kicks_height"] = 0
-        elif division == "KICK":
-            data["skills_turns"] = 0
-            data["skills_leaps_jumps"] = 0
-            data["kicks_technique"] = random.randint(6, 10)
-            data["kicks_height"] = random.randint(6, 10)
-        else:
-            data["skills_turns"] = 0
-            data["skills_leaps_jumps"] = 0
-            data["kicks_technique"] = 0
-            data["kicks_height"] = 0
-
-        return data

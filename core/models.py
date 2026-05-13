@@ -1,37 +1,46 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-#####  • A user can now have any combination of roles
-#####  • Roles are stored in a separate table
-#####  • You can add more roles later (Coach, Admin, Coordinator, etc.)
 
-class Role(models.Model):
-    code = models.CharField(max_length=50, unique=True, null=True, blank=True)   # e.g. "JUDGE", "KCT", "TABULATOR", "SUPERIOR_JUDGE"
-    name = models.CharField(max_length=100)               # Human readable
-
-    def __str__(self):
-        return self.name
-
-class User(AbstractUser):
-    roles = models.ManyToManyField(Role, related_name="users", blank=True)
+##### TEAM LEVEL ENUM #####
+class TeamLevel(models.TextChoices):
+    VARSITY = "VARSITY", "Varsity"
+    JV = "JV", "Junior Varsity"
+    BSQUAD = "BSQUAD", "B-Squad"
 
 
+##### SCHOOL MODEL #####
 class School(models.Model):
     name = models.CharField(max_length=255)
-    abbreviation = models.CharField(max_length=10)
-    
+    city = models.CharField(max_length=255, blank=True)
+    mascot = models.CharField(max_length=255, blank=True)
+
     def __str__(self):
         return self.name
 
+
+##### TEAM MODEL #####
 class Team(models.Model):
-    LEVELS = [
-        ("Varsity", "Varsity"),
-        ("JV", "Junior Varsity"),
-        ("B-Squad", "B-Squad"),
-    ]
-    
-    name = models.CharField(max_length=255)     #Team/School Name
-    level = models.CharField(max_length=50, choices=LEVELS, null=True, blank=True)     #Varsity, JV, B-Squad
-    
+    school = models.ForeignKey(School, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    level = models.CharField(max_length=20, choices=TeamLevel.choices)
+
+    def __str__(self):
+        return f"{self.school.name} {self.name} ({self.get_level_display()})"
+
+
+##### ROLE MODEL #####
+class Role(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=255)
+
     def __str__(self):
         return self.name
+
+
+##### USER MODEL #####
+class User(AbstractUser):
+    roles = models.ManyToManyField(Role, blank=True)
+
+    def has_role(self, code):
+        return self.roles.filter(code=code).exists()
