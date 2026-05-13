@@ -36,6 +36,10 @@ class Meet(models.Model):
         related_name="dq_actions"
     )
     
+    locked = models.BooleanField(default=False)
+    locked_at = models.DateTimeField(null=True, blank=True)
+    locked_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+
     def __str__(self):
         return f"{self.name} ({self.date})"
 

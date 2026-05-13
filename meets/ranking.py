@@ -1,7 +1,17 @@
 from collections import defaultdict
+from meets.models import TeamEntry
 
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ COMPUTE RANKINGS ~.~.~.~.~.~.~.~.~.~.~.~.~#
 def compute_rankings(meet, division):
     # 1. Get all team entries for this division
+    entries = TeamEntry.objects.filter(meet=meet)
+
+    # Step 5: Exclude DQ’d teams once meet is locked
+    if meet.locked:
+        entries = entries.filter(disqualified=False)
+
+    # Continue with ranking logic
     entries = meet.teamentry.set.filter(division=division, verified_by_tabulator=True)
     
     # 2. Build judge -> list of (team, score)
@@ -54,6 +64,8 @@ def compute_rankings(meet, division):
     
     return final_list
 
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ APPLY TIEBREAKERS ~.~.~.~.~.~.~.~.~.~.~.~.~#
 def apply_tiebreakers(final_list):
     i = 0
     while i < len(final_list) - 1:
@@ -85,6 +97,8 @@ def apply_tiebreakers(final_list):
 
     return final_list
 
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ ADVANCE TO FINALS ~.~.~.~.~.~.~.~.~.~.~.~.~#
 def advance_to_finals(meet, division):
     rankings = compute_rankings(meet, division)
     finalists = []
