@@ -1,13 +1,22 @@
 from django.contrib import admin
-from .models import School, Team, Role, User
+from .models import School, Team, Role, User, RuleSet
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~ RULES ADMIN ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@admin.register(RuleSet)
+class RuleSetAdmin(admin.ModelAdmin):
+    list_display = ("name", "active", "updated_at")
+    list_editable = ("active",)
+
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ SCHOOL ADMIN ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @admin.register(School)
 class SchoolAdmin(admin.ModelAdmin):
     list_display = ("name", "city", "mascot")
     search_fields = ("name", "city")
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~ TEAM ADMIN ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
     list_display = ("school", "name", "level")
@@ -15,13 +24,18 @@ class TeamAdmin(admin.ModelAdmin):
     search_fields = ("school__name", "name")
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~ ROLE ADMIN ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
     list_display = ("code", "name")
     search_fields = ("code", "name")
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~ USER ADMIN ~.~.~.~.~.~.~.~.~.~.~.~.~#
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "first_name", "last_name")
     filter_horizontal = ("roles",)
+
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#

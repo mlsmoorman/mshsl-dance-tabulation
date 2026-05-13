@@ -1,7 +1,13 @@
 from judging.models import Issue, IssueType
+from core.models import RuleSet
 import statistics
 
 from judging.models import Division
+
+
+#~.~.~.~.~.~.~.~.~.~.~.~.~ GET ACTIVE RULES ~.~.~.~.~.~.~.~.~.~.~.~.~#
+def get_active_rules():
+    return RuleSet.objects.filter(active=True).first()
 
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~ DETECT TIMING VIOLATION ~.~.~.~.~.~.~.~.~.~.~.~.~#
@@ -9,15 +15,11 @@ def detect_timing_violation(entry):
     kct = getattr(entry, "kctentry", None)
     if not kct or not kct.actual_time_seconds:
         return
-
-    # Jazz: 1:30–2:00
-    # Kick: 2:15–2:45
-    if entry.division == Division.JAZZ:
-        min_time = 90
-        max_time = 120
-    else:  # Kick
-        min_time = 135
-        max_time = 165
+    
+    rules = get_active_rules()
+    
+    min_time = rules.jazz_min_time if entry.division == Division.JAZZ else rules.kick_min_time
+    max_time = rules.jazz_max_time if entry.division == Division.JAZZ else rules.kick_max_time
 
     if kct.actual_time_seconds < min_time or kct.actual_time_seconds > max_time:
         Issue.objects.get_or_create(
@@ -39,6 +41,11 @@ def detect_kick_violation(entry):
     if not kct or not kct.kick_count:
         return
     
+    rules = get_active_rules()
+    
+    min_kicks = rules.kick_min_count
+    max_kicks = rules.kick_max_count
+    
     min_kicks = 35  # 1:30  ~ Can be updated if rules change
     max_kicks = 55  # 2:00  ~ Can be updated if rules change
     
@@ -47,9 +54,9 @@ def detect_kick_violation(entry):
 			team_entry=entry,
 			issue_type=IssueType.KICK,
 			auto_generated=True,
-			defaults=(
-				"message": f"Kick count {kct.kick_count} is outside allowed range."
-			)
+			defaults={
+       			"message": f"Kick count {kct.kick_count} is outside allowed range."
+			}
 		)
         
         
@@ -103,14 +110,12 @@ def detect_competitor_violation(entry):
 
     if entry.competitor_count is None:
         return
+    
+    rules = get_active_rules()
 
-    min_comp = 5
+    min_comp = rules.varsity_min_competitors
+    max_comp = rules.varsity_jazz_max_competitors if entry.division == Division.JAZZ else rules.varsity_kick_max_competitors
 
-    # Division-specific maximums
-    if entry.division == Division.JAZZ:
-        max_comp = 26
-    else:  # Kick
-        max_comp = 34
 
     if entry.competitor_count < min_comp or entry.competitor_count > max_comp:
         Issue.objects.get_or_create(
@@ -135,3 +140,4 @@ def run_all_issue_detectors(entry):
     detect_competitor_violation(entry)
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#
