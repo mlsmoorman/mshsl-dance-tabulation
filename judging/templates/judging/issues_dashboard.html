@@ -40,3 +40,7 @@
 {% else %}
   <p>No unresolved issues for this meet.</p>
 {% endif %}
+
+{% if issue.issue_type == "manual_judge" %}
+  <span class="badge bg-warning">Judge Flag</span>
+{% endif %}

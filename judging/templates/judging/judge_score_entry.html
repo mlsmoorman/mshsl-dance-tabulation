@@ -45,9 +45,33 @@
 
 <hr>
 
+<button name="message" value="Fall observed" class="btn btn-outline-secondary btn-sm">Fall</button>
+<button name="message" value="Illegal uniform concern" class="btn btn-outline-secondary btn-sm">Uniform</button>
+<button name="message" value="Safety concern" class="btn btn-outline-secondary btn-sm">Safety</button>
+<button name="message" value="Choreography concern" class="btn btn-outline-secondary btn-sm">Choreography</button>
+
+<a href="{% url 'judging:judge_flag_issue' entry.id %}">
+  <button class="btn btn-warning btn-sm">Flag Issue</button>
+</a>
+
+{% with issues=entry.issues.filter(issue_type='manual_judge', resolved=False) %}
+  {% if issues.exists %}
+    <div class="alert alert-warning mt-3">
+      <strong>Issues you flagged:</strong>
+      <ul>
+        {% for issue in issues %}
+          <li>{{ issue.message }} ({{ issue.created_at|date:"H:i" }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endwith %}
+
+
 <h3>Current Totals</h3>
 <ul>
 	<li>Subtotal: {{  sheet.subtotal  }}</li>
 	<li>Deductions: {{  sheet.other_deduction  }}</li>
 	<li><strong>Total Score: {{  sheet.total_score  }}</strong></li>
 </ul>
+

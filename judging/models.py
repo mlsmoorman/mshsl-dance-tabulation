@@ -84,6 +84,7 @@ class IssueType(models.TextChoices):
     MISSING_SHEET = "MISSING_SHEET", "Missing Judge Sheet"
     MANUAL = "MANUAL", "Manual Issue"
     DANGEROUS_MOVE = "dangerous_move"
+    MANUAL_JUDGE = "manual_judge"
 
 
 class Issue(models.Model):
