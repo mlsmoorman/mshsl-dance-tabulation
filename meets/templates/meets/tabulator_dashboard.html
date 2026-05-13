@@ -28,7 +28,6 @@
         <td>{{ row.order }}</td>
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
-        <td>{{ row.verified }}</td>
         <td>
           {% if not row.verified %}
             <a href="{% url 'meets:verify_entry' row.entry.id %}">
@@ -62,7 +61,6 @@
         <td>{{ row.order }}</td>
         <td>{{ row.school.name }} {{ row.team.name }}</td>
         <td>{{ row.total }}</td>
-        <td>{{ row.verified }}</td>
         <td>
           {% if not row.verified %}
             <a href="{% url 'meets:verify_entry' row.entry.id %}">
