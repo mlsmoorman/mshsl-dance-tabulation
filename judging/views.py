@@ -1,18 +1,24 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+
 from meets.models import Meet, TeamEntry, Division
 from .models import JudgeScoreSheet
 from .forms import JudgeScoreSheetForm
 
 
+
 @login_required
 def judge_meet_sheets(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
-    sheets = JudgeScoreSheet.objects.filter(
-        judge=request.user,
-        team_entry__meet=meet,
-    ).select_related("team_entry__team", "team_entry__team__school")
+
+    sheets = (
+        JudgeScoreSheet.objects
+        .filter(judge=request.user, team_entry__meet=meet)
+        .select_related("team_entry__team", "team_entry__team__school")
+    )
 
     return render(request, "judging/judge_meet_sheets.html", {
         "meet": meet,
@@ -37,8 +43,6 @@ def edit_score_sheet(request, pk):
         "form": form,
     })
 
-    from meets.models import TeamEntry, Division
-from django.db.models import Sum
 
 
 @login_required
