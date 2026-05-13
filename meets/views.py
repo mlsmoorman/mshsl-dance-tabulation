@@ -1,29 +1,45 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Meet, TeamEntry
+from django.db.models import Sum
+
+from .models import Meet, TeamEntry, Division
 from judging.models import JudgeScoreSheet
-from .models import Division
 
 
 @login_required
 def tabulator_dashboard(request, pk):
     meet = get_object_or_404(Meet, id=pk)
-    entries = TeamEntry.objects.filter(meet=meet).select_related("team", "team__school")
 
-    # Aggregate totals per entry
+    # All entries for this meet
+    entries = (
+        TeamEntry.objects
+        .filter(meet=meet)
+        .select_related("team", "team__school")
+    )
+
+    # Build data rows
     data = []
     for entry in entries:
-        sheets = JudgeScoreSheet.objects.filter(team_entry=entry)
-        total = sum(s.total for s in sheets)
+        total = (
+            JudgeScoreSheet.objects
+            .filter(team_entry=entry)
+            .aggregate(total=Sum("total"))
+            .get("total") or 0
+        )
+
         data.append({
             "entry": entry,
-            "sheets": sheets,
+            "team": entry.team,
+            "school": entry.team.school,
+            "division": entry.division,
+            "order": entry.performance_order,
+            "verified": entry.verified_by_tabulator,
             "total": total,
         })
 
     # Split by division
-    jazz = [d for d in data if d["entry"].division == Division.JAZZ]
-    kick = [d for d in data if d["entry"].division == Division.KICK]
+    jazz = [d for d in data if d["division"] == Division.JAZZ]
+    kick = [d for d in data if d["division"] == Division.KICK]
 
     # Sort by total descending
     jazz.sort(key=lambda d: d["total"], reverse=True)
