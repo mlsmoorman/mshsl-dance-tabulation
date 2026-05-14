@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'meets',
-    'kct',
-    'judging',
     'tabulation',
     'superior',
     'kct.apps.KctConfig',

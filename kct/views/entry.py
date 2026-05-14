@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from ..models import KCTEntry
 from ..forms import KCTEntryForm
-from .entry import TeamEntry
+from meets.models.entry import TeamEntry
 
 
 def kct_entry_form(request, entry_id):
