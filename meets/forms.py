@@ -1,9 +1,9 @@
 from django import forms
 from meets.models.meet import Meet
 from meets.models.entry import TeamEntry
-from core.models import Team
 from meets.models.ruleset import RuleSet
 from meets.models.choices import Division
+from core.models import Team
 
 class MeetForm(forms.ModelForm):
     class Meta:

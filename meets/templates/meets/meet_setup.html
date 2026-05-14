@@ -1,6 +1,6 @@
 <h2>Meet Setup</h2>
 
-<h4>Create New Meet</h4>
+<h3>Create New Meet</h3>
 <form method="POST">
   {% csrf_token %}
   {{ form.as_p }}
@@ -9,22 +9,43 @@
 
 <hr>
 
-<h4>Existing Meets</h4>
-<table class="table table-bordered">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Date</th>
-      <th>RuleSet</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for meet in meets %}
-      <tr>
-        <td>{{ meet.name }}</td>
-        <td>{{ meet.date }}</td>
-        <td>{{ meet.ruleset }}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<h3>Existing Meets</h3>
+
+{% for block in meet_data %}
+  <div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+      <strong>{{ block.meet.name }}</strong> — {{ block.meet.date }}
+    </div>
+
+    <div class="card-body">
+
+      <h5>Teams</h5>
+      <a href="{% url 'add_team' %}" class="btn btn-sm btn-success mb-2">+ Add Team</a>
+
+      <ul class="list-group">
+        {% for team in block.teams %}
+          <li class="list-group-item">
+            <strong>{{ team.name }}</strong> ({{ team.school }})
+
+            <div class="mt-2">
+				<a href="{% url 'add_entry' block.meet.id team.id %}" class="btn btn-sm 	btn-outline-primary">
+					+ Add Entry
+				</a>
+            </div>
+
+            {% if block.entries.team.id %}
+              <ul class="mt-2">
+                {% for entry in block.entries.team.id %}
+                  <li>
+                    {{ entry.get_division_display }} — Order {{ entry.performance_order }}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+
+    </div>
+  </div>
+{% endfor %}

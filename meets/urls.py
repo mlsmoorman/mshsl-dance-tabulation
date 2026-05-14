@@ -6,5 +6,5 @@ from .views.entry import add_entry
 urlpatterns = [
     path("setup/", meet_setup, name="meet_setup"),
     path("add-team/", add_team, name="add_team"),
-    path("add-entry/<int:team_id>/", add_entry, name="add_entry"),
+    path("add-entry/<int:meet_id>/<int:team_id>/", add_entry, name="add_entry"),
 ]

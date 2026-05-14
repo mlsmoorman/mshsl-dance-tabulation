@@ -2,8 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 
-from .models import Meet, TeamEntry, Division
-from judging.models import JudgeScoreSheet
+from core.models import Team
+from .models import Division
+from meets.models.meet import Meet
+from meets.models.entry import TeamEntry
+from meets.forms import TeamEntryForm
 
 
 #***********************************************************************CHANGES BEGIN:
@@ -127,3 +130,28 @@ def select_finalists(request, pk):
             entry.save()
             
     return redirect(request, "meets:tabulator_dashboard", pk=pk)
+
+
+
+
+def add_entry(request, meet_id, team_id):
+    meet = get_object_or_404(Meet, id=meet_id)
+    team = get_object_or_404(Team, id=team_id)
+
+    if request.method == "POST":
+        form = TeamEntryForm(request.POST)
+        if form.is_valid():
+            entry = form.save(commit=False)
+            entry.meet = meet
+            entry.team = team
+            entry.save()
+            return redirect("meet_setup")
+    else:
+        form = TeamEntryForm()
+
+    return render(request, "meets/add_entry.html", {
+        "meet": meet,
+        "team": team,
+        "form": form,
+    })
+
