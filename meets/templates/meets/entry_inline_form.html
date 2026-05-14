@@ -1,0 +1,6 @@
+<form method="POST" class="inline-edit-form">
+  {% csrf_token %}
+  {{ form.division }}
+  {{ form.performance_order }}
+  <button class="btn btn-sm btn-success">Save</button>
+</form>

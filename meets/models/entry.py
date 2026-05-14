@@ -22,6 +22,9 @@ class TeamEntry(models.Model):
 
     verified_by_tabulator = models.BooleanField(default=False)
     is_finalist = models.BooleanField(default=False)
+    
+    is_active = models.BooleanField(default=True)
+
 
     def __str__(self):
         return f"{self.team} – {self.get_division_display()} @ {self.meet}"

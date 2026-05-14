@@ -39,10 +39,24 @@
       <a href="/meets/add-entry/{{ meet.id }}/" class="btn btn-success">
         + Add Entry
       </a>
-
-      <a href="{% url 'edit_entry' entry.id %}" class="btn btn-sm btn-outline-secondary">
-        Edit
-      </a>
+      
+      {% if request.GET.edit == entry.id|stringformat:"s" %}
+        <tr>
+          <td>{{ entry.team.name }}</td>
+          <td colspan="2">
+            {% include "meets/partials/entry_inline_form.html" %}
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td>{{ entry.team.name }}</td>
+          <td>{{ entry.performance_order }}</td>
+          <td>
+            <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+          </td>
+        </tr>
+      {% endif %}
 
     </div>
   </div>
