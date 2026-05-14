@@ -1,34 +1,25 @@
-#  ✔ Superior Judge Workflow
-#  superior/views/review.py
-#  superior/views/issues_panel.py
-#  superior/views/dq_review.py
-#  • Review KCT data
-#  • Review judge sheets
-#  • Review issues
-#  • Resolve issues
-#  • DQ review
-#  • DQ execution
+from django.shortcuts import render, get_object_or_404
+from meets.models.entry import TeamEntry
+from kct.models import KCTEntry
+from judging.models import JudgeScoreSheet
 
-#~.~.~.~.~.~.~.~.~.~.~.~.~ SUPERIOR REVIEW VIEW ~.~.~.~.~.~.~.~.~.~.~.~.~#
-@login_required
-def superior_review(request, meet_id):
-    if not request.user.has_role("SUPERIOR"):
-        return redirect("/")
 
-    meet = get_object_or_404(Meet, id=meet_id)
-    entries = (
-        TeamEntry.objects
-        .filter(meet=meet)
-        .select_related("team", "team__school", "kctentry")
-        .prefetch_related("issues", "judgesscoresheet_set")
-        .order_by("performance_order")
+def superior_review(request, entry_id):
+    team_entry = get_object_or_404(TeamEntry, id=entry_id)
+
+    kct_entries = list(
+        KCTEntry.objects.filter(team_entry=team_entry).select_related("kct")
     )
+    judge_sheets = list(
+        JudgeScoreSheet.objects.filter(team_entry=team_entry).select_related("judge")
+    )
+    issues = team_entry.issues.all().order_by("status", "-created_at")
+    dq_entries = team_entry.dq_entries.all().order_by("-created_at")
 
     return render(request, "superior/review.html", {
-        "meet": meet,
-        "entries": entries,
+        "team_entry": team_entry,
+        "kct_entries": kct_entries,
+        "judge_sheets": judge_sheets,
+        "issues": issues,
+        "dq_entries": dq_entries,
     })
-
-
-
-#~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#

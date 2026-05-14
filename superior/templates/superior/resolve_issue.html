@@ -1,0 +1,9 @@
+<h2>Resolve Issue — {{ team_entry.team.name }}</h2>
+
+<p>{{ issue.issue_type }} — {{ issue.description }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-success">Save Resolution</button>
+</form>

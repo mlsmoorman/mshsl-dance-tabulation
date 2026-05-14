@@ -1,0 +1,42 @@
+<h2>Superior Judge Dashboard — {{ meet.name }}</h2>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Division</th>
+      <th>Team</th>
+      <th>Order</th>
+      <th>Open Issues</th>
+      <th>DQ Status</th>
+      <th>Review</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in entries %}
+      <tr>
+        <td>{{ entry.division }}</td>
+        <td>{{ entry.team.name }}</td>
+        <td>{{ entry.performance_order }}</td>
+        <td>
+          {% if entry.open_issues %}
+            {{ entry.open_issues|length }} open
+          {% else %}
+            None
+          {% endif %}
+        </td>
+        <td>
+          {% if entry.dq %}
+            {{ entry.dq.status }}
+          {% else %}
+            None
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'superior:review' entry.id %}" class="btn btn-primary btn-sm">
+            Review
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

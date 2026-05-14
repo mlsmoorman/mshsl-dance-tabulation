@@ -1,0 +1,7 @@
+<h2>Create DQ — {{ team_entry.team.name }}</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-danger">Create DQ</button>
+</form>
