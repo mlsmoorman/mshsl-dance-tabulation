@@ -22,6 +22,7 @@ class JudgeScoreSheetForm(forms.ModelForm):
             "time_deduction",
             "kick_deduction",
             "other_deduction",
+            "comments",
         ]
 
     def __init__(self, *args, **kwargs):

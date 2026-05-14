@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'kct',
     'judging',
     'tabulation',
-    'deductions.apps.DeductionsConfig',
+    'superior',
+    'kct.apps.KctConfig',
+    'judging.apps.JudgingConfig'
 ]
 ## SuperUser:  admin. Password: dance5678
 

@@ -38,6 +38,9 @@ class JudgeScoreSheet(models.Model):
     kick_deduction = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     other_deduction = models.DecimalField(max_digits=4, decimal_places=1, default=0)
 
+    # Comments
+    comments = models.TextField(blank=True)
+
     # Computed
     subtotal = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     total = models.DecimalField(max_digits=5, decimal_places=1, default=0)
