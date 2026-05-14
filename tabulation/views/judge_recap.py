@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from meets.models.meet import Meet
-from ..services.rankings import compute_rankings
+from ..services.ranking import compute_rankings
 
 
 @login_required

@@ -13,6 +13,9 @@ def meet_overview(request, meet_id):
         resolved_at__isnull=True
     )
 
+    is_locked = hasattr(meet, "meetlock")
+    "locked" = is_locked
+    
     # Count issues per entry
     entry_issue_counts = {}
     for issue in issues:
@@ -43,7 +46,8 @@ def meet_overview(request, meet_id):
         div = issue.team_entry.division
         if div in divisions:
             divisions[div]["issue_count"] += 1
-
+    
+    
     return render(request, "tabulation/meet_overview.html", {
         "meet": meet,
         "divisions": divisions,

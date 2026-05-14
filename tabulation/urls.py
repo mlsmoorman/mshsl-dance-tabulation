@@ -2,7 +2,7 @@ from django.urls import path
 from .views.dashboard import tabulator_dashboard
 from .views.verify import tabulator_verify
 from .views.lock_meet import lock_meet
-from .views.final_results import final_results
+from .views.results import final_results
 from .views.announcer import announcer_results
 from .views.judge_recap import judge_recap
 from .views.meet_overview import meet_overview

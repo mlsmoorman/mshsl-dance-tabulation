@@ -1,0 +1,25 @@
+<h2>{{ meet.name }} — Final Results</h2>
+
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Team</th>
+      <th>Total Score</th>
+      <th>Rank Points</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for r in results %}
+      <tr>
+        <td>{{ r.final_rank }}</td>
+        <td>{{ r.entry.team.name }}</td>
+        <td>{{ r.final_total_score }}</td>
+        <td>{{ r.final_rank_points }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<a href="/tabulator/" class="btn btn-secondary">Back to Dashboard</a>

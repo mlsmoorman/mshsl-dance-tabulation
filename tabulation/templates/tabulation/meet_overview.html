@@ -193,5 +193,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   });
 
+  
 });
 </script>
+
+{% if not meet.meetlock %}
+  <a href="{% url 'lock_meet' meet.id %}" class="btn btn-danger">
+    Lock Meet & Generate Results
+  </a>
+{% else %}
+  <a href="{% url 'meet_results' meet.id %}" class="btn btn-success">
+    View Final Results
+  </a>
+{% endif %}
+
+{% if locked %}
+  <p class="text-danger">This meet is locked. No further changes allowed.</p>
+{% endif %}
+
+{% if not locked %}
+  <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+  <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+{% endif %}
