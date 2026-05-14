@@ -1,3 +1,5 @@
+{% load static %}
+
 <h2>{{ meet.name }} — Meet Overview</h2>
 <p><strong>Date:</strong> {{ meet.date }}</p>
 <p><strong>Site:</strong> {{ meet.site }}</p>
@@ -13,7 +15,8 @@
     </div>
 
     <div class="card-body">
-      <table class="table table-bordered">
+
+      <table class="table table-bordered table-striped">
         <thead>
           <tr>
             <th>Team</th>
@@ -21,49 +24,25 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
+
+        <!-- SORTABLE BODY -->
+        <tbody id="division-{{ division }}">
           {% for entry in entries %}
-            <tr>
+            <tr data-entry-id="{{ entry.id }}">
               <td>{{ entry.team.name }}</td>
               <td>{{ entry.performance_order }}</td>
               <td>
-                <a href="/meets/add-entry/{{ meet.id }}/{{ entry.team.id }}/" class="btn btn-sm btn-outline-primary">
-                  Edit Entry
-                </a>
+                <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
               </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
 
-      <h3>Add Team</h3>
-      <form method="POST" action="{% url 'add_team_inline' meet.id %}">
-        {% csrf_token %}
-        {{ inline_team_form.as_p }}
-        <button class="btn btn-primary">Add Team</button>
-      </form>
-
       <a href="/meets/add-entry/{{ meet.id }}/" class="btn btn-success">
         + Add Entry
       </a>
-      
-      {% if request.GET.edit == entry.id|stringformat:"s" %}
-        <tr>
-          <td>{{ entry.team.name }}</td>
-          <td colspan="2">
-            {% include "meets/partials/entry_inline_form.html" %}
-          </td>
-        </tr>
-      {% else %}
-        <tr>
-          <td>{{ entry.team.name }}</td>
-          <td>{{ entry.performance_order }}</td>
-          <td>
-            <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-            <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-          </td>
-        </tr>
-      {% endif %}
 
     </div>
   </div>
@@ -94,3 +73,39 @@
 <a href="/kct/meet/{{ meet.id }}/" class="btn btn-outline-dark">KCT Dashboard</a>
 <a href="/judge/meet/{{ meet.id }}/" class="btn btn-outline-dark">Judging Dashboard</a>
 <a href="/superior/meet/{{ meet.id }}/" class="btn btn-outline-dark">Superior Judge</a>
+
+<!-- SORTABLEJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  // For every division table body
+  document.querySelectorAll("tbody[id^='division-']").forEach(function (tbody) {
+
+    new Sortable(tbody, {
+      animation: 150,
+      handle: "tr",
+
+      onEnd: function () {
+        const entryIds = Array.from(tbody.querySelectorAll("tr"))
+          .map(row => row.dataset.entryId);
+
+        fetch("{% url 'reorder_entries' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            "entry_ids[]": entryIds
+          })
+        });
+      }
+    });
+
+  });
+
+});
+</script>
+
