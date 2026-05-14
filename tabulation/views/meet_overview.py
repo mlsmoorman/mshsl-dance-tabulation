@@ -13,6 +13,13 @@ def meet_overview(request, meet_id):
         resolved_at__isnull=True
     )
 
+    # Count issues per entry
+    entry_issue_counts = {}
+    for issue in issues:
+        entry_id = issue.team_entry_id
+        entry_issue_counts[entry_id] = entry_issue_counts.get(entry_id, 0) + 1
+
+    # Build divisions
     divisions = {}
 
     for entry in entries:
@@ -23,12 +30,15 @@ def meet_overview(request, meet_id):
                 "entries": [],
                 "entry_count": 0,
                 "issue_count": 0,
-                "avg_score": None,  # placeholder
+                "avg_score": None,
             }
+
+        entry.issue_count = entry_issue_counts.get(entry.id, 0)
 
         divisions[div]["entries"].append(entry)
         divisions[div]["entry_count"] += 1
 
+    # Count issues per division
     for issue in issues:
         div = issue.team_entry.division
         if div in divisions:

@@ -1,5 +1,11 @@
 {% load static %}
 
+<style>
+.issue-high { background-color: #ffcccc !important; }
+.issue-medium { background-color: #ffe5cc !important; }
+.issue-low { background-color: #fff8cc !important; }
+</style>
+
 <h2>{{ meet.name }} — Meet Overview</h2>
 <p><strong>Date:</strong> {{ meet.date }}</p>
 <p><strong>Site:</strong> {{ meet.site }}</p>
@@ -32,6 +38,15 @@
             <div class="card-body">
               <h5 class="card-title">Unresolved Issues</h5>
               <p class="card-text display-6">{{ data.issue_count }}</p>
+                <span class="badge 
+                  {% if issue.severity == 'HIGH' %}bg-danger
+                  {% elif issue.severity == 'MEDIUM' %}bg-warning
+                  {% else %}bg-secondary
+                  {% endif %}
+                ">
+                  {{ issue.severity }}
+                </span>
+              <div class="card text-center {% if data.issue_count > 0 %}border-danger{% endif %}">
             </div>
           </div>
         </div>
@@ -71,6 +86,43 @@
                 <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                 <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
               </td>
+
+              <tr data-entry-id="{{ entry.id }}"
+                  class="
+                    {% if entry.issue_count > 0 %}
+                      {% if entry.issue_count > 3 %}
+                        issue-high
+                      {% elif entry.issue_count > 1 %}
+                        issue-medium
+                      {% else %}
+                        issue-low
+                      {% endif %}
+                    {% endif %}
+                  ">
+                <td>
+                  {{ entry.team.name }}
+
+                  {% if entry.issue_count > 0 %}
+                    <span class="badge bg-danger ms-2">
+                      {{ entry.issue_count }} issue{{ entry.issue_count|pluralize }}
+                    </span>
+                  {% endif %}
+                </td>
+
+                <td>{{ entry.performance_order }}</td>
+
+                <td>
+                  <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                  <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+
+                  {% if entry.issue_count > 0 %}
+                    <a href="/superior/entry/{{ entry.id }}/" class="btn btn-sm btn-warning ms-2">
+                      Review Issues
+                    </a>
+                  {% endif %}
+                </td>
+              </tr>
+
             </tr>
           {% endfor %}
         </tbody>
