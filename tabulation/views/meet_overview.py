@@ -6,7 +6,7 @@ from superior.models import Issue
 def meet_overview(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
 
-    entries = TeamEntry.objects.filter(meet=meet).order_by("division", "performance_order")
+    entries = TeamEntry.objects.filter(meet=meet, is_active=True)
 
     issues = Issue.objects.filter(
         team_entry__in=entries,
@@ -17,6 +17,8 @@ def meet_overview(request, meet_id):
     divisions = {}
     for entry in entries:
         divisions.setdefault(entry.division, []).append(entry)
+
+
 
     return render(request, "tabulation/meet_overview.html", {
         "meet": meet,

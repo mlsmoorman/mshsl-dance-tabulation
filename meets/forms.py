@@ -19,3 +19,8 @@ class TeamEntryForm(forms.ModelForm):
     class Meta:
         model = TeamEntry
         fields = ["division", "performance_order"]
+
+class InlineTeamForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = ["name", "school", "level"]

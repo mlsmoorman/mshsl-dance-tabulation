@@ -36,6 +36,13 @@
         </tbody>
       </table>
 
+      <h3>Add Team</h3>
+      <form method="POST" action="{% url 'add_team_inline' meet.id %}">
+        {% csrf_token %}
+        {{ inline_team_form.as_p }}
+        <button class="btn btn-primary">Add Team</button>
+      </form>
+
       <a href="/meets/add-entry/{{ meet.id }}/" class="btn btn-success">
         + Add Entry
       </a>
