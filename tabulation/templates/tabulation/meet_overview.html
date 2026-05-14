@@ -8,7 +8,7 @@
 
 <h3>Divisions</h3>
 
-{% for division, entries in divisions.items %}
+{% for division, data in divisions.items %}
   <div class="card mb-4">
     <div class="card-header bg-secondary text-white">
       <strong>{{ division }}</strong>
@@ -16,6 +16,43 @@
 
     <div class="card-body">
 
+      <!-- SUMMARY CARDS -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Entries</h5>
+              <p class="card-text display-6">{{ data.entry_count }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card text-center {% if data.issue_count > 0 %}border-danger{% endif %}">
+            <div class="card-body">
+              <h5 class="card-title">Unresolved Issues</h5>
+              <p class="card-text display-6">{{ data.issue_count }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Avg Score</h5>
+              <p class="card-text display-6">
+                {% if data.avg_score %}
+                  {{ data.avg_score }}
+                {% else %}
+                  —
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTRY TABLE -->
       <table class="table table-bordered table-striped">
         <thead>
           <tr>
@@ -25,9 +62,8 @@
           </tr>
         </thead>
 
-        <!-- SORTABLE BODY -->
         <tbody id="division-{{ division }}">
-          {% for entry in entries %}
+          {% for entry in data.entries %}
             <tr data-entry-id="{{ entry.id }}">
               <td>{{ entry.team.name }}</td>
               <td>{{ entry.performance_order }}</td>
@@ -80,7 +116,6 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  // For every division table body
   document.querySelectorAll("tbody[id^='division-']").forEach(function (tbody) {
 
     new Sortable(tbody, {
@@ -108,4 +143,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
-
