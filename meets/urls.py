@@ -1,6 +1,10 @@
 from django.urls import path
-from . import views
+from .views.setup import meet_setup
+from .views.team import add_team
+from .views.entry import add_entry
 
-app_name = "meets"
-
-urlpatterns = []
+urlpatterns = [
+    path("setup/", meet_setup, name="meet_setup"),
+    path("add-team/", add_team, name="add_team"),
+    path("add-entry/<int:team_id>/", add_entry, name="add_entry"),
+]

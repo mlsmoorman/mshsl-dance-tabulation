@@ -21,6 +21,14 @@ class Meet(models.Model):
         User, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="dq_actions"
     )
+
+    ruleset = models.ForeignKey(
+        "meets.RuleSet",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
     
     locked = models.BooleanField(default=False)
     locked_at = models.DateTimeField(null=True, blank=True)
@@ -28,3 +36,5 @@ class Meet(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.date})"
+    
+    

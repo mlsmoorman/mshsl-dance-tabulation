@@ -1,57 +1,83 @@
-<h1>{{ meet.name }} — {{ division }} Tabulation</h1>
+{% extends "base.html" %}
+{% block content %}
 
-<h2>Judge Submission Status</h2>
-<table>
+<h2 class="mb-4">Tabulator Dashboard</h2>
+
+<table class="table table-bordered table-striped">
+  <thead class="table-dark">
     <tr>
-        <th>Judge</th>
-        <th>Submitted</th>
-        <th>Missing</th>
-        <th>Status</th>
+      <th>Meet</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Entries</th>
+      <th>Unresolved Issues</th>
+      <th>Verify</th>
+      <th>Results</th>
+      <th>Announcer</th>
+      <th>Recap</th>
     </tr>
-    {% for row in judge_status %}
-    <tr>
-        <td>{{ row.judge.username }}</td>
-        <td>{{ row.submitted }}</td>
-        <td>{{ row.missing }}</td>
+  </thead>
+
+  <tbody>
+    {% for item in meet_data %}
+      <tr>
+        <td>{{ item.meet.name }}</td>
+        <td>{{ item.meet.date }}</td>
+
         <td>
-            {% if row.complete %}
-                ✔ Complete
-            {% else %}
-                ⚠ Missing
-            {% endif %}
+          {% if item.is_locked %}
+            <span class="badge bg-danger">Locked</span>
+          {% else %}
+            <span class="badge bg-success">Open</span>
+          {% endif %}
         </td>
-    </tr>
+
+        <td>{{ item.entries_count }}</td>
+
+        <td>
+          {% if item.unresolved_issues > 0 %}
+            <span class="badge bg-warning text-dark">
+              {{ item.unresolved_issues }} issue(s)
+            </span>
+          {% else %}
+            <span class="badge bg-success">0</span>
+          {% endif %}
+        </td>
+
+        <td>
+          <a class="btn btn-primary btn-sm"
+             href="{% url 'tabulation:tabulator_verify' item.meet.id %}">
+            Verify
+          </a>
+        </td>
+
+        <td>
+          <a class="btn btn-secondary btn-sm"
+             href="{% url 'tabulation:final_results' item.meet.id %}">
+            Results
+          </a>
+        </td>
+
+        <td>
+          <a class="btn btn-info btn-sm"
+             href="{% url 'tabulation:announcer_results' item.meet.id %}">
+            Announcer
+          </a>
+        </td>
+
+        <td>
+          <a class="btn btn-warning btn-sm"
+             href="{% url 'tabulation:judge_recap' item.meet.id 'JAZZ' %}">
+            Jazz
+          </a>
+          <a class="btn btn-warning btn-sm"
+             href="{% url 'tabulation:judge_recap' item.meet.id 'KICK' %}">
+            Kick
+          </a>
+        </td>
+      </tr>
     {% endfor %}
+  </tbody>
 </table>
 
-<hr>
-
-{% if entry.disqualified %}
-  <span class="text-danger fw-bold">DQ</span>
-{% endif %}
-
-<h2>Actions</h2>
-
-<a href="{% url 'run_prelims_ranking' meet.id division %}">Run Prelims Ranking</a><br>
-<a href="{% url 'advance_finalists' meet.id division %}">Advance Finalists</a><br>
-<a href="{% url 'run_finals_ranking' meet.id division %}">Run Finals Ranking</a><br>
-
-<hr>
-
-<h2>Finalists</h2>
-{% if finalists %}
-<table>
-    <tr>
-        <th>Team</th>
-        <th>Prelim Rank</th>
-    </tr>
-    {% for entry in finalists %}
-    <tr>
-        <td>{{ entry.team }}</td>
-        <td>{{ entry.prelim_rank }}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>No finalists selected yet.</p>
-{% endif %}
+{% endblock %}

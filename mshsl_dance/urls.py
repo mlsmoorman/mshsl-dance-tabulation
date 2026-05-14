@@ -24,5 +24,5 @@ urlpatterns = [
     path("kct/", include("kct.urls")),              # KCT UI
     path("tabulator/", include("tabulation.urls")), # Tabulation Dashboard
     path("accounts/", include("django.contrib.auth.urls")),
-
+    path("meets/", include("meets.urls")),          # Meets
 ]
