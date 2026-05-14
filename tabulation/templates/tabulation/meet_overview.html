@@ -1,0 +1,70 @@
+<h2>{{ meet.name }} — Meet Overview</h2>
+<p><strong>Date:</strong> {{ meet.date }}</p>
+<p><strong>Site:</strong> {{ meet.site }}</p>
+
+<hr>
+
+<h3>Divisions</h3>
+
+{% for division, entries in divisions.items %}
+  <div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+      <strong>{{ division }}</strong>
+    </div>
+
+    <div class="card-body">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Performance Order</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+            <tr>
+              <td>{{ entry.team.name }}</td>
+              <td>{{ entry.performance_order }}</td>
+              <td>
+                <a href="/meets/add-entry/{{ meet.id }}/{{ entry.team.id }}/" class="btn btn-sm btn-outline-primary">
+                  Edit Entry
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <a href="/meets/add-entry/{{ meet.id }}/" class="btn btn-success">
+        + Add Entry
+      </a>
+    </div>
+  </div>
+{% endfor %}
+
+<hr>
+
+<h3>Unresolved Issues</h3>
+
+{% if issues %}
+  <ul class="list-group">
+    {% for issue in issues %}
+      <li class="list-group-item">
+        <strong>{{ issue.issue_type }}</strong> — {{ issue.description }}
+        <br>
+        <em>Team:</em> {{ issue.team_entry.team.name }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No unresolved issues.</p>
+{% endif %}
+
+<hr>
+
+<h3>Actions</h3>
+
+<a href="/kct/meet/{{ meet.id }}/" class="btn btn-outline-dark">KCT Dashboard</a>
+<a href="/judge/meet/{{ meet.id }}/" class="btn btn-outline-dark">Judging Dashboard</a>
+<a href="/superior/meet/{{ meet.id }}/" class="btn btn-outline-dark">Superior Judge</a>

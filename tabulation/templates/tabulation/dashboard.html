@@ -1,0 +1,19 @@
+<h2>Tabulator Dashboard</h2>
+
+{% for block in meet_data %}
+  <div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+      <strong>{{ block.meet.name }}</strong> — {{ block.meet.date }}
+    </div>
+
+    <div class="card-body">
+      <p><strong>Entries:</strong> {{ block.entries.count }}</p>
+      <p><strong>Unresolved Issues:</strong> {{ block.unresolved_count }}</p>
+
+      <a href="{% url 'meet_overview' block.meet.id %}" class="btn btn-primary">
+        Open Meet
+      </a>
+
+    </div>
+  </div>
+{% endfor %}

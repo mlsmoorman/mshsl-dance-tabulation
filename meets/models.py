@@ -1,5 +1,7 @@
 from django.db import models
 from core.models import School, Team, User
+from .models.meet import Meet
+from .models.choices import Division
 
 
 #***********************************************************************CHANGES BEGIN:
