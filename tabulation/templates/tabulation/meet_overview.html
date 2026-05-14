@@ -39,6 +39,11 @@
       <a href="/meets/add-entry/{{ meet.id }}/" class="btn btn-success">
         + Add Entry
       </a>
+
+      <a href="{% url 'edit_entry' entry.id %}" class="btn btn-sm btn-outline-secondary">
+        Edit
+      </a>
+
     </div>
   </div>
 {% endfor %}

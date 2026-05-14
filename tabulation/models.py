@@ -6,10 +6,10 @@ from meets.models.entry import TeamEntry
 from core.models import User
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# -------------------------------------------------------------
 # FINAL RESULTS SNAPSHOT
 # Stores the final ranking + scores after tabulation is locked.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# -------------------------------------------------------------
 class FinalResult(models.Model):
     meet = models.ForeignKey(Meet, on_delete=models.CASCADE)
     entry = models.ForeignKey(TeamEntry, on_delete=models.CASCADE)
@@ -28,10 +28,10 @@ class FinalResult(models.Model):
         return f"{self.entry.team.name} – Rank {self.final_rank}"
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# TABULATOR VERIFICATION LOG
+# -------------------------------------------------------------
+# VERIFICATION LOG
 # Records when a tabulator verifies an entry’s scores.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# -------------------------------------------------------------
 class VerificationLog(models.Model):
     entry = models.ForeignKey(TeamEntry, on_delete=models.CASCADE)
     verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -41,10 +41,10 @@ class VerificationLog(models.Model):
         return f"Verified {self.entry} at {self.verified_at}"
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# MEET LOCK LOG
+# -------------------------------------------------------------
+# MEET LOCK
 # Records when a meet is locked by the tabulator.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# -------------------------------------------------------------
 class MeetLock(models.Model):
     meet = models.OneToOneField(Meet, on_delete=models.CASCADE)
     locked_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
