@@ -7,6 +7,7 @@ from .views.announcer import announcer_results
 from .views.judge_recap import judge_recap
 from .views.meet_overview import meet_overview
 from .views.reorder_entries import reorder_entries
+from .views.public_results import public_results
 
 app_name = "tabulation"
 
@@ -19,4 +20,5 @@ urlpatterns = [
     path("meet/<int:meet_id>/announcer/", announcer_results, name="announcer_results"),
     path("meet/<int:meet_id>/recap/<str:division>/", judge_recap, name="judge_recap"),
     path("reorder-entries/", reorder_entries, name="reorder_entries"),
+    path("public-results/<int:meet_id>/", public_results, name="public_results"),
 ]

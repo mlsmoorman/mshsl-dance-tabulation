@@ -215,3 +215,9 @@ document.addEventListener("DOMContentLoaded", function () {
   <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
   <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
 {% endif %}
+
+{% if meet.meetlock %}
+  <a href="{% url 'public_results' meet.id %}" class="btn btn-primary">
+    Public Results
+  </a>
+{% endif %}
