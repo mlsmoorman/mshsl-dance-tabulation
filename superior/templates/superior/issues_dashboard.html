@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Superior Judge — Issues Dashboard</h1>
+<h3>{{ meet.name }}</h3>
+
+{% if issues %}
+    {% for issue in issues %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>{{ issue.team_entry.team.name }}</strong>
+                — {{ issue.team_entry.get_division_display }}
+            </div>
+
+            <div class="card-body">
+                <p>
+                    <strong>Type:</strong> {{ issue.get_issue_type_display }}<br>
+                    <strong>Severity:</strong> {{ issue.get_severity_display }}<br>
+                    <strong>Description:</strong> {{ issue.description }}<br>
+                    <strong>Flagged by:</strong> {{ issue.created_by }}<br>
+                    <strong>Time:</strong> {{ issue.created_at|date:"H:i" }}
+                </p>
+
+                <a href="{% url 'superior:resolve_issue' issue.id %}" class="btn btn-success">
+                    Resolve Issue
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No open issues.</p>
+{% endif %}
+
+{% endblock %}

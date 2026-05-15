@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from superior.models import Issue, IssueType, IssueSeverity
 from meets.models.entry import TeamEntry
+from django.shortcuts import render, get_object_or_404, redirect
 
 def judge_flag_issue(request, entry_id):
     entry = get_object_or_404(TeamEntry, id=entry_id)
@@ -9,7 +9,7 @@ def judge_flag_issue(request, entry_id):
         Issue.objects.create(
             team_entry=entry,
             created_by=request.user,
-            issue_type=IssueType.OTHER,  # or whatever type you want judges to flag
+            issue_type=request.POST.get("issue_type"),
             severity=IssueSeverity.WARNING,
             description=request.POST.get("description", ""),
         )
@@ -17,4 +17,5 @@ def judge_flag_issue(request, entry_id):
 
     return render(request, "judging/judge_flag_issue.html", {
         "entry": entry,
+        "issue_types": IssueType.choices,
     })

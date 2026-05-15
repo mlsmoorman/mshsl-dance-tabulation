@@ -4,7 +4,7 @@
 <h1>Judge Scoring – {{ meet.name }}</h1>
 
 {% if entry_sheets %}
-  {% for entry, sheet in entry_sheets %}
+  {% for entry, sheet, judge_issues in entry_sheets %}
 
     <hr>
     <h2>{{ entry.team.name }} — {{ entry.get_division_display }}</h2>
@@ -136,6 +136,22 @@
     </form>
 
     <hr>
+
+  {% if judge_issues %}
+      <div class="alert alert-warning mt-3">
+          <strong>Issues you flagged:</strong>
+          <ul>
+              {% for issue in judge_issues %}
+                  <li>
+                      <strong>{{ issue.get_issue_type_display }}</strong>
+                      — {{ issue.description }}
+                      <small class="text-muted">({{ issue.created_at|date:"H:i" }})</small>
+                  </li>
+              {% endfor %}
+          </ul>
+      </div>
+  {% endif %}
+
 
     <a href="{% url 'judging:judge_flag_issue' entry.id %}">
       <button class="btn btn-warning btn-sm">Flag Issue</button>

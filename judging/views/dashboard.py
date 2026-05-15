@@ -28,7 +28,10 @@ def judge_dashboard(request, meet_id):
                 "comments": "",
             }
         )   
-        entry_sheets.append((entry, sheet))
+        # ⭐ Fetch issues for this entry created by THIS judge
+        judge_issues = entry.issues.filter(created_by=request.user).order_by("-created_at")
+
+        entry_sheets.append((entry, sheet, judge_issues))
 
     # Handle POST
     if request.method == "POST":

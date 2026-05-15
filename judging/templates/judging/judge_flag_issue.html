@@ -7,6 +7,17 @@
     {% csrf_token %}
 
     <div class="card mb-3">
+        <div class="card-header">Issue Type</div>
+        <div class="card-body">
+            <select name="issue_type" class="form-control" required>
+                {% for value, label in issue_types %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="card mb-3">
         <div class="card-header">Describe the Issue</div>
         <div class="card-body">
             <textarea name="description" class="form-control" rows="4" required></textarea>

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Resolve Issue — {{ issue.team_entry.team.name }}</h2>
+
+<p><strong>Type:</strong> {{ issue.get_issue_type_display }}</p>
+<p><strong>Description:</strong> {{ issue.description }}</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="card mb-3">
+        <div class="card-header">Resolution Action</div>
+        <div class="card-body">
+            <select name="action" class="form-control" required>
+                <option value="APPLY_DEDUCTION">Apply Deduction</option>
+                <option value="WARNING_ONLY">Warning Only</option>
+                <option value="NO_ACTION">No Action</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">Resolution Notes</div>
+        <div class="card-body">
+            <textarea name="notes" class="form-control" rows="4"></textarea>
+        </div>
+    </div>
+
+    <button class="btn btn-primary">Resolve Issue</button>
+</form>
+
+{% endblock %}

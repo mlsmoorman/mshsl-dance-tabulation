@@ -25,4 +25,5 @@ urlpatterns = [
     path("tabulator/", include("tabulation.urls")), # Tabulation Dashboard
     path("accounts/", include("django.contrib.auth.urls")),
     path("meets/", include("meets.urls")),          # Meets
+    path("superior/", include("superior.urls")),    # Superior
 ]
