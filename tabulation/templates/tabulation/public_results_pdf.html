@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h1 { text-align: center; margin-bottom: 5px; }
+    h2 { margin-top: 40px; background: #eee; padding: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background: #f0f0f0; }
+    .rank { font-weight: bold; }
+  </style>
+</head>
+
+<body>
+
+<h1>{{ meet.name }} — Official Results</h1>
+<p style="text-align:center;">
+  {{ meet.date }} — {{ meet.site }}
+</p>
+
+{% for division, results in divisions.items %}
+  <h2>{{ division }}</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Team</th>
+        <th>Total Score</th>
+        <th>Rank Points</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for r in results %}
+        <tr>
+          <td class="rank">{{ r.final_rank }}</td>
+          <td>{{ r.entry.team.name }}</td>
+          <td>{{ r.final_total_score }}</td>
+          <td>{{ r.final_rank_points }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+
+</body>
+</html>
