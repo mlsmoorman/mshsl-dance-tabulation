@@ -25,6 +25,14 @@ class TeamEntry(models.Model):
     
     is_active = models.BooleanField(default=True)
 
+    # Kick & Time confirmations
+    kct_kick_count = models.PositiveSmallIntegerField(null=True, blank=True)
+    kct_time_seconds = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    # Jazz confirmations
+    kct_turn_confirmed = models.BooleanField(default=False)
+    kct_leap_jump_confirmed = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f"{self.team} – {self.get_division_display()} @ {self.meet}"

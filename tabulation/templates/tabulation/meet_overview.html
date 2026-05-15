@@ -161,6 +161,7 @@
 <a href="/kct/meet/{{ meet.id }}/" class="btn btn-outline-dark">KCT Dashboard</a>
 <a href="/judge/meet/{{ meet.id }}/" class="btn btn-outline-dark">Judging Dashboard</a>
 <a href="/superior/meet/{{ meet.id }}/" class="btn btn-outline-dark">Superior Judge</a>
+<a href="{% url 'view_score_sheets' entry.id %}" class="btn btn-sm btn-info ms-2">Score Sheets</a>
 
 <!-- SORTABLEJS -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>

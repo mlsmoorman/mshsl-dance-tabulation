@@ -1,0 +1,108 @@
+<h2>Judge Score Sheets — {{ entry.team.name }} ({{ entry.division }})</h2>
+
+<style>
+  .score-high { background: #d4edda; }      /* light green */
+  .score-low { background: #f8d7da; }       /* light red */
+  .deduction { background: #fff3cd; }       /* light yellow */
+  .missing { background: #e2e3e5; }         /* light gray */
+</style>
+
+
+{% for sheet in sheets %}
+  <div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+      Judge: {{ sheet.judge.first_name }} {{ sheet.judge.last_name }}
+    </div>
+
+    <div class="card-body">
+
+      <h5>Skills</h5>
+      <table class="table table-bordered">
+        <tbody>
+          {% if entry.division == "JAZZ" %}
+            <tr><th>Turns</th><td>{{ sheet.skills_turns }}</td></tr>
+            <tr><th>Leaps/Jumps</th><td>{{ sheet.skills_leaps_jumps }}</td></tr>
+          {% else %}
+            <tr><th>Kicks Technique</th><td>{{ sheet.kicks_technique }}</td></tr>
+            <tr><th>Kicks Height</th><td>{{ sheet.kicks_height }}</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      <h5>Choreography</h5>
+      <table class="table table-bordered">
+        <tbody>
+          <tr><th>Creativity</th><td>{{ sheet.choreo_creativity }}</td></tr>
+          <tr><th>Visual Effect</th><td>{{ sheet.choreo_visual_effect }}</td></tr>
+        </tbody>
+      </table>
+
+      <h5>Difficulty</h5>
+      <table class="table table-bordered">
+        <tbody>
+          <tr><th>Routine</th><td>{{ sheet.diff_routine }}</td></tr>
+          <tr><th>Formations</th><td>{{ sheet.diff_formations }}</td></tr>
+          <tr><th>Skills/Kicks</th><td>{{ sheet.diff_skills_or_kicks }}</td></tr>
+        </tbody>
+      </table>
+
+      <h5>Execution</h5>
+      <table class="table table-bordered">
+        <tbody>
+          <tr><th>Placement/Control</th><td>{{ sheet.exec_placement_control }}</td></tr>
+          <tr><th>Accuracy</th><td>{{ sheet.exec_accuracy }}</td></tr>
+        </tbody>
+      </table>
+
+      <h5>Routine Effectiveness</h5>
+      <p>{{ sheet.routine_effectiveness }}</p>
+
+      <h5>Deductions</h5>
+      <table class="table table-bordered">
+        <tbody>
+          <tr><th>Time</th><td>{{ sheet.time_deduction }}</td></tr>
+          <tr><th>Kick</th><td>{{ sheet.kick_deduction }}</td></tr>
+          <tr><th>Other</th><td>{{ sheet.other_deduction }}</td></tr>
+        </tbody>
+      </table>
+
+      <h5>Totals</h5>
+      <p><strong>Subtotal:</strong> {{ sheet.subtotal }}</p>
+      <p><strong>Total:</strong> {{ sheet.total }}</p>
+	  
+		
+    	{% if sheet.comments %}
+        	<h5>Comments</h5>
+        	<p>{{ sheet.comments }}</p>
+      	{% endif %}
+
+	</div>
+  </div>
+{% endfor %}
+
+<a onclick="window.print()" class="btn btn-secondary mb-3">Print</a>
+<style>
+	@media print {
+	.btn { display: none; }
+	body { margin: 0; }
+	.card { page-break-inside: avoid; }
+	}
+</style>
+
+<td class="{% if sheet.total >= 80 %}score-high{% elif sheet.total <= 60 %}score-low{% endif %}">
+	{{ sheet.total }}
+</td>
+
+<td class="{% if sheet.time_deduction or sheet.kick_deduction or sheet.other_deduction %}deduction{% endif %}">
+	{{ sheet.time_deduction|add:sheet.kick_deduction|add:sheet.other_deduction }}
+</td>
+
+<a href="?compare=1" class="btn btn-outline-primary mb-3">Compare Judges</a>
+
+{% if compare %}
+  {% include "judging/compare_judges.html" %}
+{% endif %}
+
+
+<a href="/tabulator/meet/{{ entry.meet.id }}/" class="btn btn-secondary">Back to Meet</a>
+

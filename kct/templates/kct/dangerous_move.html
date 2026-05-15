@@ -1,8 +1,8 @@
-<h2>Mark Dangerous Move</h2>
+<h2>Report Dangerous Move</h2>
 
-<p>Are you sure you want to mark this routine as having a dangerous move?</p>
+<p>Team: {{ entry.team.name }}</p>
 
-<form method="post">
+<form method="POST">
   {% csrf_token %}
-  <button class="btn btn-danger">Confirm</button>
+  <button class="btn btn-danger">Confirm Dangerous Move</button>
 </form>

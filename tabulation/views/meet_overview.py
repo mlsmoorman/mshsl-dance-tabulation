@@ -14,7 +14,6 @@ def meet_overview(request, meet_id):
     )
 
     is_locked = hasattr(meet, "meetlock")
-    "locked" = is_locked
     
     # Count issues per entry
     entry_issue_counts = {}
@@ -34,6 +33,7 @@ def meet_overview(request, meet_id):
                 "entry_count": 0,
                 "issue_count": 0,
                 "avg_score": None,
+                "locked": is_locked,
             }
 
         entry.issue_count = entry_issue_counts.get(entry.id, 0)

@@ -1,0 +1,54 @@
+<h2>KCT Entry — {{ entry.team.name }} ({{ entry.division }})</h2>
+
+<form method="POST" action="{% url 'save_kct' entry.id %}">
+  {% csrf_token %}
+
+  <h4>Competitors</h4>
+  <input type="number" name="num_competitors"
+         value="{{ kct.num_competitors }}"
+         class="form-control">
+
+  <h4>Routine Time (seconds)</h4>
+  <input type="number" name="routine_time_seconds"
+         value="{{ kct.routine_time_seconds }}"
+         class="form-control">
+
+  {% if entry.division == "KICK" %}
+    <h4>Kick Count</h4>
+    <input type="number" name="kick_count"
+           value="{{ kct.kick_count }}"
+           class="form-control">
+  {% endif %}
+
+  {% if entry.division == "JAZZ" %}
+    <h4>Jazz Skills</h4>
+
+    <label>
+      <input type="checkbox" name="jazz_team_turn_performed"
+             {% if kct.jazz_team_turn_performed %}checked{% endif %}>
+      Turn Performed
+    </label><br>
+
+    <label>
+      <input type="checkbox" name="jazz_leap_jump_performed"
+             {% if kct.jazz_leap_jump_performed %}checked{% endif %}>
+      Leap/Jump Performed
+    </label>
+  {% endif %}
+
+  <h4>Observations</h4>
+
+  <label>Falls Observed</label>
+  <input type="number" name="falls_observed"
+         value="{{ kct.falls_observed }}"
+         class="form-control">
+
+  <label>
+    <input type="checkbox" name="dangerous_move_observed"
+           {% if kct.dangerous_move_observed %}checked{% endif %}>
+    Dangerous Move Observed
+  </label>
+
+  <br><br>
+  <button class="btn btn-success">Save KCT</button>
+</form>

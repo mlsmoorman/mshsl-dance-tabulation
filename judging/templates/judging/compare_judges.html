@@ -1,0 +1,48 @@
+<h3>Judge Comparison</h3>
+
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Category</th>
+      {% for sheet in sheets %}
+        <th>{{ sheet.judge.first_name }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr><th>Subtotal</th>
+      {% for sheet in sheets %}
+        <td>{{ sheet.subtotal }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr><th>Total</th>
+      {% for sheet in sheets %}
+        <td>{{ sheet.total }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr><th>Time Deduction</th>
+      {% for sheet in sheets %}
+        <td>{{ sheet.time_deduction }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr><th>Kick Deduction</th>
+      {% for sheet in sheets %}
+        <td>{{ sheet.kick_deduction }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr><th>Other Deduction</th>
+      {% for sheet in sheets %}
+        <td>{{ sheet.other_deduction }}</td>
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>
+
+<a class="btn btn-outline-dark mb-3" disabled>
+  Download All Sheets (coming soon)
+</a>

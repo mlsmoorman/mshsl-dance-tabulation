@@ -1,9 +1,16 @@
 from django.urls import path
-from .views import dashboard, score_sheet
-
-app_name = "judging"
+from .views import dashboard
+from .views import view_score_sheets
 
 urlpatterns = [
-    path("meet/<int:meet_id>/", dashboard.judge_dashboard, name="dashboard"),
-    path("entry/<int:entry_id>/", score_sheet.judge_score_sheet, name="score_sheet"),
+    path(
+        "meet/<int:meet_id>/",
+        dashboard.judge_dashboard,
+        name="judge_dashboard"
+    ),
+    path(
+        "score-sheets/<int:entry_id>/",
+        view_score_sheets.view_score_sheets,
+        name="view_score_sheets"
+    ),
 ]
