@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Flag Issue — {{ entry.team.name }} ({{ entry.get_division_display }})</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="card mb-3">
+        <div class="card-header">Describe the Issue</div>
+        <div class="card-body">
+            <textarea name="description" class="form-control" rows="4" required></textarea>
+        </div>
+    </div>
+
+    <button class="btn btn-warning">Submit Issue</button>
+</form>
+
+{% endblock %}

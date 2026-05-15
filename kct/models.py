@@ -21,7 +21,7 @@ class KCTEntry(models.Model):
     jazz_leap_jump_performed = models.BooleanField(default=False)
 
     # Observations
-    falls_observed = models.PositiveSmallIntegerField(default=0)
+    falls_observed = models.BooleanField(default=False)
     dangerous_move_observed = models.BooleanField(default=False)
 
     def __str__(self):

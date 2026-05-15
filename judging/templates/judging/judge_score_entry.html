@@ -1,77 +1,171 @@
-<h2>Judge Scoring - {{  team_entry.team.name  }} ({{  team_entry.division  }})</h2>
+{% extends "base.html" %}
+{% block content %}
 
-<form method="POST">
-	{% csrf_token %}
+<h1>Judge Scoring – {{ meet.name }}</h1>
 
-	<div class="card mb-3">
-		<div class="card-header">Performance</div>
-		<div class="card-body">
-			<input type="number" name="performance" class="form-control" 
-				value="{{  sheet.performance  }}" min="1" max="10" required>
-		</div>
-	</div>
+{% if entry_sheets %}
+  {% for entry, sheet in entry_sheets %}
 
-	<div class="card mb-3">
-		<div class="card-header">Choreography</div>
-		<div class="card-body">
-			<input type="number" name="choreography" class="form-control" 
-				value="{{  sheet.choreography  }}" min="1" max="10" required>
-		</div>
-	</div>
+    <hr>
+    <h2>{{ entry.team.name }} — {{ entry.get_division_display }}</h2>
 
-	<div class="card mb-3">
-		<div class="card-header">Execution</div>
-		<div class="card-body">
-			<input type="number" name="excecution" class="form-control" 
-				value="{{  sheet.excecution  }}" min="1" max="10" required>
-		</div>
-	</div>
-	<div class="card mb-3">
-		<div class="card-body">Presentation</div>
-		<div class="card-holder">
-			<input type="number" name="presentation" class="form-control" 
-				value="{{  sheet.presentation  }}" min="1" max="10" required>
-		</div>
-	</div>
-	<div class="card mb-3">
-		<div class="card-header">Comments (optional)</div>
-		<div class="card-body">
-			<textarea name="comments" class="form-control">{{  sheet.comments  }}</textarea>
-		</div>
-	</div>
-	
-	<button class="btn btn-primary">Save Scores</button>
-</form>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="entry_id" value="{{ entry.id }}">
 
-<hr>
+      <h4>Choreography</h4>
 
-<button name="message" value="Fall observed" class="btn btn-outline-secondary btn-sm">Fall</button>
-<button name="message" value="Illegal uniform concern" class="btn btn-outline-secondary btn-sm">Uniform</button>
-<button name="message" value="Safety concern" class="btn btn-outline-secondary btn-sm">Safety</button>
-<button name="message" value="Choreography concern" class="btn btn-outline-secondary btn-sm">Choreography</button>
+      <div class="card mb-3">
+        <div class="card-header">Creativity</div>
+        <div class="card-body">
+          <input type="number" name="choreo_creativity" class="form-control"
+                 value="{{ sheet.choreo_creativity }}" min="1" max="10" required>
+        </div>
+      </div>
 
-<a href="{% url 'judging:judge_flag_issue' entry.id %}">
-  <button class="btn btn-warning btn-sm">Flag Issue</button>
-</a>
+      <div class="card mb-3">
+        <div class="card-header">Visual Effectiveness</div>
+        <div class="card-body">
+          <input type="number" name="choreo_visual_effect" class="form-control"
+                 value="{{ sheet.choreo_visual_effect }}" min="1" max="10" required>
+        </div>
+      </div>
 
-{% with issues=entry.issues.filter(issue_type='manual_judge', resolved=False) %}
-  {% if issues.exists %}
-    <div class="alert alert-warning mt-3">
-      <strong>Issues you flagged:</strong>
-      <ul>
-        {% for issue in issues %}
-          <li>{{ issue.message }} ({{ issue.created_at|date:"H:i" }})</li>
-        {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
-{% endwith %}
+      <h4>Difficulty</h4>
 
+      <div class="card mb-3">
+        <div class="card-header">Routine Difficulty</div>
+        <div class="card-body">
+          <input type="number" name="diff_routine" class="form-control"
+                 value="{{ sheet.diff_routine }}" min="1" max="10" required>
+        </div>
+      </div>
 
-<h3>Current Totals</h3>
-<ul>
-	<li>Subtotal: {{  sheet.subtotal  }}</li>
-	<li>Deductions: {{  sheet.other_deduction  }}</li>
-	<li><strong>Total Score: {{  sheet.total_score  }}</strong></li>
-</ul>
+      <div class="card mb-3">
+        <div class="card-header">Formations & Transitions</div>
+        <div class="card-body">
+          <input type="number" name="diff_formations" class="form-control"
+                 value="{{ sheet.diff_formations }}" min="1" max="10" required>
+        </div>
+      </div>
 
+      <div class="card mb-3">
+        <div class="card-header">Skills / Kicks Difficulty</div>
+        <div class="card-body">
+          <input type="number" name="diff_skills_or_kicks" class="form-control"
+                 value="{{ sheet.diff_skills_or_kicks }}" min="1" max="10" required>
+        </div>
+      </div>
+
+      <h4>Execution</h4>
+
+      <div class="card mb-3">
+        <div class="card-header">Placement & Control</div>
+        <div class="card-body">
+          <input type="number" name="exec_placement_control" class="form-control"
+                 value="{{ sheet.exec_placement_control }}" min="1" max="10" required>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">Accuracy</div>
+        <div class="card-body">
+          <input type="number" name="exec_accuracy" class="form-control"
+                 value="{{ sheet.exec_accuracy }}" min="1" max="10" required>
+        </div>
+      </div>
+
+      <h4>Routine Effectiveness</h4>
+
+      <div class="card mb-3">
+        <div class="card-header">Overall Effectiveness</div>
+        <div class="card-body">
+          <input type="number" name="routine_effectiveness" class="form-control"
+                 value="{{ sheet.routine_effectiveness }}" min="1" max="10" required>
+        </div>
+      </div>
+
+      {% if entry.division == "JAZZ" %}
+        <h4>Jazz Skills</h4>
+
+        <div class="card mb-3">
+          <div class="card-header">Turns</div>
+          <div class="card-body">
+            <input type="number" name="skills_turns" class="form-control"
+                   value="{{ sheet.skills_turns }}" min="1" max="10" required>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header">Leaps & Jumps</div>
+          <div class="card-body">
+            <input type="number" name="skills_leaps_jumps" class="form-control"
+                   value="{{ sheet.skills_leaps_jumps }}" min="1" max="10" required>
+          </div>
+        </div>
+
+      {% else %}
+        <h4>Kick Skills</h4>
+
+        <div class="card mb-3">
+          <div class="card-header">Kick Technique</div>
+          <div class="card-body">
+            <input type="number" name="kicks_technique" class="form-control"
+                   value="{{ sheet.kicks_technique }}" min="1" max="10" required>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header">Kick Height</div>
+          <div class="card-body">
+            <input type="number" name="kicks_height" class="form-control"
+                   value="{{ sheet.kicks_height }}" min="1" max="10" required>
+          </div>
+        </div>
+
+      {% endif %}
+
+      <div class="card mb-3">
+        <div class="card-header">Comments (optional)</div>
+        <div class="card-body">
+          <textarea name="comments" class="form-control">{{ sheet.comments }}</textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-primary">Save Scores</button>
+    </form>
+
+    <hr>
+
+    <a href="{% url 'judging:judge_flag_issue' entry.id %}">
+      <button class="btn btn-warning btn-sm">Flag Issue</button>
+    </a>
+
+    {% with issues=entry.issues.all %}
+      {% if issues %}
+        <div class="alert alert-warning mt-3">
+          <strong>Issues you flagged:</strong>
+          <ul>
+            {% for issue in issues %}
+              {% if issue.issue_type == 'manual_judge' and not issue.resolved %}
+                <li>{{ issue.message }} ({{ issue.created_at|date:"H:i" }})</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h3>Current Totals</h3>
+    <ul>
+      <li>Subtotal: {{ sheet.subtotal }}</li>
+      <li>Deductions: {{ sheet.other_deduction }}</li>
+      <li><strong>Total Score: {{ sheet.total }}</strong></li>
+    </ul>
+
+  {% endfor %}
+{% else %}
+  <p>No entries found for this meet.</p>
+{% endif %}
+
+{% endblock %}
