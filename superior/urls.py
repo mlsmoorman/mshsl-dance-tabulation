@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import dashboard, review, dq_actions, remove_deduction
+from .views import dashboard, review, dq_actions
+from .views.remove_deduction import remove_deduction
 from .views.issues_dashboard import superior_issues_dashboard
 from .views.resolve_issues import resolve_issue
 

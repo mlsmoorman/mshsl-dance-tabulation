@@ -1,19 +1,26 @@
 <h2>Tabulator Dashboard</h2>
 
 {% for block in meet_data %}
-  <div class="card mb-4">
-    <div class="card-header bg-dark text-white">
-      <strong>{{ block.meet.name }}</strong> — {{ block.meet.date }}
-    </div>
+  <div class="card border-danger mb-4">
+      <div class="card-header bg-danger text-white">
+          <strong>Deductions Summary</strong>
+      </div>
 
-    <div class="card-body">
-      <p><strong>Entries:</strong> {{ block.entries.count }}</p>
-      <p><strong>Unresolved Issues:</strong> {{ block.unresolved_count }}</p>
+      <div class="card-body">
+          {% for entry_id, data in deduction_summary.items %}
+              <h5>{{ data.team }}</h5>
+              <span class="badge bg-danger mb-2">Total: -{{ data.total }} pts</span>
 
-      <a href="{% url 'meet_overview' block.meet.id %}" class="btn btn-primary">
-        Open Meet
-      </a>
-
-    </div>
+              <ul class="list-group mb-3">
+                  {% for item in data.items %}
+                      <li class="list-group-item d-flex justify-content-between">
+                          ❗ {{ item.label }}
+                          <span class="badge bg-danger">-{{ item.points }}</span>
+                      </li>
+                  {% endfor %}
+              </ul>
+          {% endfor %}
+      </div>
   </div>
+
 {% endfor %}

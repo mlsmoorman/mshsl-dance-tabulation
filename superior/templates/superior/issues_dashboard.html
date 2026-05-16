@@ -5,73 +5,58 @@
 <h3>{{ meet.name }}</h3>
 
 {% if issues %}
-    {% for issue in issues %}
-
-        {# Determine card border color #}
-        {% if issue.severity == "DEDUCTION" %}
-            {% set card_class = "border-danger" %}
-        {% elif issue.severity == "POTENTIAL_DEDUCTION" %}
-            {% set card_class = "border-warning" %}
-        {% else %}
-            {% set card_class = "border-secondary" %}
-        {% endif %}
-
-        <div class="card mb-3 {{ card_class }}">
-            <div class="card-header">
-                <strong>{{ issue.team_entry.team.name }}</strong>
-                — {{ issue.team_entry.get_division_display }}
+    {% for team_entry, team_issues in issues_by_team.items %}
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <strong>{{ team_entry.team.name }}</strong>
+                — {{ team_entry.get_division_display }}
             </div>
 
             <div class="card-body">
 
-                <!--  ICON + SEVERITY BADGE -->
-                {% if issue.severity == "DEDUCTION" %}
-                    <span class="badge bg-danger">❗ Deduction</span>
-                {% elif issue.severity == "POTENTIAL_DEDUCTION" %}
-                    <span class="badge bg-warning text-dark">⚠️ Warning</span>
-                {% else %}
-                    <span class="badge bg-secondary">ℹ️ Info</span>
-                {% endif %}
+                {% for issue in team_issues %}
+                    <div class="mb-3 p-2 border rounded">
 
-                <span class="badge bg-primary">{{ issue.issue_type }}</span>
+                        {% if issue.severity == "DEDUCTION" %}
+                            <span class="badge bg-danger">❗ Deduction</span>
+                        {% elif issue.severity == "POTENTIAL_DEDUCTION" %}
+                            <span class="badge bg-warning text-dark">⚠️ Warning</span>
+                        {% else %}
+                            <span class="badge bg-secondary">ℹ️ Info</span>
+                        {% endif %}
+
+                        <span class="badge bg-primary">{{ issue.issue_type }}</span>
+
+                        <p class="mt-2">
+                            <strong>Description:</strong> {{ issue.description }}<br>
+                            <strong>Flagged by:</strong> {{ issue.created_by }}<br>
+                            <strong>Time:</strong> {{ issue.created_at|date:"H:i" }}
+                        </p>
+
+                        <a href="{% url 'superior:resolve_issue' issue.id %}" class="btn btn-success btn-sm">
+                            Resolve Issue
+                        </a>
+                    </div>
+                {% endfor %}
 
                 <hr>
 
-                <p>
-                    <strong>Type:</strong> {{ issue.get_issue_type_display }}<br>
-                    <strong>Severity:</strong> {{ issue.get_severity_display }}<br>
-                    <strong>Description:</strong> {{ issue.description }}<br>
-                    <strong>Flagged by:</strong> {{ issue.created_by }}<br>
-                    <strong>Time:</strong> {{ issue.created_at|date:"H:i" }}
-                </p>
-
-                <!--  DEDUCTIONS FOR THIS TEAM ENTRY -->
+                <h6>Deductions</h6>
                 {% for d in deductions %}
-                    {% if d.team_entry.id == issue.team_entry.id %}
+                    {% if d.team_entry.id == team_entry.id %}
                         <div class="mt-2">
                             <span class="badge bg-danger">
-                                ❗ {{ d.deduction_type.label }}
-                                -{{ d.total_points }} pts
+                                ❗ {{ d.deduction_type.label }} -{{ d.total_points }} pts
                             </span>
-                            {% if d.notes %}
-                                <small class="text-muted">{{ d.notes }}</small>
-                            {% endif %}
-                            <!-- REMOVE BUTTON -->
-                            <a href="{% url 'superior:remove_deduction' d.id %}"
-                            class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('Remove this deduction?');">
-                                Remove
-                            </a>
+                            <small class="text-muted d-block">
+                                Applied by {{ d.applied_by }} at {{ d.applied_at|date:"H:i" }}
+                            </small>
                         </div>
                     {% endif %}
                 {% endfor %}
 
-                <a href="{% url 'superior:resolve_issue' issue.id %}" class="btn btn-success mt-3">
-                    Resolve Issue
-                </a>
-
             </div>
         </div>
-
     {% endfor %}
 {% else %}
     <p>No open issues.</p>

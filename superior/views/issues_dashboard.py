@@ -16,6 +16,12 @@ def superior_issues_dashboard(request, meet_id):
         "team_entry__performance_order",
         "-created_at"
     )
+    
+    # Group issues by team entry
+    issues_by_team = defaultdict(list)
+
+    for issue in issues:
+        issues_by_team[issue.team_entry].append(issue)
 
     # Prefetch deductions for all team entries in this meet
     deductions = RoutineDeduction.objects.filter(
@@ -42,6 +48,7 @@ def superior_issues_dashboard(request, meet_id):
         "issues": issues,
         "deductions": deductions,
         "deduction_summary": summary,
+        "issues_by_team": issues_by_team,
     })
     
     

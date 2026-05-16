@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
 from meets.models.entry import TeamEntry
 
 
@@ -23,6 +25,27 @@ class RoutineDeduction(models.Model):
     deduction_type = models.ForeignKey(DeductionType, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(default=1)
     notes = models.TextField(blank=True)
+
+    # IDS USER THAT APPLIES THE DEDUCTION WITH TIME STAMP
+    applied_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="deductions_applied"
+    )
+    applied_at = models.DateTimeField(default=timezone.now)
+
+    # IDS USER THAT REMOVES THE DEDUCTION WITH TIME STAMP
+    removed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="deductions_removed"
+    )
+    removed_at = models.DateTimeField(null=True, blank=True)
+
 
     def total_points(self):
         return self.count * self.deduction_type.points

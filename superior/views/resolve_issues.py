@@ -29,6 +29,7 @@ def resolve_issue(request, issue_id):
 				deduction_type=deduction_type,
 				count=1,
 				notes=f"Auto-applied from SJ resolution: {issue.description}",
+                applied_by=request.user,
 			)
             
 			# Recompute all judge sheets
