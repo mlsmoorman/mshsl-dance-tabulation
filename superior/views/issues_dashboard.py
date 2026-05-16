@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from superior.models import Issue, IssueStatus
 from meets.models import Meet
 from deductions.models import RoutineDeduction
-
+from collections import defaultdict
 
 def superior_issues_dashboard(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
@@ -22,8 +22,26 @@ def superior_issues_dashboard(request, meet_id):
         team_entry__meet=meet
     ).select_related("deduction_type", "team_entry")
 
+
+    # Build a summary: { team_entry_id: { "team": name, "total": X, "items": [...] } }
+    summary = defaultdict(lambda: {"team": None, "total": 0, "items": []})
+
+    for d in deductions:
+        entry = d.team_entry
+        summary[entry.id]["team"] = entry.team.name
+        summary[entry.id]["total"] += d.total_points()
+        summary[entry.id]["items"].append({
+            "label": d.deduction_type.label,
+            "points": d.total_points(),
+            "count": d.count,
+        })
+
+    
     return render(request, "superior/issues_dashboard.html", {
         "meet": meet,
         "issues": issues,
         "deductions": deductions,
+        "deduction_summary": summary,
     })
+    
+    
