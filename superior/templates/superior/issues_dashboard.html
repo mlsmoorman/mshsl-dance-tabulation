@@ -6,7 +6,17 @@
 
 {% if issues %}
     {% for issue in issues %}
-        <div class="card mb-3">
+
+        {# Determine card border color #}
+        {% if issue.severity == "DEDUCTION" %}
+            {% set card_class = "border-danger" %}
+        {% elif issue.severity == "POTENTIAL_DEDUCTION" %}
+            {% set card_class = "border-warning" %}
+        {% else %}
+            {% set card_class = "border-secondary" %}
+        {% endif %}
+
+        <div class="card mb-3 {{ card_class }}">
             <div class="card-header">
                 <strong>{{ issue.team_entry.team.name }}</strong>
                 — {{ issue.team_entry.get_division_display }}
@@ -14,7 +24,19 @@
 
             <div class="card-body">
 
-                <!-- Issue details -->
+                {# ICON + SEVERITY BADGE #}
+                {% if issue.severity == "DEDUCTION" %}
+                    <span class="badge bg-danger">❗ Deduction</span>
+                {% elif issue.severity == "POTENTIAL_DEDUCTION" %}
+                    <span class="badge bg-warning text-dark">⚠️ Warning</span>
+                {% else %}
+                    <span class="badge bg-secondary">ℹ️ Info</span>
+                {% endif %}
+
+                <span class="badge bg-primary">{{ issue.issue_type }}</span>
+
+                <hr>
+
                 <p>
                     <strong>Type:</strong> {{ issue.get_issue_type_display }}<br>
                     <strong>Severity:</strong> {{ issue.get_severity_display }}<br>
@@ -23,23 +45,12 @@
                     <strong>Time:</strong> {{ issue.created_at|date:"H:i" }}
                 </p>
 
-                <!-- Severity + IssueType badges -->
-                {% if issue.severity == "DEDUCTION" %}
-                    <span class="badge bg-danger">Deduction</span>
-                {% elif issue.severity == "POTENTIAL_DEDUCTION" %}
-                    <span class="badge bg-warning text-dark">Warning</span>
-                {% else %}
-                    <span class="badge bg-secondary">Info</span>
-                {% endif %}
-
-                <span class="badge bg-primary">{{ issue.issue_type }}</span>
-
-                <!-- Deductions for this team -->
+                {# DEDUCTIONS FOR THIS TEAM ENTRY #}
                 {% for d in deductions %}
                     {% if d.team_entry.id == issue.team_entry.id %}
                         <div class="mt-2">
                             <span class="badge bg-danger">
-                                {{ d.deduction_type.label }}
+                                ❗ {{ d.deduction_type.label }}
                                 -{{ d.total_points }} pts
                             </span>
                             {% if d.notes %}
@@ -49,13 +60,13 @@
                     {% endif %}
                 {% endfor %}
 
-                <!-- Resolve button -->
                 <a href="{% url 'superior:resolve_issue' issue.id %}" class="btn btn-success mt-3">
                     Resolve Issue
                 </a>
 
             </div>
         </div>
+
     {% endfor %}
 {% else %}
     <p>No open issues.</p>
