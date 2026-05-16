@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from core.models import User
 from meets.models.entry import TeamEntry
-from tabulation.models import DeductionType
+
 
 
 class IssueType(models.TextChoices):
@@ -14,22 +14,6 @@ class IssueType(models.TextChoices):
     KICK = "KICK", "Kick Count Violation"
     COMPETITOR = "COMPETITOR", "Competitor Count"
     OTHER = "OTHER", "Other"
-
-class RoutineDeduction(models.Model):
-    team_entry = models.ForeignKey(
-        TeamEntry,
-        on_delete=models.CASCADE,
-        related_name="routine_deductions"
-    )
-    deduction_type = models.ForeignKey(DeductionType, on_delete=models.CASCADE)
-    count = models.PositiveIntegerField(default=1)
-    notes = models.TextField(blank=True)
-
-    def total_points(self):
-        return self.count * self.deduction_type.points
-
-    def __str__(self):
-        return f"{self.deduction_type.label} x{self.count}"
 
 
 class IssueSeverity(models.TextChoices):

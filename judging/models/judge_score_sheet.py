@@ -68,17 +68,18 @@ class JudgeScoreSheet(models.Model):
 
         self.subtotal = sum(getattr(self, f) or 0 for f in fields)
 
+
     def compute_total(self):
         self.compute_subtotal()
-        self.total = self.subtotal - (
-            self.time_deduction + self.kick_deduction + self.other_deduction
-        )
+
+        # Sum all deductions for this routine
         deductions = sum(
             d.total_points() for d in self.team_entry.routine_deductions.all()
         )
 
         self.other_deduction = deductions
         self.total = self.subtotal - deductions
+
 
 
     def save(self, *args, **kwargs):
