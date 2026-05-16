@@ -13,6 +13,8 @@
             </div>
 
             <div class="card-body">
+
+                <!-- Issue details -->
                 <p>
                     <strong>Type:</strong> {{ issue.get_issue_type_display }}<br>
                     <strong>Severity:</strong> {{ issue.get_severity_display }}<br>
@@ -21,9 +23,37 @@
                     <strong>Time:</strong> {{ issue.created_at|date:"H:i" }}
                 </p>
 
-                <a href="{% url 'superior:resolve_issue' issue.id %}" class="btn btn-success">
+                <!-- Severity + IssueType badges -->
+                {% if issue.severity == "DEDUCTION" %}
+                    <span class="badge bg-danger">Deduction</span>
+                {% elif issue.severity == "POTENTIAL_DEDUCTION" %}
+                    <span class="badge bg-warning text-dark">Warning</span>
+                {% else %}
+                    <span class="badge bg-secondary">Info</span>
+                {% endif %}
+
+                <span class="badge bg-primary">{{ issue.issue_type }}</span>
+
+                <!-- Deductions for this team -->
+                {% for d in deductions %}
+                    {% if d.team_entry.id == issue.team_entry.id %}
+                        <div class="mt-2">
+                            <span class="badge bg-danger">
+                                {{ d.deduction_type.label }}
+                                -{{ d.total_points }} pts
+                            </span>
+                            {% if d.notes %}
+                                <small class="text-muted">{{ d.notes }}</small>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Resolve button -->
+                <a href="{% url 'superior:resolve_issue' issue.id %}" class="btn btn-success mt-3">
                     Resolve Issue
                 </a>
+
             </div>
         </div>
     {% endfor %}
