@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import DQEntry
-from .forms import DQEntryForm
+from ..models import DQEntry
+from ..forms import DQEntryForm
 from meets.models.entry import TeamEntry
 
 
