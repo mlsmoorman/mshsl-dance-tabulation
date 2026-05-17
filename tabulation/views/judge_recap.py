@@ -56,3 +56,8 @@ def judge_recap(request, meet_id, division):
         })
 
     return render(request, "tabulation/judge_recap.html", {
+        "meet": meet,
+        "division": division,
+        "judges": judges,
+        "rows": rows,
+    })
