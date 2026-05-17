@@ -28,3 +28,5 @@ def judge_recap(request, meet_id, division):
         "judges": judges,
         "rows": rows,
     })
+
+

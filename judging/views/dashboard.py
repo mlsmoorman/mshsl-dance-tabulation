@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseForbidden
 from judging.models import JudgeScoreSheet
 from meets.models import Meet, TeamEntry, Division
+from tabulation.models import MeetLock
 
 def judge_dashboard(request, meet_id):
     meet = get_object_or_404(Meet, id=meet_id)
     entries = meet.teamentry_set.filter(is_active=True)
-
+    
     # Build (entry, sheet) pairs
     entry_sheets = []
     for entry in entries:
@@ -34,6 +36,10 @@ def judge_dashboard(request, meet_id):
         entry_sheets.append((entry, sheet, judge_issues))
 
     # Handle POST
+    
+    if MeetLock.objects.filter(meet=entry.meet).exists():
+        return HttpResponseForbidden("Meet is locked.")
+
     if request.method == "POST":
         entry_id = request.POST.get("entry_id")
         entry = get_object_or_404(TeamEntry, id=entry_id)

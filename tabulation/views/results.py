@@ -10,3 +10,15 @@ def meet_results(request, meet_id):
         "meet": meet,
         "results": results,
     })
+
+def tabulation_results(request, meet_id):
+    meet = get_object_or_404(Meet, id=meet_id)
+
+    results = FinalResult.objects.filter(meet=meet).select_related(
+        "entry", "entry__team"
+    ).order_by("final_rank")
+
+    return render(request, "tabulation/results.html", {
+        "meet": meet,
+        "results": results,
+    })

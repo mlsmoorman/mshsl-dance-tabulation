@@ -1,11 +1,16 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponseForbidden
 from ..models import DQEntry
 from ..forms import DQEntryForm
 from meets.models.entry import TeamEntry
-
+from tabulation.models import MeetLock
 
 def create_dq(request, entry_id):
     team_entry = get_object_or_404(TeamEntry, id=entry_id)
+
+    if MeetLock.objects.filter(meet=team_entry.meet).exists():
+        return HttpResponseForbidden("Meet is locked.")
+
 
     if request.method == "POST":
         form = DQEntryForm(request.POST)

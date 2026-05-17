@@ -1,12 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from superior.models import Issue, IssueStatus
 from django.utils import timezone
+from superior.models import Issue, IssueStatus
+from django.http import HttpResponseForbidden
 from deductions.models import DeductionType, RoutineDeduction
-
+from tabulation.models import MeetLock
 
 def resolve_issue(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
     
+    if MeetLock.objects.filter(meet=issue.team_entry.meet).exists():
+        return HttpResponseForbidden("Meet is locked.")
+
+
 	# 1. Mark issue resolved
     if request.method == "POST":
         action = request.POST.get("action")

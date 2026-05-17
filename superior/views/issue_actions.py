@@ -1,11 +1,17 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponseForbidden
 from ..models import Issue
 from ..forms import IssueResolutionForm
+from tabulation.models import MeetLock
 
 
 def resolve_issue(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
     team_entry = issue.team_entry
+
+    if MeetLock.objects.filter(meet=team_entry.meet).exists():
+        return HttpResponseForbidden("Meet is locked.")
+
 
     if request.method == "POST":
         form = IssueResolutionForm(request.POST, instance=issue)

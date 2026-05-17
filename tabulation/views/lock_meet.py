@@ -33,4 +33,4 @@ def lock_meet(request, meet_id):
             final_total_score=result["total_score"],
         )
 
-    return redirect("meet_results", meet_id=meet.id)
+    return redirect("tabulation_results", meet_id=meet.id)
