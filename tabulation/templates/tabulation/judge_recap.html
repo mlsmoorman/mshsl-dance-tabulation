@@ -1,29 +1,51 @@
+{% load recap_extras %}
+
 <h1>Judge Recap – {{ meet.name }} – {{ division }}</h1>
 
-<table class="table table-bordered">
-  <thead>
+<table class="table table-bordered table-sm">
+  <thead class="table-light">
     <tr>
       <th>Place</th>
       <th>Team</th>
+
       {% for j in judges %}
+        <th>J{{ j }} Total</th>
         <th>J{{ j }} Rank</th>
       {% endfor %}
+
       <th>Total Rank Pts</th>
-      <th>Total Score</th>
+      <th>Final Score</th>
     </tr>
   </thead>
+
   <tbody>
     {% for row in rows %}
       <tr>
-        <td>{{ row.placement }}</td>
-        <td>{{ row.entry.team.school.name }} {{ row.entry.team.name }}</td>
+        <td><strong>{{ row.placement }}</strong></td>
+
+        <td>
+          {{ row.entry.team.school.name }}
+          {{ row.entry.team.name }}
+        </td>
+
         {% for j in judges %}
-          <td>{{ row.rank_points.j }}</td>  {# may need a get_item filter #}
+          <td>{{ row.judge_totals|get_item:j }}</td>
+          <td>{{ row.rank_points|get_item:j }}</td>
         {% endfor %}
-        <td>{{ row.total_rank_points }}</td>
-        <td>{{ row.total_score }}</td>
+
+        <td><strong>{{ row.total_rank_points }}</strong></td>
+        <td><strong>{{ row.total_score }}</strong></td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
+
+<style>
+  @media print {
+    h1 { margin-bottom: 20px; }
+    table { font-size: 12px; }
+    th, td { padding: 4px !important; }
+    .page-break { page-break-before: always; }
+  }
+</style>
 

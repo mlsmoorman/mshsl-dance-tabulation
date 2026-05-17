@@ -160,7 +160,8 @@ def compute_rank_recap(meet, division):
         rows.append({
             "entry": entry,
             "placement": item["placement"],
-            "rank_points": item["rank_points"],  # per judge
+            "rank_points": item["rank_points"], 
+            "judge_totals": item["judge_totals"],  
             "total_rank_points": sum(item["rank_points"].values()),
             "total_score": item["total_score"],
         })

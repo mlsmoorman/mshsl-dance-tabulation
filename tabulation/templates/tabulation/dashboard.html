@@ -24,6 +24,15 @@
       <div class="card-header bg-danger text-white">
           <strong>Deductions Summary</strong>
       </div>
+      <a href="{% url 'tabulation:judge_recap' meet.id 'Jazz' %}"
+        class="btn btn-secondary mb-2">
+          Jazz Judge Recap
+      </a>
+
+      <a href="{% url 'tabulation:judge_recap' meet.id 'Kick' %}"
+        class="btn btn-secondary mb-2">
+          Kick Judge Recap
+      </a>
 
       <div class="card-body">
           {% for entry_id, data in deduction_summary.items %}
