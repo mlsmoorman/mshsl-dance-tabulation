@@ -11,8 +11,19 @@ class Meet(models.Model):
     class_level = models.CharField(max_length=10, choices=ClassLevel.choices)
     num_finalists = models.IntegerField(default=6)
 
-    judges = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="judged_meets")
-    kcts = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="kct_meets")
+
+    judges = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through="meets.JudgeAssignment",
+        related_name="judged_meets"
+    )
+
+    kcts = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through="meets.KCTAssignment",
+        related_name="kct_meets"
+    )
+
 
 #    disqualified = models.BooleanField(default=False)
     dq_reason = models.TextField(blank=True, null=True)

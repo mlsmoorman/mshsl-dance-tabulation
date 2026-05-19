@@ -19,11 +19,13 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include("core.urls")),                 # Home Page
+    
     path("judge/", include("judging.urls")),        # Judge / Superior Judge UI
     path("kct/", include("kct.urls")),              # KCT UI
     path("tabulator/", include("tabulation.urls")), # Tabulation Dashboard
     path("accounts/", include("django.contrib.auth.urls")),
-    path("meets/", include("meets.urls")),          # Meets
+    path("meets/", include(("meets.urls", "meets"), namespace="meets")),  # Meets
     path("superior/", include("superior.urls")),    # Superior
+    
+    path('', include("core.urls")),                 # Home Page
 ]

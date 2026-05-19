@@ -1,40 +1,41 @@
 <h2>Tabulator Dashboard</h2>
 
 <!-- Lock the meet -->
-{% if not meet.meetlock_set.exists %}
-    <a href="{% url 'tabulation:lock_meet' meet.id %}"
-       class="btn btn-danger mb-3"
-       onclick="return confirm('Lock this meet? This will finalize all scores.');">
-        🔒 Lock Meet & Publish Results
-    </a>
-{% else %}
-    <div class="alert alert-info mb-3">
-        🔒 This meet is locked. Scores and deductions are final.
-    </div>
-
-    <a href="{% url 'tabulation_results' meet.id %}"
-       class="btn btn-primary mb-3">
-        📊 View Final Results
-    </a>
-{% endif %}
-
+{% for item in meet_data %}
+    {% with meet=item.meet %}
+        {% if not meet.meetlock_set.exists %}
+            <a href="{% url 'tabulation:lock_meet' meet.id %}"
+               class="btn btn-danger mb-3">
+               🔒 Lock {{ meet.name }}
+            </a>
+        {% else %}
+            <div class="alert alert-info mb-3">
+                🔒 {{ meet.name }} is locked.
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endfor %}
 
 {% for block in meet_data %}
-  <div class="card border-danger mb-4">
-      <div class="card-header bg-danger text-white">
-          <strong>Deductions Summary</strong>
-      </div>
-      <a href="{% url 'tabulation:judge_recap' meet.id 'Jazz' %}"
-        class="btn btn-secondary mb-2">
-          Jazz Judge Recap
-      </a>
+  {% with meet=block.meet %}
+    <div class="card border-danger mb-4">
+        <div class="card-header bg-danger text-white">
+            <strong>Deductions Summary</strong>
+        </div>
 
-      <a href="{% url 'tabulation:judge_recap' meet.id 'Kick' %}"
-        class="btn btn-secondary mb-2">
-          Kick Judge Recap
-      </a>
+        <a href="{% url 'tabulation:judge_recap' meet.id 'Jazz' %}"
+           class="btn btn-secondary mb-2">
+            Jazz Judge Recap
+        </a>
 
-      <div class="card-body">
+        <a href="{% url 'tabulation:judge_recap' meet.id 'Kick' %}"
+           class="btn btn-secondary mb-2">
+            Kick Judge Recap
+        </a>
+
+        <div class="card-body">
+
+        <div class="card-body">
           {% for entry_id, data in deduction_summary.items %}
               <h5>{{ data.team }}</h5>
               <span class="badge bg-danger mb-2">Total: -{{ data.total }} pts</span>
@@ -48,9 +49,9 @@
                   {% endfor %}
               </ul>
           {% endfor %}
-      </div>
-  </div>
-
+        </div>
+    </div>
+  {% endwith %}
 {% endfor %}
 
 

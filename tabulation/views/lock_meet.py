@@ -10,7 +10,7 @@ def lock_meet(request, meet_id):
 
     # Prevent double-locking
     if MeetLock.objects.filter(meet=meet).exists():
-        return redirect("meet_results", meet_id=meet.id)
+        return redirect("tabulation:final_results", meet_id=meet.id)
 
     # Create lock record
     MeetLock.objects.create(
@@ -33,4 +33,4 @@ def lock_meet(request, meet_id):
             final_total_score=result["total_score"],
         )
 
-    return redirect("tabulation_results", meet_id=meet.id)
+    return redirect("tabulation:final_results", meet_id=meet.id)

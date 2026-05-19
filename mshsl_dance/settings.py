@@ -47,6 +47,8 @@ INSTALLED_APPS = [
 ## SuperUser:  admin. Password: dance5678
 
 AUTH_USER_MODEL = 'core.User'
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

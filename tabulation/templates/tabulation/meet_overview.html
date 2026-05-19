@@ -12,6 +12,12 @@
 
 <hr>
 
+<a href="{% url 'tabulation:tabulator_verify' meet.id %}"
+   class="btn btn-warning">
+   Tabulator Verify
+</a>
+
+
 <h3>Divisions</h3>
 
 {% for division, data in divisions.items %}
@@ -77,16 +83,8 @@
           </tr>
         </thead>
 
-        <tbody id="division-{{ division }}">
-          {% for entry in data.entries %}
-            <tr data-entry-id="{{ entry.id }}">
-              <td>{{ entry.team.name }}</td>
-              <td>{{ entry.performance_order }}</td>
-              <td>
-                <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-              </td>
-
+          <tbody id="division-{{ division }}">
+            {% for entry in data.entries %}
               <tr data-entry-id="{{ entry.id }}"
                   class="
                     {% if entry.issue_count > 0 %}
@@ -99,6 +97,7 @@
                       {% endif %}
                     {% endif %}
                   ">
+
                 <td>
                   {{ entry.team.name }}
 
@@ -112,20 +111,30 @@
                 <td>{{ entry.performance_order }}</td>
 
                 <td>
-                  <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                  <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+
+                  {% if not locked %}
+                    <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <a href="{% url 'meets:delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                  {% endif %}
+
+                  <a href="{% url 'judging:view_score_sheets' entry.id %}"
+                    class="btn btn-sm btn-info ms-2">
+                    Score Sheets
+                  </a>
 
                   {% if entry.issue_count > 0 %}
                     <a href="/superior/entry/{{ entry.id }}/" class="btn btn-sm btn-warning ms-2">
                       Review Issues
                     </a>
                   {% endif %}
-                </td>
-              </tr>
 
-            </tr>
-          {% endfor %}
-        </tbody>
+                </td>
+
+              </tr>
+            {% endfor %}
+          </tbody>
+
+
       </table>
 
       <a href="/meets/add-entry/{{ meet.id }}/" class="btn btn-success">
@@ -161,7 +170,8 @@
 <a href="/kct/meet/{{ meet.id }}/" class="btn btn-outline-dark">KCT Dashboard</a>
 <a href="/judge/meet/{{ meet.id }}/" class="btn btn-outline-dark">Judging Dashboard</a>
 <a href="/superior/meet/{{ meet.id }}/" class="btn btn-outline-dark">Superior Judge</a>
-<a href="{% url 'view_score_sheets' entry.id %}" class="btn btn-sm btn-info ms-2">Score Sheets</a>
+Sheets</a>
+
 
 <!-- SORTABLEJS -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -179,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const entryIds = Array.from(tbody.querySelectorAll("tr"))
           .map(row => row.dataset.entryId);
 
-        fetch("{% url 'reorder_entries' %}", {
+        fetch("{% url 'tabulation:reorder_entries' %}", {
           method: "POST",
           headers: {
             "X-CSRFToken": "{{ csrf_token }}",
@@ -199,26 +209,19 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 {% if not meet.meetlock %}
-  <a href="{% url 'lock_meet' meet.id %}" class="btn btn-danger">
+  <a href="{% url 'tabulation:lock_meet' meet.id %}" class="btn btn-danger">
     Lock Meet & Generate Results
   </a>
 {% else %}
-  <a href="{% url 'meet_results' meet.id %}" class="btn btn-success">
+  <a href="{% url 'tabulation:final_results' meet.id %}" class="btn btn-success">
     View Final Results
   </a>
 {% endif %}
 
-{% if locked %}
-  <p class="text-danger">This meet is locked. No further changes allowed.</p>
-{% endif %}
 
-{% if not locked %}
-  <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-  <a href="{% url 'delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-{% endif %}
 
 {% if meet.meetlock %}
-  <a href="{% url 'public_results' meet.id %}" class="btn btn-primary">
+  <a href="{% url 'tabulation:public_results' meet.id %}" class="btn btn-primary">
     Public Results
   </a>
 {% endif %}

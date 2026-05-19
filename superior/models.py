@@ -99,7 +99,7 @@ class DQEntry(models.Model):
     team_entry = models.ForeignKey(
         TeamEntry,
         on_delete=models.CASCADE,
-        related_name="dq_entries",
+        related_name="dq_entry",
     )
     reported_by = models.ForeignKey(
         User,

@@ -12,7 +12,6 @@ class MeetAdmin(admin.ModelAdmin):
     list_display = ("name", "date", "site", "class_level")
     list_filter = ("class_level", "date")
     search_fields = ("name", "site")
-    filter_horizontal = ("judges", "kcts")
     inlines = [TeamEntryInline]
 
 

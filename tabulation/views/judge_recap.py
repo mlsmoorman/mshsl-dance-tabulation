@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from meets.models.meet import Meet
+from meets.models.assignments import JudgeAssignment
 from tabulation.models import FinalResult
 from judging.models import JudgeScoreSheet
 
@@ -16,6 +17,11 @@ def judge_recap(request, meet_id, division):
         entry__division=division
     ).select_related("entry", "entry__team").order_by("final_rank")
 
+    # Judge assignments (this is where judge_number lives)
+    assignments = JudgeAssignment.objects.filter(meet=meet).select_related("judge")
+    judge_map = {a.judge.id: a.judge_number for a in assignments}
+    judges = [a.judge_number for a in assignments]
+
     # All judge sheets for this division
     sheets = JudgeScoreSheet.objects.filter(
         team_entry__meet=meet,
@@ -24,21 +30,18 @@ def judge_recap(request, meet_id, division):
 
     # Group sheets by entry
     sheets_by_entry = {}
-    judges = set()
 
     for sheet in sheets:
         entry_id = sheet.team_entry.id
-        judges.add(sheet.judge.judge_number)  # assuming judge_number exists
+        judge_number = judge_map.get(sheet.judge_id)
 
         if entry_id not in sheets_by_entry:
             sheets_by_entry[entry_id] = {}
 
-        sheets_by_entry[entry_id][sheet.judge.judge_number] = {
+        sheets_by_entry[entry_id][judge_number] = {
             "total": sheet.total,
             "rank": sheet.rank,
         }
-
-    judges = sorted(judges)
 
     # Build rows for template
     rows = []

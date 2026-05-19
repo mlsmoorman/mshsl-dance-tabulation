@@ -43,5 +43,5 @@ def tabulator_dashboard(request):
 
 
     return render(request, "tabulation/dashboard.html", {
-        "meet_data": meet_data, "deduction_summary": summary,
+        "meet_data": meet_data, "deduction_summary": dict(summary),
     })
