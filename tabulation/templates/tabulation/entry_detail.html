@@ -1,25 +1,174 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{{ entry.team.name }} – {{ entry.routine_name }}</h2>
 
-<h3>Judge Sheets</h3>
-<ul>
-    {% for sheet in judge_sheets %}
-        <li>Judge {{ sheet.judge }} — Total: {{ sheet.total }} — Rank: {{ sheet.rank }}</li>
-    {% empty %}
-        <li>No judge sheets submitted</li>
-    {% endfor %}
-</ul>
+<h1>Routine Details</h1>
 
-<h3>KCT Entries</h3>
-<ul>
-    {% for k in kct_entries %}
-        <li>KCT {{ k.kct }} — Illegal: {{ k.illegal }}</li>
-    {% empty %}
-        <li>No KCT entries submitted</li>
-    {% endfor %}
-</ul>
+<div class="entry-header">
+    <h2>{{ entry.team.name }}</h2>
+    <h3 class="routine-name">{{ entry.routine_name }}</h3>
+</div>
 
-<a href="javascript:history.back()">Back</a>
+<div class="detail-grid">
+
+    <!-- ===================== JUDGE SHEETS ===================== -->
+    <div class="detail-card">
+        <h3>Judge Sheets</h3>
+
+        {% if judge_sheets %}
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Judge</th>
+                        <th>Total</th>
+                        <th>Rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sheet in judge_sheets %}
+                    <tr>
+                        <td>{{ sheet.judge }}</td>
+                        <td><span class="chip chip-score">{{ sheet.total }}</span></td>
+                        <td><span class="chip chip-rank">{{ sheet.rank }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty">No judge sheets submitted</p>
+        {% endif %}
+    </div>
+
+    <!-- ===================== KCT ENTRIES ===================== -->
+    <div class="detail-card">
+        <h3>KCT Entries</h3>
+
+        {% if kct_entries %}
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>KCT</th>
+                        <th>Illegal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for k in kct_entries %}
+                    <tr>
+                        <td>{{ k.kct }}</td>
+                        <td>
+                            {% if k.illegal %}
+                                <span class="chip chip-illegal">Yes</span>
+                            {% else %}
+                                <span class="chip chip-ok">No</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty">No KCT entries submitted</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<a href="javascript:history.back()" class="back-button">← Back to Verification</a>
+
+<style>
+/* ===== Layout ===== */
+.entry-header {
+    margin-bottom: 20px;
+}
+.entry-header h2 {
+    margin: 0;
+    font-size: 28px;
+}
+.routine-name {
+    margin: 0;
+    color: #555;
+    font-weight: normal;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* ===== Cards ===== */
+.detail-card {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+}
+.detail-card h3 {
+    margin-top: 0;
+}
+
+/* ===== Tables ===== */
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.detail-table th,
+.detail-table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: center;
+}
+.detail-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+}
+
+/* ===== Chips ===== */
+.chip {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.chip-score {
+    background: #e3f2fd;
+    color: #0d47a1;
+}
+.chip-rank {
+    background: #fff3cd;
+    color: #856404;
+}
+.chip-illegal {
+    background: #f8d7da;
+    color: #721c24;
+}
+.chip-ok {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* ===== Empty State ===== */
+.empty {
+    color: #777;
+    font-style: italic;
+}
+
+/* ===== Back Button ===== */
+.back-button {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 10px 16px;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.back-button:hover {
+    background: #0056b3;
+}
+</style>
+
 {% endblock %}
