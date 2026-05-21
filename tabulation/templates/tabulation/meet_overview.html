@@ -67,7 +67,10 @@
 <h2>Divisions</h2>
 
 {% for d in division_data %}
-<div class="division-card" onclick="window.location.href='{% url 'tabulator_verify' meet.id d.division %}'">
+<div class="division-card"
+     data-url="{% url 'tabulator_verify' meet.id d.division %}"
+     onclick="goToDivision(this)">
+
     <h2>
         {{ d.division }}
         {% if d.status == "success" %}
@@ -109,6 +112,10 @@
 setInterval(() => {
     location.reload();
 }, 15000);
+
+function goToDivision(el) {
+    window.location.href = el.getAttribute("data-url");
+}
 </script>
 
 {% endblock %}
