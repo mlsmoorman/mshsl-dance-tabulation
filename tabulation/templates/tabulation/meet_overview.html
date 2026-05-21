@@ -1,225 +1,114 @@
-{% load static %}
+{% extends "base.html" %}
+{% block content %}
+
+<h1>{{ meet.name }} — Meet Overview</h1>
 
 <style>
-.issue-high { background-color: #ffcccc !important; }
-.issue-medium { background-color: #ffe5cc !important; }
-.issue-low { background-color: #fff8cc !important; }
+    .summary-bar {
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .summary-success { background:#ccffcc; border:2px solid #060; }
+    .summary-warning { background:#fff3cd; border:2px solid #aa8800; }
+    .summary-danger { background:#ffe6e6; border:2px solid #900; }
+
+    .division-card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        background: #fafafa;
+        cursor: pointer;
+    }
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 12px;
+        color: white;
+    }
+    .badge-success { background:#28a745; }
+    .badge-warning { background:#ffc107; color:black; }
+    .badge-danger { background:#dc3545; }
+
+    .progress-bar-container {
+        width: 100%;
+        background: #eee;
+        border-radius: 4px;
+        margin: 5px 0;
+    }
+    .progress-bar {
+        height: 12px;
+        border-radius: 4px;
+    }
+    .progress-green { background:#28a745; }
+    .progress-yellow { background:#ffc107; }
+    .progress-red { background:#dc3545; }
 </style>
 
-<h2>{{ meet.name }} — Meet Overview</h2>
-<p><strong>Date:</strong> {{ meet.date }}</p>
-<p><strong>Site:</strong> {{ meet.site }}</p>
+{# ===================== MEET SUMMARY ===================== #}
+{% if meet_conflicts > 0 %}
+<div class="summary-bar summary-danger">
+    ⚠ Meet Issues — Conflicts: {{ meet_conflicts }}, Missing Judges: {{ meet_missing_judges }}, Missing KCTs: {{ meet_missing_kcts }}
+</div>
+{% elif meet_missing_judges > 0 or meet_missing_kcts > 0 %}
+<div class="summary-bar summary-warning">
+    ⚠ Meet Needs Attention — Missing Judges: {{ meet_missing_judges }}, Missing KCTs: {{ meet_missing_kcts }}
+</div>
+{% else %}
+<div class="summary-bar summary-success">
+    ✔ All Clear — All divisions complete
+</div>
+{% endif %}
 
-<hr>
+<h2>Divisions</h2>
 
-<a href="{% url 'tabulator_verify' meet.id division.name %}">Verify {{ division.name }}</a>
+{% for d in division_data %}
+<div class="division-card" onclick="window.location.href='{% url 'tabulator_verify' meet.id d.division %}'">
+    <h2>
+        {{ d.division }}
+        {% if d.status == "success" %}
+            <span class="badge badge-success">OK</span>
+        {% elif d.status == "warning" %}
+            <span class="badge badge-warning">Needs Attention</span>
+        {% else %}
+            <span class="badge badge-danger">Issues</span>
+        {% endif %}
+    </h2>
 
+    <p><strong>Entries:</strong> {{ d.entries }}</p>
 
-
-<h3>Divisions</h3>
-
-{% for division, data in divisions.items %}
-  <div class="card mb-4">
-    <div class="card-header bg-secondary text-white">
-      <strong>{{ division }}</strong>
+    <p><strong>Judge Sheets:</strong> {{ d.judge_progress }}%</p>
+    <div class="progress-bar-container">
+        <div class="progress-bar 
+            {% if d.judge_progress == 100 %}progress-green
+            {% elif d.judge_progress >= 60 %}progress-yellow
+            {% else %}progress-red{% endif %}"
+            style="width: {{ d.judge_progress }}%;">
+        </div>
     </div>
 
-    <div class="card-body">
-
-      <!-- SUMMARY CARDS -->
-      <div class="row mb-3">
-        <div class="col-md-4">
-          <div class="card text-center">
-            <div class="card-body">
-              <h5 class="card-title">Entries</h5>
-              <p class="card-text display-6">{{ data.entry_count }}</p>
-            </div>
-          </div>
+    <p><strong>KCT Entries:</strong> {{ d.kct_progress }}%</p>
+    <div class="progress-bar-container">
+        <div class="progress-bar 
+            {% if d.kct_progress == 100 %}progress-green
+            {% elif d.kct_progress >= 60 %}progress-yellow
+            {% else %}progress-red{% endif %}"
+            style="width: {{ d.kct_progress }}%;">
         </div>
-
-        <div class="col-md-4">
-          <div class="card text-center {% if data.issue_count > 0 %}border-danger{% endif %}">
-            <div class="card-body">
-              <h5 class="card-title">Unresolved Issues</h5>
-              <p class="card-text display-6">{{ data.issue_count }}</p>
-                <span class="badge 
-                  {% if issue.severity == 'HIGH' %}bg-danger
-                  {% elif issue.severity == 'MEDIUM' %}bg-warning
-                  {% else %}bg-secondary
-                  {% endif %}
-                ">
-                  {{ issue.severity }}
-                </span>
-              <div class="card text-center {% if data.issue_count > 0 %}border-danger{% endif %}">
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card text-center">
-            <div class="card-body">
-              <h5 class="card-title">Avg Score</h5>
-              <p class="card-text display-6">
-                {% if data.avg_score %}
-                  {{ data.avg_score }}
-                {% else %}
-                  —
-                {% endif %}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ENTRY TABLE -->
-      <table class="table table-bordered table-striped">
-        <thead>
-          <tr>
-            <th>Team</th>
-            <th>Performance Order</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-          <tbody id="division-{{ division }}">
-            {% for entry in data.entries %}
-              <tr data-entry-id="{{ entry.id }}"
-                  class="
-                    {% if entry.issue_count > 0 %}
-                      {% if entry.issue_count > 3 %}
-                        issue-high
-                      {% elif entry.issue_count > 1 %}
-                        issue-medium
-                      {% else %}
-                        issue-low
-                      {% endif %}
-                    {% endif %}
-                  ">
-
-                <td>
-                  {{ entry.team.name }}
-
-                  {% if entry.issue_count > 0 %}
-                    <span class="badge bg-danger ms-2">
-                      {{ entry.issue_count }} issue{{ entry.issue_count|pluralize }}
-                    </span>
-                  {% endif %}
-                </td>
-
-                <td>{{ entry.performance_order }}</td>
-
-                <td>
-
-                  {% if not locked %}
-                    <a href="?edit={{ entry.id }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    <a href="{% url 'meets:delete_entry' entry.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-                  {% endif %}
-
-                  <a href="{% url 'judging:view_score_sheets' entry.id %}"
-                    class="btn btn-sm btn-info ms-2">
-                    Score Sheets
-                  </a>
-
-                  {% if entry.issue_count > 0 %}
-                    <a href="/superior/entry/{{ entry.id }}/" class="btn btn-sm btn-warning ms-2">
-                      Review Issues
-                    </a>
-                  {% endif %}
-
-                </td>
-
-              </tr>
-            {% endfor %}
-          </tbody>
-
-
-      </table>
-
-      <a href="/meets/add-entry/{{ meet.id }}/" class="btn btn-success">
-        + Add Entry
-      </a>
-
     </div>
-  </div>
+
+    <p><strong>Conflicts:</strong> {{ d.conflicts }}</p>
+</div>
 {% endfor %}
 
-<hr>
-
-<h3>Unresolved Issues</h3>
-
-{% if issues %}
-  <ul class="list-group">
-    {% for issue in issues %}
-      <li class="list-group-item">
-        <strong>{{ issue.issue_type }}</strong> — {{ issue.description }}
-        <br>
-        <em>Team:</em> {{ issue.team_entry.team.name }}
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No unresolved issues.</p>
-{% endif %}
-
-<hr>
-
-<h3>Actions</h3>
-
-<a href="/kct/meet/{{ meet.id }}/" class="btn btn-outline-dark">KCT Dashboard</a>
-<a href="/judge/meet/{{ meet.id }}/" class="btn btn-outline-dark">Judging Dashboard</a>
-<a href="/superior/meet/{{ meet.id }}/" class="btn btn-outline-dark">Superior Judge</a>
-Sheets</a>
-
-
-<!-- SORTABLEJS -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  document.querySelectorAll("tbody[id^='division-']").forEach(function (tbody) {
-
-    new Sortable(tbody, {
-      animation: 150,
-      handle: "tr",
-
-      onEnd: function () {
-        const entryIds = Array.from(tbody.querySelectorAll("tr"))
-          .map(row => row.dataset.entryId);
-
-        fetch("{% url 'tabulation:reorder_entries' %}", {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            "entry_ids[]": entryIds
-          })
-        });
-      }
-    });
-
-  });
-
-  
-});
+setInterval(() => {
+    location.reload();
+}, 15000);
 </script>
 
-{% if not meet.meetlock %}
-  <a href="{% url 'tabulation:lock_meet' meet.id %}" class="btn btn-danger">
-    Lock Meet & Generate Results
-  </a>
-{% else %}
-  <a href="{% url 'tabulation:final_results' meet.id %}" class="btn btn-success">
-    View Final Results
-  </a>
-{% endif %}
-
-
-
-{% if meet.meetlock %}
-  <a href="{% url 'tabulation:public_results' meet.id %}" class="btn btn-primary">
-    Public Results
-  </a>
-{% endif %}
+{% endblock %}
