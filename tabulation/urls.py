@@ -1,4 +1,5 @@
 from django.urls import path
+from .views.home_dashboard import tabulator_home
 from .views.dashboard import tabulator_dashboard
 from .views.verify import tabulator_verify
 from .views.meet_overview import meet_overview
@@ -14,7 +15,8 @@ from .views.meet_overview import meet_overview
 app_name = "tabulation"
 
 urlpatterns = [
-    path("", tabulator_dashboard, name="dashboard"),
+    path("", tabulator_home, name="home"), 
+    path("meet/<int:meet_id>/", tabulator_dashboard, name="tabulator_dashboard"),  
     path("verify/<int:meet_id>/<str:division>/", tabulator_verify, name="tabulator_verify"),
     path("meet/<int:meet_id>/", meet_overview, name="meet_overview"),
     path("meet/<int:meet_id>/lock/", lock_meet, name="lock_meet"),

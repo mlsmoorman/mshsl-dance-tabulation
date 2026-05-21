@@ -3,7 +3,7 @@ from .views.home_dashboard import kct_home
 from .views.division_selector import kct_division_selector
 from .views.dashboard import kct_dashboard
 from .views.entry import kct_entry
-from .views import save_kct
+from .views.save_kct import save_kct
 from .views.dangerous_move import report_dangerous_move
 
 
