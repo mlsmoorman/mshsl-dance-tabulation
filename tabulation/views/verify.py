@@ -1,20 +1,18 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from meets.models.meet import Meet
-from meets.models.entry import TeamEntry
-from kct.models import KCTEntry
 from meets.models.assignments import JudgeAssignment, KCTAssignment
-from judging.models.judge_score_sheet import JudgeScoreSheet
+from meets.models import TeamEntry
+from judging.models import JudgeScoreSheet
+from kct.models import KCTEntry
 
 
 @login_required
 def tabulator_verify(request, meet_id, division):
     meet = get_object_or_404(Meet, id=meet_id)
-    ...
 
-    division = request.GET.get("division")  # or pass it as a URL parameter
-
+    # --- Judge assignments ---
     judge_assignments = (
         JudgeAssignment.objects
         .filter(meet=meet)
@@ -22,6 +20,10 @@ def tabulator_verify(request, meet_id, division):
         .order_by("judge_number")
     )
 
+    judge_map = {a.judge_id: a.judge_number for a in judge_assignments}
+    judge_numbers = [a.judge_number for a in judge_assignments]
+
+    # --- KCT assignments ---
     kct_assignments = (
         KCTAssignment.objects
         .filter(meet=meet)
@@ -29,12 +31,10 @@ def tabulator_verify(request, meet_id, division):
         .order_by("kct_number")
     )
 
-    judge_map = {a.judge_id: a.judge_number for a in judge_assignments}
     kct_map = {a.kct_id: a.kct_number for a in kct_assignments}
-
-    judge_numbers = [a.judge_number for a in judge_assignments]
     kct_numbers = [a.kct_number for a in kct_assignments]
 
+    # --- Entries in this division ---
     entries = (
         TeamEntry.objects
         .filter(meet=meet, division=division)
@@ -42,12 +42,12 @@ def tabulator_verify(request, meet_id, division):
         .order_by("performance_order")
     )
 
+    # --- Judge sheets ---
     sheets = (
         JudgeScoreSheet.objects
         .filter(team_entry__meet=meet, team_entry__division=division)
         .select_related("judge", "team_entry")
     )
-
 
     sheets_by_entry = {}
 
@@ -55,12 +55,15 @@ def tabulator_verify(request, meet_id, division):
         entry_id = sheet.team_entry_id
         judge_number = judge_map.get(sheet.judge_id)
 
+        if judge_number is None:
+            continue  # judge not assigned to this meet
+
         if entry_id not in sheets_by_entry:
             sheets_by_entry[entry_id] = {}
 
         sheets_by_entry[entry_id][judge_number] = sheet
 
-    # Load all KCT entries and group them
+    # --- KCT entries ---
     kct_entries = (
         KCTEntry.objects
         .filter(team_entry__meet=meet, team_entry__division=division)
@@ -73,12 +76,15 @@ def tabulator_verify(request, meet_id, division):
         entry_id = ke.team_entry_id
         kct_number = kct_map.get(ke.kct_id)
 
+        if kct_number is None:
+            continue  # KCT not assigned to this meet
+
         if entry_id not in kct_by_entry:
             kct_by_entry[entry_id] = {}
 
         kct_by_entry[entry_id][kct_number] = ke
 
-    # Build verification rows
+    # --- Build verification rows ---
     rows = []
 
     for entry in entries:
@@ -90,7 +96,7 @@ def tabulator_verify(request, meet_id, division):
         missing_judges = [j for j in judge_numbers if j not in judge_data]
         missing_kcts = [k for k in kct_numbers if k not in kct_data]
 
-        # KCT conflict detection
+        # Detect KCT conflicts (e.g., illegal mismatch)
         kct_conflicts = False
         if len(kct_numbers) >= 2:
             k1 = kct_data.get(1)
@@ -107,7 +113,6 @@ def tabulator_verify(request, meet_id, division):
             "missing_kcts": missing_kcts,
             "kct_conflicts": kct_conflicts,
         })
-
 
     return render(request, "tabulation/verify.html", {
         "meet": meet,
