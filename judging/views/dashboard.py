@@ -37,7 +37,7 @@ def judge_dashboard(request, meet_id):
 
     # Handle POST
     
-    if MeetLock.objects.filter(meet=entry.meet).exists():
+    if MeetLock.objects.filter(meet=meet).exists():
         return HttpResponseForbidden("Meet is locked.")
 
     if request.method == "POST":

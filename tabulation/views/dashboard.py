@@ -1,17 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from meets.models.meet import Meet
 from meets.models.entry import TeamEntry
 from superior.models import Issue
 from deductions.models import RoutineDeduction
 from collections import defaultdict
 
-def tabulator_dashboard(request):
-    meets = Meet.objects.all().order_by("-date")
+def tabulator_dashboard(request, meet_id):
+    meet = get_object_or_404(Meet, id=meet_id)
 
+    meets = Meet.objects.all().order_by("-date")
     meet_data = []
 
-    for meet in meets:
-        entries = TeamEntry.objects.filter(meet=meet)
+    for m in meets:
+        entries = TeamEntry.objects.filter(meet=m)
 
         unresolved_issues = Issue.objects.filter(
             team_entry__in=entries,
@@ -19,7 +20,7 @@ def tabulator_dashboard(request):
         )
 
         meet_data.append({
-            "meet": meet,
+            "meet": m,
             "entries": entries,
             "unresolved_count": unresolved_issues.count(),
         })
@@ -41,7 +42,8 @@ def tabulator_dashboard(request):
             "count": d.count,
         })
 
-
     return render(request, "tabulation/dashboard.html", {
-        "meet_data": meet_data, "deduction_summary": dict(summary),
+        "meet_data": meet_data,
+        "deduction_summary": dict(summary),
+        "meet": meet,
     })

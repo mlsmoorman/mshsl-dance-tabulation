@@ -4,78 +4,176 @@
 
 <h1>Tabulator Dashboard — {{ meet.name }}</h1>
 
-<!-- Lock Meet -->
-{% if not meet.meetlock_set.exists %}
-    <a href="{% url 'tabulation:lock_meet' meet.id %}"
-       class="btn btn-danger mb-3">
-       🔒 Lock {{ meet.name }}
-    </a>
-{% else %}
-    <div class="alert alert-info mb-3">
-        🔒 {{ meet.name }} is locked.
-    </div>
-{% endif %}
+<!-- ===================== LOCK MEET ===================== -->
+<div class="lock-section">
+    {% if not meet.meetlock_set.exists %}
+        <a href="{% url 'tabulation:lock_meet' meet.id %}"
+           class="btn-lock">
+            🔒 Lock {{ meet.name }}
+        </a>
+    {% else %}
+        <div class="locked-banner">
+            🔒 {{ meet.name }} is locked.
+        </div>
+    {% endif %}
+</div>
 
-<!-- Judge Recap Buttons -->
-<div class="recap-buttons mb-4">
-    <a href="{% url 'tabulation:judge_recap' meet.id 'Jazz' %}"
-       class="btn btn-secondary me-2">
-        Jazz Judge Recap
+<!-- ===================== JUDGE RECAP BUTTONS ===================== -->
+<div class="recap-grid">
+    <a href="{% url 'tabulation:judge_recap' meet.id 'Jazz' %}" class="recap-card">
+        <h3>Jazz Judge Recap</h3>
     </a>
 
-    <a href="{% url 'tabulation:judge_recap' meet.id 'Kick' %}"
-       class="btn btn-secondary">
-        Kick Judge Recap
+    <a href="{% url 'tabulation:judge_recap' meet.id 'Kick' %}" class="recap-card">
+        <h3>Kick Judge Recap</h3>
     </a>
 </div>
 
-<!-- Deductions Summary -->
-<div class="card border-danger mb-4">
-    <div class="card-header bg-danger text-white">
-        <strong>Deductions Summary</strong>
-    </div>
+<!-- ===================== DEDUCTIONS SUMMARY ===================== -->
+<div class="deductions-card">
+    <h2>Deductions Summary</h2>
 
-    <div class="card-body">
+    {% if deduction_summary %}
+        {% for entry_id, data in deduction_summary.items %}
+            <div class="deduction-block">
 
-        {% if deduction_summary %}
-            {% for entry_id, data in deduction_summary.items %}
-                <div class="deduction-block mb-4">
-
-                    <h5 class="mb-1">{{ data.team }}</h5>
-                    <span class="badge bg-danger mb-2">
-                        Total: -{{ data.total }} pts
-                    </span>
-
-                    <ul class="list-group">
-                        {% for item in data.items %}
-                            <li class="list-group-item d-flex justify-content-between">
-                                ❗ {{ item.label }}
-                                <span class="badge bg-danger">-{{ item.points }}</span>
-                            </li>
-                        {% endfor %}
-                    </ul>
-
+                <div class="team-header">
+                    <h3>{{ data.team }}</h3>
+                    <span class="chip chip-total">-{{ data.total }} pts</span>
                 </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No deductions recorded.</p>
-        {% endif %}
 
-    </div>
+                <ul class="deduction-list">
+                    {% for item in data.items %}
+                        <li class="deduction-item">
+                            <span>❗ {{ item.label }}</span>
+                            <span class="chip chip-item">-{{ item.points }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty">No deductions recorded.</p>
+    {% endif %}
 </div>
 
 <style>
-.recap-buttons a {
-    min-width: 180px;
+/* ===== Layout ===== */
+.lock-section {
+    margin-bottom: 20px;
 }
 
+/* ===== Lock Button / Banner ===== */
+.btn-lock {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #dc3545;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+}
+.btn-lock:hover {
+    background: #b02a37;
+}
+
+.locked-banner {
+    padding: 12px 20px;
+    background: #e2e3e5;
+    color: #383d41;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+/* ===== Recap Buttons ===== */
+.recap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.recap-card {
+    display: block;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #000;
+    transition: box-shadow .2s ease, transform .2s ease;
+}
+.recap-card:hover {
+    box-shadow: 0 0 12px rgba(0,0,0,.15);
+    transform: translateY(-3px);
+}
+.recap-card h3 {
+    margin: 0;
+    text-align: center;
+}
+
+/* ===== Deductions Card ===== */
+.deductions-card {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 25px;
+}
+.deductions-card h2 {
+    margin-top: 0;
+}
+
+/* ===== Deduction Blocks ===== */
 .deduction-block {
+    padding: 15px 0;
     border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
 }
-
 .deduction-block:last-child {
     border-bottom: none;
+}
+
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.team-header h3 {
+    margin: 0;
+}
+
+/* ===== Chips ===== */
+.chip {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.chip-total {
+    background: #f8d7da;
+    color: #721c24;
+}
+.chip-item {
+    background: #f5c6cb;
+    color: #721c24;
+}
+
+/* ===== Deduction List ===== */
+.deduction-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 10px;
+}
+.deduction-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+/* ===== Empty State ===== */
+.empty {
+    color: #777;
+    font-style: italic;
 }
 </style>
 
