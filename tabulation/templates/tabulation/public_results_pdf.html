@@ -2,23 +2,99 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <title>{{ meet.name }} — Official Results</title>
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    h1 { text-align: center; margin-bottom: 5px; }
-    h2 { margin-top: 40px; background: #eee; padding: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 8px; }
-    th { background: #f0f0f0; }
-    .rank { font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      color: #222;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+      font-size: 32px;
+    }
+
+    .meet-info {
+      text-align: center;
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      margin-top: 40px;
+      background: #f1f3f5;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 22px;
+      border: 1px solid #ddd;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 16px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #f8f9fa;
+      font-weight: bold;
+    }
+
+    .team-name {
+      text-align: left;
+      font-weight: 600;
+    }
+
+    /* ===== Chips ===== */
+    .chip {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 14px;
+      display: inline-block;
+    }
+    .chip-rank {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+    .chip-score {
+      background: #d4edda;
+      color: #155724;
+    }
+    .chip-rankpoints {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    /* ===== Print Styles ===== */
+    @media print {
+      body { margin: 20px; }
+      h1 { margin-bottom: 10px; }
+      table { font-size: 13px; }
+      th, td { padding: 6px !important; }
+      .chip { padding: 2px 6px; font-size: 11px; }
+    }
   </style>
 </head>
 
 <body>
 
 <h1>{{ meet.name }} — Official Results</h1>
-<p style="text-align:center;">
+
+<div class="meet-info">
   {{ meet.date }} — {{ meet.site }}
-</p>
+</div>
 
 {% for division, results in divisions.items %}
   <h2>{{ division }}</h2>
@@ -36,10 +112,15 @@
     <tbody>
       {% for r in results %}
         <tr>
-          <td class="rank">{{ r.final_rank }}</td>
-          <td>{{ r.entry.team.name }}</td>
-          <td>{{ r.final_total_score }}</td>
-          <td>{{ r.final_rank_points }}</td>
+          <td><span class="chip chip-rank">{{ r.final_rank }}</span></td>
+
+          <td class="team-name">
+            {{ r.entry.team.school.name }} {{ r.entry.team.name }}
+          </td>
+
+          <td><span class="chip chip-score">{{ r.final_total_score }}</span></td>
+
+          <td><span class="chip chip-rankpoints">{{ r.final_rank_points }}</span></td>
         </tr>
       {% endfor %}
     </tbody>
