@@ -45,6 +45,13 @@
         text-align: left;
         font-weight: bold;
     }
+    tr:hover {
+        background: #f7f7f7;
+        cursor: pointer;
+    }
+    .hidden-row {
+        display: none;
+    }
 </style>
 
 {# ===================== SUMMARY BAR ===================== #}
@@ -82,6 +89,11 @@
             style="padding:8px 14px; background:#0099ff; border:1px solid #0066aa; cursor:pointer; font-weight:bold; color:white;">
         Export Issues CSV
     </button>
+
+    <button onclick="toggleIssues()"
+            style="padding:8px 14px; background:#666; border:1px solid #333; cursor:pointer; font-weight:bold; color:white;">
+        Show Only Issues
+    </button>
 </div>
 
 {# ===================== MAIN TABLE ===================== #}
@@ -111,12 +123,12 @@
             data-routine="{{ row.entry.routine_name }}"
             data-missing-judges="{{ row.missing_judges|join:', ' }}"
             data-missing-kcts="{{ row.missing_kcts|join:', ' }}"
-            data-conflict="{{ row.kct_conflicts }}">
+            data-conflict="{{ row.kct_conflicts }}"
+            onclick="openRoutine('{{ row.entry.id }}')">
 
             <td class="entry-name">{{ row.entry.team.name }}</td>
             <td>{{ row.entry.routine_name }}</td>
 
-            {# --- Judge Sheets --- #}
             {% for j in judge_numbers %}
                 {% if row.judge_sheets.j %}
                     <td class="ok">✓</td>
@@ -125,7 +137,6 @@
                 {% endif %}
             {% endfor %}
 
-            {# --- KCT Entries --- #}
             {% for k in kct_numbers %}
                 {% if row.kct_entries.k %}
                     <td class="ok">✓</td>
@@ -134,7 +145,6 @@
                 {% endif %}
             {% endfor %}
 
-            {# --- Conflict Column --- #}
             {% if row.kct_conflicts %}
                 <td class="conflict">KCT Mismatch</td>
             {% else %}
@@ -176,6 +186,19 @@ function exportCSV() {
     a.href = url;
     a.download = "verify_report.csv";
     a.click();
+}
+
+function toggleIssues() {
+    const rows = document.querySelectorAll("tr[data-entry-row='true']");
+    rows.forEach(row => {
+        if (row.getAttribute("data-has-issue") === "false") {
+            row.classList.toggle("hidden-row");
+        }
+    });
+}
+
+function openRoutine(entryId) {
+    window.location.href = "/tabulation/entry/" + entryId + "/";
 }
 </script>
 
