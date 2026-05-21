@@ -13,7 +13,7 @@ app_name = "tabulation"
 
 urlpatterns = [
     path("", tabulator_dashboard, name="dashboard"),
-    path("meet/<int:meet_id>/verify/", tabulator_verify, name="tabulator_verify"),
+    path("verify/<int:meet_id>/<str:division>/", tabulator_verify, name="tabulator_verify"),
     path("meet/<int:meet_id>/", meet_overview, name="meet_overview"),
     path("meet/<int:meet_id>/lock/", lock_meet, name="lock_meet"),
     path("meet/<int:meet_id>/results/", meet_results, name="final_results"),

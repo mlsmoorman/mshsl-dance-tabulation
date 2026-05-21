@@ -12,10 +12,8 @@
 
 <hr>
 
-<a href="{% url 'tabulation:tabulator_verify' meet.id %}"
-   class="btn btn-warning">
-   Tabulator Verify
-</a>
+<a href="{% url 'tabulator_verify' meet.id division.name %}">Verify {{ division.name }}</a>
+
 
 
 <h3>Divisions</h3>
