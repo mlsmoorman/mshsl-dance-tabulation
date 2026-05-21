@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ entry.team.name }} – {{ entry.routine_name }}</h2>
+
+<h3>Judge Sheets</h3>
+<ul>
+    {% for sheet in judge_sheets %}
+        <li>Judge {{ sheet.judge }} — Total: {{ sheet.total }} — Rank: {{ sheet.rank }}</li>
+    {% empty %}
+        <li>No judge sheets submitted</li>
+    {% endfor %}
+</ul>
+
+<h3>KCT Entries</h3>
+<ul>
+    {% for k in kct_entries %}
+        <li>KCT {{ k.kct }} — Illegal: {{ k.illegal }}</li>
+    {% empty %}
+        <li>No KCT entries submitted</li>
+    {% endfor %}
+</ul>
+
+<a href="javascript:history.back()">Back</a>
+{% endblock %}
