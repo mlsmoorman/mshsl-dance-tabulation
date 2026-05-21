@@ -1,0 +1,12 @@
+<h1>{{ meet.name }}</h1>
+<h2>Select Division</h2>
+
+<ul>
+    {% for division in divisions %}
+        <li>
+            <a href="{% url 'kct:kct_dashboard' meet.id division %}">
+                {{ division }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>

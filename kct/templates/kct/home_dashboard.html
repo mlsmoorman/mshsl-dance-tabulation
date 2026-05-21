@@ -1,0 +1,12 @@
+<h1>KCT Dashboard</h1>
+<h2>Select Your Meet</h2>
+
+<ul>
+    {% for meet in meets %}
+        <li>
+            <a href="{% url 'kct:division_selector' meet.id %}">
+                {{ meet.name }} — {{ meet.date }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>

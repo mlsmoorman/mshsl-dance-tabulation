@@ -1,0 +1,12 @@
+<h1>Judge Dashboard</h1>
+<h2>Select Your Meet</h2>
+
+<ul>
+    {% for meet in meets %}
+        <li>
+            <a href="{% url 'judging:judge_dashboard' meet.id %}">
+                {{ meet.name }} — {{ meet.date }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
