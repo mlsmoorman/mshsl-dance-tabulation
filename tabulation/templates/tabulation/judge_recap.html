@@ -1,51 +1,114 @@
+{% extends "base.html" %}
 {% load recap_extras %}
 
-<h1>Judge Recap – {{ meet.name }} – {{ division }}</h1>
+{% block content %}
 
-<table class="table table-bordered table-sm">
-  <thead class="table-light">
-    <tr>
-      <th>Place</th>
-      <th>Team</th>
+<h1>Judge Recap — {{ meet.name }} ({{ division }})</h1>
 
-      {% for j in judges %}
-        <th>J{{ j }} Total</th>
-        <th>J{{ j }} Rank</th>
-      {% endfor %}
+<div class="recap-container">
 
-      <th>Total Rank Pts</th>
-      <th>Final Score</th>
-    </tr>
-  </thead>
+    <table class="recap-table">
+        <thead>
+            <tr>
+                <th>Place</th>
+                <th>Team</th>
 
-  <tbody>
-    {% for row in rows %}
-      <tr>
-        <td><strong>{{ row.placement }}</strong></td>
+                {% for j in judges %}
+                    <th>J{{ j }} Total</th>
+                    <th>J{{ j }} Rank</th>
+                {% endfor %}
 
-        <td>
-          {{ row.entry.team.school.name }}
-          {{ row.entry.team.name }}
-        </td>
+                <th>Total Rank Pts</th>
+                <th>Final Score</th>
+            </tr>
+        </thead>
 
-        {% for j in judges %}
-          <td>{{ row.judge_totals|get_item:j }}</td>
-          <td>{{ row.rank_points|get_item:j }}</td>
-        {% endfor %}
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td><span class="chip chip-place">{{ row.placement }}</span></td>
 
-        <td><strong>{{ row.total_rank_points }}</strong></td>
-        <td><strong>{{ row.total_score }}</strong></td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+                <td class="team-name">
+                    {{ row.entry.team.school.name }} {{ row.entry.team.name }}
+                </td>
+
+                {% for j in judges %}
+                    <td><span class="chip chip-total">{{ row.judge_totals|get_item:j }}</span></td>
+                    <td><span class="chip chip-rank">{{ row.rank_points|get_item:j }}</span></td>
+                {% endfor %}
+
+                <td><span class="chip chip-rank-total">{{ row.total_rank_points }}</span></td>
+                <td><span class="chip chip-final">{{ row.total_score }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
 
 <style>
-  @media print {
+/* ===== Layout ===== */
+.recap-container {
+    margin-top: 20px;
+}
+
+/* ===== Table ===== */
+.recap-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+.recap-table th,
+.recap-table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: center;
+}
+.recap-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+}
+.team-name {
+    text-align: left;
+    font-weight: 600;
+}
+
+/* ===== Chips ===== */
+.chip {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-block;
+}
+.chip-place {
+    background: #e3f2fd;
+    color: #0d47a1;
+}
+.chip-total {
+    background: #fff3cd;
+    color: #856404;
+}
+.chip-rank {
+    background: #e2e3e5;
+    color: #383d41;
+}
+.chip-rank-total {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+.chip-final {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* ===== Print Styles ===== */
+@media print {
     h1 { margin-bottom: 20px; }
     table { font-size: 12px; }
     th, td { padding: 4px !important; }
-    .page-break { page-break-before: always; }
-  }
+    .chip { padding: 2px 6px; font-size: 11px; }
+}
 </style>
 
+{% endblock %}
