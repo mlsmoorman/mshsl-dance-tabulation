@@ -2,166 +2,217 @@
 {% load static %}
 
 {% block content %}
-<h1>Verify – {{ meet.name }} ({{ division }})</h1>
+
+<h1>Verify — {{ meet.name }} ({{ division }})</h1>
 
 <style>
-    table.verify-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        font-size: 15px;
-    }
-    table.verify-table th,
-    table.verify-table td {
-        border: 1px solid #ccc;
-        padding: 6px 8px;
-        text-align: center;
-    }
-    table.verify-table th {
-        background: #f0f0f0;
-        font-weight: bold;
-    }
-    thead th {
-        position: sticky;
-        top: 0;
-        background: #f0f0f0;
-        z-index: 5;
-    }
-    .missing {
-        background: #ffcccc;
-        color: #900;
-        font-weight: bold;
-    }
-    .ok {
-        background: #ccffcc;
-        color: #060;
-    }
-    .conflict {
-        background: #ffe680;
-        color: #a60;
-        font-weight: bold;
-    }
-    .entry-name {
-        text-align: left;
-        font-weight: bold;
-    }
-    tr:hover {
-        background: #f7f7f7;
-        cursor: pointer;
-    }
-    .hidden-row {
-        display: none;
-    }
+/* ===== Layout ===== */
+.verify-container {
+    margin-top: 20px;
+}
+
+/* ===== Summary Bar ===== */
+.summary-bar {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.summary-success {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #155724;
+}
+
+.summary-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #721c24;
+}
+
+/* ===== Legend ===== */
+.legend {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+.legend span {
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+}
+
+/* ===== Buttons ===== */
+.verify-actions {
+    margin-bottom: 15px;
+}
+.verify-actions button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.btn-jump { background: #ffcc00; border: 1px solid #aa8800; }
+.btn-export { background: #0099ff; border: 1px solid #0066aa; color: white; }
+.btn-toggle { background: #666; border: 1px solid #333; color: white; }
+
+/* ===== Table ===== */
+.verify-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 15px;
+}
+.verify-table th,
+.verify-table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: center;
+}
+.verify-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+}
+.verify-table tr:hover {
+    background: #f1f1f1;
+    cursor: pointer;
+}
+
+/* Sticky header */
+.verify-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+/* ===== Status Colors ===== */
+.ok {
+    background: #d4edda;
+    color: #155724;
+    font-weight: bold;
+}
+.missing {
+    background: #f8d7da;
+    color: #721c24;
+    font-weight: bold;
+}
+.conflict {
+    background: #fff3cd;
+    color: #856404;
+    font-weight: bold;
+}
+
+/* Hide rows */
+.hidden-row {
+    display: none;
+}
+
+/* Entry name left aligned */
+.entry-name {
+    text-align: left;
+    font-weight: bold;
+}
 </style>
 
-{# ===================== SUMMARY BAR ===================== #}
-{% if all_clear %}
-<div style="background:#ccffcc; padding:15px; border:2px solid #060; margin-bottom:20px; font-size:18px; font-weight:bold; text-align:center;">
-    ✔ All Clear — All judges and KCTs have submitted their sheets
-</div>
-{% else %}
-<div style="background:#ffe6e6; padding:15px; border:2px solid #900; margin-bottom:20px; font-size:18px; font-weight:bold;">
-    <div>⚠ Verification Issues Detected</div>
-    <ul style="margin-top:10px; font-size:16px;">
-        <li>Missing Judge Sheets: <strong>{{ total_missing_judges }}</strong></li>
-        <li>Missing KCT Entries: <strong>{{ total_missing_kcts }}</strong></li>
-        <li>KCT Conflicts: <strong>{{ total_conflicts }}</strong></li>
-    </ul>
-</div>
-{% endif %}
+<div class="verify-container">
 
-{# ===================== LEGEND ===================== #}
-<div style="margin-bottom: 15px; font-size: 14px;">
-    <strong>Legend:</strong>
-    <span style="background:#ccffcc; padding:3px 6px; border:1px solid #060;">OK</span>
-    <span style="background:#ffcccc; padding:3px 6px; border:1px solid #900;">Missing</span>
-    <span style="background:#ffe680; padding:3px 6px; border:1px solid #a60;">KCT Conflict</span>
-</div>
+    <!-- ===== Summary Bar ===== -->
+    {% if all_clear %}
+        <div class="summary-bar summary-success">
+            ✔ All Clear — All judges and KCTs have submitted their sheets
+        </div>
+    {% else %}
+        <div class="summary-bar summary-danger">
+            ⚠ Verification Issues Detected
+            <ul style="margin-top:10px; font-size:16px;">
+                <li>Missing Judge Sheets: <strong>{{ total_missing_judges }}</strong></li>
+                <li>Missing KCT Entries: <strong>{{ total_missing_kcts }}</strong></li>
+                <li>KCT Conflicts: <strong>{{ total_conflicts }}</strong></li>
+            </ul>
+        </div>
+    {% endif %}
 
-{# ===================== ACTION BUTTONS ===================== #}
-<div style="margin-bottom: 15px;">
-    <button onclick="jumpToFirstIssue()"
-            style="padding:8px 14px; background:#ffcc00; border:1px solid #aa8800; cursor:pointer; font-weight:bold;">
-        Jump to First Issue
-    </button>
+    <!-- ===== Legend ===== -->
+    <div class="legend">
+        <strong>Legend:</strong>
+        <span class="ok">OK</span>
+        <span class="missing">Missing</span>
+        <span class="conflict">KCT Conflict</span>
+    </div>
 
-    <button onclick="exportCSV()"
-            style="padding:8px 14px; background:#0099ff; border:1px solid #0066aa; cursor:pointer; font-weight:bold; color:white;">
-        Export Issues CSV
-    </button>
+    <!-- ===== Action Buttons ===== -->
+    <div class="verify-actions">
+        <button class="btn-jump" onclick="jumpToFirstIssue()">Jump to First Issue</button>
+        <button class="btn-export" onclick="exportCSV()">Export Issues CSV</button>
+        <button class="btn-toggle" onclick="toggleIssues()">Show Only Issues</button>
+    </div>
 
-    <button onclick="toggleIssues()"
-            style="padding:8px 14px; background:#666; border:1px solid #333; cursor:pointer; font-weight:bold; color:white;">
-        Show Only Issues
-    </button>
-</div>
+    <!-- ===== Main Table ===== -->
+    <table class="verify-table">
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Routine</th>
 
-{# ===================== MAIN TABLE ===================== #}
-<table class="verify-table">
-    <thead>
-        <tr>
-            <th>Team</th>
-            <th>Routine</th>
+                {% for j in judge_numbers %}
+                    <th>Judge {{ j }}</th>
+                {% endfor %}
 
-            {% for j in judge_numbers %}
-                <th>Judge {{ j }}</th>
+                {% for k in kct_numbers %}
+                    <th>KCT {{ k }}</th>
+                {% endfor %}
+
+                <th>Conflicts</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in rows %}
+            <tr data-entry-row="true"
+                data-has-issue="{% if row.missing_judges or row.missing_kcts or row.kct_conflicts %}true{% else %}false{% endif %}"
+                data-team="{{ row.entry.team.name }}"
+                data-routine="{{ row.entry.routine_name }}"
+                data-missing-judges="{{ row.missing_judges|join:', ' }}"
+                data-missing-kcts="{{ row.missing_kcts|join:', ' }}"
+                data-conflict="{{ row.kct_conflicts }}"
+                onclick="openRoutine('{{ row.entry.id }}')">
+
+                <td class="entry-name">{{ row.entry.team.name }}</td>
+                <td>{{ row.entry.routine_name }}</td>
+
+                {% for j in judge_numbers %}
+                    {% if j in row.judge_sheets %}
+                        <td class="ok">✓</td>
+                    {% else %}
+                        <td class="missing" title="Judge {{ j }} has not submitted a sheet">Missing</td>
+                    {% endif %}
+                {% endfor %}
+
+                {% for k in kct_numbers %}
+                    {% if k in row.kct_entries %}
+                        <td class="ok">✓</td>
+                    {% else %}
+                        <td class="missing" title="KCT {{ k }} has not submitted an entry">Missing</td>
+                    {% endif %}
+                {% endfor %}
+
+                {% if row.kct_conflicts %}
+                    <td class="conflict" title="KCTs disagree on illegal skills">KCT Mismatch</td>
+                {% else %}
+                    <td class="ok">OK</td>
+                {% endif %}
+
+            </tr>
             {% endfor %}
+        </tbody>
+    </table>
 
-            {% for k in kct_numbers %}
-                <th>KCT {{ k }}</th>
-            {% endfor %}
+</div>
 
-            <th>Conflicts</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for row in rows %}
-        <tr data-entry-row="true"
-            data-has-issue="{% if row.missing_judges or row.missing_kcts or row.kct_conflicts %}true{% else %}false{% endif %}"
-            data-team="{{ row.entry.team.name }}"
-            data-routine="{{ row.entry.routine_name }}"
-            data-missing-judges="{{ row.missing_judges|join:', ' }}"
-            data-missing-kcts="{{ row.missing_kcts|join:', ' }}"
-            data-conflict="{{ row.kct_conflicts }}"
-            onclick="openRoutine('{{ row.entry.id }}')">
-
-            <td class="entry-name">{{ row.entry.team.name }}</td>
-            <td>{{ row.entry.routine_name }}</td>
-           
-            {# ===================== ISSUES W/ ADDED DESCRIPTION ON HOVER ===================== #}
-            {% for j in judge_numbers %}
-
-              {# ===================== JUDGE ENTRIES MISSING ===================== #}
-              {% if row.judge_sheets.j %}
-                  <td class="ok">✓</td>
-              {% else %}
-                  <td class="missing" title="Judge {{ j }} has not submitted a sheet">Missing</td>
-              {% endif %}
-            {% endfor %}
-
-            {# ===================== KCT ENTRIES MISSING ===================== #}
-            {% for k in kct_numbers %}
-              {% if row.kct_entries.kct_number == k %}
-                  <td class="ok">✓</td>
-              {% else %}
-                  <td class="missing" title="KCT {{ k }} has not submitted an entry">Missing</td>
-              {% endif %}
-            {% endfor %}
-
-            {# ===================== KCT ISSUES MISMATCH ===================== #}
-            {% if row.kct_conflicts %}
-                <td class="conflict" title="KCTs disagree on illegal skills">KCT Mismatch</td>
-            {% else %}
-                <td class="ok">OK</td>
-            {% endif %}
-
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-{# ===================== JAVASCRIPT ===================== #}
+<!-- ===== JavaScript (unchanged) ===== -->
 <script>
 function jumpToFirstIssue() {
     const rows = document.querySelectorAll("tr[data-has-issue='true']");
@@ -212,18 +263,10 @@ setInterval(() => {
 }, 10000);
 
 document.addEventListener("keydown", function(e) {
-    if (e.key === "j") {
-        jumpToFirstIssue();
-    }
-    if (e.key === "c") {
-        exportCSV();
-    }
-    if (e.key === "i") {
-        toggleIssues();
-    }
+    if (e.key === "j") jumpToFirstIssue();
+    if (e.key === "c") exportCSV();
+    if (e.key === "i") toggleIssues();
 });
-
-
 </script>
 
 {% endblock %}

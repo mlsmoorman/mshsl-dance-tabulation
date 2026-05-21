@@ -1,57 +1,82 @@
-<h2>Tabulator Dashboard</h2>
+{% extends "base.html" %}
 
-<!-- Lock the meet -->
-{% for item in meet_data %}
-    {% with meet=item.meet %}
-        {% if not meet.meetlock_set.exists %}
-            <a href="{% url 'tabulation:lock_meet' meet.id %}"
-               class="btn btn-danger mb-3">
-               🔒 Lock {{ meet.name }}
-            </a>
-        {% else %}
-            <div class="alert alert-info mb-3">
-                🔒 {{ meet.name }} is locked.
-            </div>
-        {% endif %}
-    {% endwith %}
-{% endfor %}
+{% block content %}
 
-{% for block in meet_data %}
-  {% with meet=block.meet %}
-    <div class="card border-danger mb-4">
-        <div class="card-header bg-danger text-white">
-            <strong>Deductions Summary</strong>
-        </div>
+<h1>Tabulator Dashboard — {{ meet.name }}</h1>
 
-        <a href="{% url 'tabulation:judge_recap' meet.id 'Jazz' %}"
-           class="btn btn-secondary mb-2">
-            Jazz Judge Recap
-        </a>
-
-        <a href="{% url 'tabulation:judge_recap' meet.id 'Kick' %}"
-           class="btn btn-secondary mb-2">
-            Kick Judge Recap
-        </a>
-
-        <div class="card-body">
-
-        <div class="card-body">
-          {% for entry_id, data in deduction_summary.items %}
-              <h5>{{ data.team }}</h5>
-              <span class="badge bg-danger mb-2">Total: -{{ data.total }} pts</span>
-
-              <ul class="list-group mb-3">
-                  {% for item in data.items %}
-                      <li class="list-group-item d-flex justify-content-between">
-                          ❗ {{ item.label }}
-                          <span class="badge bg-danger">-{{ item.points }}</span>
-                      </li>
-                  {% endfor %}
-              </ul>
-          {% endfor %}
-        </div>
+<!-- Lock Meet -->
+{% if not meet.meetlock_set.exists %}
+    <a href="{% url 'tabulation:lock_meet' meet.id %}"
+       class="btn btn-danger mb-3">
+       🔒 Lock {{ meet.name }}
+    </a>
+{% else %}
+    <div class="alert alert-info mb-3">
+        🔒 {{ meet.name }} is locked.
     </div>
-  {% endwith %}
-{% endfor %}
+{% endif %}
 
+<!-- Judge Recap Buttons -->
+<div class="recap-buttons mb-4">
+    <a href="{% url 'tabulation:judge_recap' meet.id 'Jazz' %}"
+       class="btn btn-secondary me-2">
+        Jazz Judge Recap
+    </a>
 
+    <a href="{% url 'tabulation:judge_recap' meet.id 'Kick' %}"
+       class="btn btn-secondary">
+        Kick Judge Recap
+    </a>
+</div>
+
+<!-- Deductions Summary -->
+<div class="card border-danger mb-4">
+    <div class="card-header bg-danger text-white">
+        <strong>Deductions Summary</strong>
+    </div>
+
+    <div class="card-body">
+
+        {% if deduction_summary %}
+            {% for entry_id, data in deduction_summary.items %}
+                <div class="deduction-block mb-4">
+
+                    <h5 class="mb-1">{{ data.team }}</h5>
+                    <span class="badge bg-danger mb-2">
+                        Total: -{{ data.total }} pts
+                    </span>
+
+                    <ul class="list-group">
+                        {% for item in data.items %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                ❗ {{ item.label }}
+                                <span class="badge bg-danger">-{{ item.points }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No deductions recorded.</p>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.recap-buttons a {
+    min-width: 180px;
+}
+
+.deduction-block {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.deduction-block:last-child {
+    border-bottom: none;
+}
+</style>
+
+{% endblock %}
