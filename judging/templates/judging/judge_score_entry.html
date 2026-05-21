@@ -1,187 +1,272 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Judge Scoring – {{ meet.name }}</h1>
+<h1>Judge Scoring — {{ meet.name }}</h1>
 
 {% if entry_sheets %}
   {% for entry, sheet, judge_issues in entry_sheets %}
 
-    <hr>
-    <h2>{{ entry.team.name }} — {{ entry.get_division_display }}</h2>
+  <div class="routine-header">
+      <h2>{{ entry.team.name }}</h2>
+      <h3 class="division">{{ entry.get_division_display }}</h3>
+  </div>
 
-    <form method="POST">
+  <form method="POST" class="score-form">
       {% csrf_token %}
       <input type="hidden" name="entry_id" value="{{ entry.id }}">
 
-      <h4>Choreography</h4>
+      <!-- ===================== CHOREOGRAPHY ===================== -->
+      <div class="section">
+          <h3>Choreography</h3>
 
-      <div class="card mb-3">
-        <div class="card-header">Creativity</div>
-        <div class="card-body">
-          <input type="number" name="choreo_creativity" class="form-control"
-                 value="{{ sheet.choreo_creativity }}" min="1" max="10" required>
-        </div>
+          <div class="score-grid">
+              <div class="score-card">
+                  <label>Creativity</label>
+                  <input type="number" name="choreo_creativity"
+                         value="{{ sheet.choreo_creativity }}" min="1" max="10" required>
+              </div>
+
+              <div class="score-card">
+                  <label>Visual Effectiveness</label>
+                  <input type="number" name="choreo_visual_effect"
+                         value="{{ sheet.choreo_visual_effect }}" min="1" max="10" required>
+              </div>
+          </div>
       </div>
 
-      <div class="card mb-3">
-        <div class="card-header">Visual Effectiveness</div>
-        <div class="card-body">
-          <input type="number" name="choreo_visual_effect" class="form-control"
-                 value="{{ sheet.choreo_visual_effect }}" min="1" max="10" required>
-        </div>
+      <!-- ===================== DIFFICULTY ===================== -->
+      <div class="section">
+          <h3>Difficulty</h3>
+
+          <div class="score-grid">
+              <div class="score-card">
+                  <label>Routine Difficulty</label>
+                  <input type="number" name="diff_routine"
+                         value="{{ sheet.diff_routine }}" min="1" max="10" required>
+              </div>
+
+              <div class="score-card">
+                  <label>Formations & Transitions</label>
+                  <input type="number" name="diff_formations"
+                         value="{{ sheet.diff_formations }}" min="1" max="10" required>
+              </div>
+
+              <div class="score-card">
+                  <label>Skills / Kicks Difficulty</label>
+                  <input type="number" name="diff_skills_or_kicks"
+                         value="{{ sheet.diff_skills_or_kicks }}" min="1" max="10" required>
+              </div>
+          </div>
       </div>
 
-      <h4>Difficulty</h4>
+      <!-- ===================== EXECUTION ===================== -->
+      <div class="section">
+          <h3>Execution</h3>
 
-      <div class="card mb-3">
-        <div class="card-header">Routine Difficulty</div>
-        <div class="card-body">
-          <input type="number" name="diff_routine" class="form-control"
-                 value="{{ sheet.diff_routine }}" min="1" max="10" required>
-        </div>
+          <div class="score-grid">
+              <div class="score-card">
+                  <label>Placement & Control</label>
+                  <input type="number" name="exec_placement_control"
+                         value="{{ sheet.exec_placement_control }}" min="1" max="10" required>
+              </div>
+
+              <div class="score-card">
+                  <label>Accuracy</label>
+                  <input type="number" name="exec_accuracy"
+                         value="{{ sheet.exec_accuracy }}" min="1" max="10" required>
+              </div>
+          </div>
       </div>
 
-      <div class="card mb-3">
-        <div class="card-header">Formations & Transitions</div>
-        <div class="card-body">
-          <input type="number" name="diff_formations" class="form-control"
-                 value="{{ sheet.diff_formations }}" min="1" max="10" required>
-        </div>
+      <!-- ===================== ROUTINE EFFECTIVENESS ===================== -->
+      <div class="section">
+          <h3>Routine Effectiveness</h3>
+
+          <div class="score-grid">
+              <div class="score-card">
+                  <label>Overall Effectiveness</label>
+                  <input type="number" name="routine_effectiveness"
+                         value="{{ sheet.routine_effectiveness }}" min="1" max="10" required>
+              </div>
+          </div>
       </div>
 
-      <div class="card mb-3">
-        <div class="card-header">Skills / Kicks Difficulty</div>
-        <div class="card-body">
-          <input type="number" name="diff_skills_or_kicks" class="form-control"
-                 value="{{ sheet.diff_skills_or_kicks }}" min="1" max="10" required>
-        </div>
-      </div>
-
-      <h4>Execution</h4>
-
-      <div class="card mb-3">
-        <div class="card-header">Placement & Control</div>
-        <div class="card-body">
-          <input type="number" name="exec_placement_control" class="form-control"
-                 value="{{ sheet.exec_placement_control }}" min="1" max="10" required>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-header">Accuracy</div>
-        <div class="card-body">
-          <input type="number" name="exec_accuracy" class="form-control"
-                 value="{{ sheet.exec_accuracy }}" min="1" max="10" required>
-        </div>
-      </div>
-
-      <h4>Routine Effectiveness</h4>
-
-      <div class="card mb-3">
-        <div class="card-header">Overall Effectiveness</div>
-        <div class="card-body">
-          <input type="number" name="routine_effectiveness" class="form-control"
-                 value="{{ sheet.routine_effectiveness }}" min="1" max="10" required>
-        </div>
-      </div>
-
+      <!-- ===================== DIVISION-SPECIFIC ===================== -->
       {% if entry.division == "JAZZ" %}
-        <h4>Jazz Skills</h4>
+      <div class="section">
+          <h3>Jazz Skills</h3>
 
-        <div class="card mb-3">
-          <div class="card-header">Turns</div>
-          <div class="card-body">
-            <input type="number" name="skills_turns" class="form-control"
-                   value="{{ sheet.skills_turns }}" min="1" max="10" required>
-          </div>
-        </div>
+          <div class="score-grid">
+              <div class="score-card">
+                  <label>Turns</label>
+                  <input type="number" name="skills_turns"
+                         value="{{ sheet.skills_turns }}" min="1" max="10" required>
+              </div>
 
-        <div class="card mb-3">
-          <div class="card-header">Leaps & Jumps</div>
-          <div class="card-body">
-            <input type="number" name="skills_leaps_jumps" class="form-control"
-                   value="{{ sheet.skills_leaps_jumps }}" min="1" max="10" required>
+              <div class="score-card">
+                  <label>Leaps & Jumps</label>
+                  <input type="number" name="skills_leaps_jumps"
+                         value="{{ sheet.skills_leaps_jumps }}" min="1" max="10" required>
+              </div>
           </div>
-        </div>
+      </div>
 
       {% else %}
-        <h4>Kick Skills</h4>
+      <div class="section">
+          <h3>Kick Skills</h3>
 
-        <div class="card mb-3">
-          <div class="card-header">Kick Technique</div>
-          <div class="card-body">
-            <input type="number" name="kicks_technique" class="form-control"
-                   value="{{ sheet.kicks_technique }}" min="1" max="10" required>
+          <div class="score-grid">
+              <div class="score-card">
+                  <label>Kick Technique</label>
+                  <input type="number" name="kicks_technique"
+                         value="{{ sheet.kicks_technique }}" min="1" max="10" required>
+              </div>
+
+              <div class="score-card">
+                  <label>Kick Height</label>
+                  <input type="number" name="kicks_height"
+                         value="{{ sheet.kicks_height }}" min="1" max="10" required>
+              </div>
           </div>
-        </div>
-
-        <div class="card mb-3">
-          <div class="card-header">Kick Height</div>
-          <div class="card-body">
-            <input type="number" name="kicks_height" class="form-control"
-                   value="{{ sheet.kicks_height }}" min="1" max="10" required>
-          </div>
-        </div>
-
+      </div>
       {% endif %}
 
-      <div class="card mb-3">
-        <div class="card-header">Comments (optional)</div>
-        <div class="card-body">
-          <textarea name="comments" class="form-control">{{ sheet.comments }}</textarea>
-        </div>
+      <!-- ===================== COMMENTS ===================== -->
+      <div class="section">
+          <h3>Comments (optional)</h3>
+          <textarea name="comments" class="comments-box">{{ sheet.comments }}</textarea>
       </div>
 
-      <button class="btn btn-primary">Save Scores</button>
-    </form>
+      <!-- ===================== TOTALS ===================== -->
+      <div class="totals-box">
+          <p>Subtotal: <strong>{{ sheet.subtotal }}</strong></p>
+          <p>Deductions: <strong>{{ sheet.other_deduction }}</strong></p>
+          <p>Total Score: <strong>{{ sheet.total }}</strong></p>
+      </div>
 
-    <hr>
+      <button class="save-button">Save Scores</button>
+  </form>
 
+  <!-- ===================== ISSUES ===================== -->
   {% if judge_issues %}
-      <div class="alert alert-warning mt-3">
+      <div class="issues-box">
           <strong>Issues you flagged:</strong>
           <ul>
               {% for issue in judge_issues %}
                   <li>
                       <strong>{{ issue.get_issue_type_display }}</strong>
                       — {{ issue.description }}
-                      <small class="text-muted">({{ issue.created_at|date:"H:i" }})</small>
+                      <small class="timestamp">({{ issue.created_at|date:"H:i" }})</small>
                   </li>
               {% endfor %}
           </ul>
       </div>
   {% endif %}
 
+  <a href="{% url 'judging:judge_flag_issue' entry.id %}" class="flag-button">
+      Flag Issue
+  </a>
 
-    <a href="{% url 'judging:judge_flag_issue' entry.id %}">
-      <button class="btn btn-warning btn-sm">Flag Issue</button>
-    </a>
-
-    {% with issues=entry.issues.all %}
-      {% if issues %}
-        <div class="alert alert-warning mt-3">
-          <strong>Issues you flagged:</strong>
-          <ul>
-            {% for issue in issues %}
-              {% if issue.issue_type == 'manual_judge' and not issue.resolved %}
-                <li>{{ issue.message }} ({{ issue.created_at|date:"H:i" }})</li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-    {% endwith %}
-
-    <h3>Current Totals</h3>
-    <ul>
-      <li>Subtotal: {{ sheet.subtotal }}</li>
-      <li>Deductions: {{ sheet.other_deduction }}</li>
-      <li><strong>Total Score: {{ sheet.total }}</strong></li>
-    </ul>
+  <hr>
 
   {% endfor %}
 {% else %}
   <p>No entries found for this meet.</p>
 {% endif %}
+
+<style>
+/* ===== Routine Header ===== */
+.routine-header {
+    margin-top: 30px;
+}
+.routine-header h2 {
+    margin: 0;
+    font-size: 28px;
+}
+.division {
+    margin: 0;
+    color: #555;
+    font-weight: normal;
+}
+
+/* ===== Sections ===== */
+.section {
+    margin-top: 25px;
+}
+.section h3 {
+    margin-bottom: 10px;
+}
+
+/* ===== Score Grid ===== */
+.score-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+.score-card {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+}
+.score-card label {
+    font-weight: bold;
+}
+.score-card input {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px;
+}
+
+/* ===== Comments ===== */
+.comments-box {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+}
+
+/* ===== Totals ===== */
+.totals-box {
+    margin-top: 20px;
+    background: #eef7ff;
+    border: 1px solid #bcd4f6;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* ===== Buttons ===== */
+.save-button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+}
+.flag-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 14px;
+    background: #ffc107;
+    color: black;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* ===== Issues ===== */
+.issues-box {
+    margin-top: 20px;
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 15px;
+    border-radius: 8px;
+}
+.timestamp {
+    color: #666;
+    font-size: 12px;
+}
+</style>
 
 {% endblock %}
