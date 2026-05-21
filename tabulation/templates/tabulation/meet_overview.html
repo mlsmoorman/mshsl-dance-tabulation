@@ -1,121 +1,142 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
 
-<h1>{{ meet.name }} — Meet Overview</h1>
+<h1>Meet Overview — {{ meet.name }}</h1>
 
-<style>
-    .summary-bar {
-        padding: 15px;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-    .summary-success { background:#ccffcc; border:2px solid #060; }
-    .summary-warning { background:#fff3cd; border:2px solid #aa8800; }
-    .summary-danger { background:#ffe6e6; border:2px solid #900; }
+<div class="summary-container">
 
-    .division-card {
-        border: 1px solid #ccc;
-        padding: 15px;
-        margin-bottom: 15px;
-        border-radius: 6px;
-        background: #fafafa;
-        cursor: pointer;
-    }
-    .badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-weight: bold;
-        font-size: 12px;
-        color: white;
-    }
-    .badge-success { background:#28a745; }
-    .badge-warning { background:#ffc107; color:black; }
-    .badge-danger { background:#dc3545; }
+    {% if meet_missing_judges or meet_missing_kcts or meet_conflicts %}
+        <div class="summary-bar summary-danger">
+            ⚠ Issues Found —
+            {{ meet_missing_judges }} missing judge sheets,
+            {{ meet_missing_kcts }} missing KCT entries,
+            {{ meet_conflicts }} conflicts
+        </div>
+    {% else %}
+        <div class="summary-bar summary-success">
+            ✔ All Clear — All divisions complete
+        </div>
+    {% endif %}
 
-    .progress-bar-container {
-        width: 100%;
-        background: #eee;
-        border-radius: 4px;
-        margin: 5px 0;
-    }
-    .progress-bar {
-        height: 12px;
-        border-radius: 4px;
-    }
-    .progress-green { background:#28a745; }
-    .progress-yellow { background:#ffc107; }
-    .progress-red { background:#dc3545; }
-</style>
-
-{# ===================== MEET SUMMARY ===================== #}
-{% if meet_conflicts > 0 %}
-<div class="summary-bar summary-danger">
-    ⚠ Meet Issues — Conflicts: {{ meet_conflicts }}, Missing Judges: {{ meet_missing_judges }}, Missing KCTs: {{ meet_missing_kcts }}
 </div>
-{% elif meet_missing_judges > 0 or meet_missing_kcts > 0 %}
-<div class="summary-bar summary-warning">
-    ⚠ Meet Needs Attention — Missing Judges: {{ meet_missing_judges }}, Missing KCTs: {{ meet_missing_kcts }}
-</div>
-{% else %}
-<div class="summary-bar summary-success">
-    ✔ All Clear — All divisions complete
-</div>
-{% endif %}
 
 <h2>Divisions</h2>
 
-{% for d in division_data %}
-<div class="division-card"
-     data-url="{% url 'tabulator_verify' meet.id d.division %}"
-     onclick="goToDivision(this)">
+<div class="division-list">
 
-    <h2>
-        {{ d.division }}
-        {% if d.status == "success" %}
-            <span class="badge badge-success">OK</span>
-        {% elif d.status == "warning" %}
-            <span class="badge badge-warning">Needs Attention</span>
-        {% else %}
-            <span class="badge badge-danger">Issues</span>
+    {% for d in division_data %}
+    <div class="division-card"
+         data-url="{% url 'tabulation:tabulator_verify' meet.id d.division %}"
+         onclick="goToDivision(this)">
+
+        <h2>
+            {{ d.division }}
+            {% if d.status == "success" %}
+                <span class="badge badge-success">OK</span>
+            {% elif d.status == "warning" %}
+                <span class="badge badge-warning">Needs Attention</span>
+            {% else %}
+                <span class="badge badge-danger">Issues</span>
+            {% endif %}
+        </h2>
+
+        <p>{{ d.entries }} entries</p>
+
+        <!-- DEBUG judge_progress="{{ d.judge_progress }}" kct_progress="{{ d.kct_progress }}" division="{{ d.division }}" -->
+
+        <div class="progress-section">
+            <label>Judge Sheets</label>
+            <div class="progress">
+                <div class="progress-bar bg-info"
+                     role="progressbar"
+                     style="width: {{ d.judge_progress }}%;"
+                     aria-valuenow="{{ d.judge_progress }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                    {{ d.judge_progress }}%
+                </div>
+            </div>
+        </div>
+
+        <!-- DEBUG judge_progress="{{ d.judge_progress }}" kct_progress="{{ d.kct_progress }}" division="{{ d.division }}" -->
+
+        <div class="progress-section">
+            <label>KCT Entries</label>
+            <div class="progress">
+                <div class="progress-bar bg-warning"
+                     role="progressbar"
+                     style="width: {{ d.kct_progress }}%;"
+                     aria-valuenow="{{ d.kct_progress }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                    {{ d.kct_progress }}%
+                </div>
+            </div>
+        </div>
+
+        {% if d.conflicts > 0 %}
+        <p class="text-danger">
+            {{ d.conflicts }} KCT conflicts detected
+        </p>
         {% endif %}
-    </h2>
 
-    <p><strong>Entries:</strong> {{ d.entries }}</p>
-
-    <p><strong>Judge Sheets:</strong> {{ d.judge_progress }}%</p>
-    <div class="progress-bar-container">
-        <div class="progress-bar 
-            {% if d.judge_progress == 100 %}progress-green
-            {% elif d.judge_progress >= 60 %}progress-yellow
-            {% else %}progress-red{% endif %}"
-            style="width: {{ d.judge_progress }}%;">
-        </div>
     </div>
+    {% endfor %}
 
-    <p><strong>KCT Entries:</strong> {{ d.kct_progress }}%</p>
-    <div class="progress-bar-container">
-        <div class="progress-bar 
-            {% if d.kct_progress == 100 %}progress-green
-            {% elif d.kct_progress >= 60 %}progress-yellow
-            {% else %}progress-red{% endif %}"
-            style="width: {{ d.kct_progress }}%;">
-        </div>
-    </div>
-
-    <p><strong>Conflicts:</strong> {{ d.conflicts }}</p>
 </div>
-{% endfor %}
 
 <script>
-setInterval(() => {
-    location.reload();
-}, 15000);
-
 function goToDivision(el) {
-    window.location.href = el.getAttribute("data-url");
+    const url = el.getAttribute("data-url").trim()
+    if (url) {
+        window.location.href = url
+    }
 }
 </script>
+
+<style>
+.division-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.division-card {
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #fafafa;
+    transition: box-shadow 0.2s ease;
+}
+
+.division-card:hover {
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+.progress-section {
+    margin-top: 10px;
+}
+
+.summary-bar {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.summary-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.summary-success {
+    background: #d4edda;
+    color: #155724;
+}
+</style>
 
 {% endblock %}

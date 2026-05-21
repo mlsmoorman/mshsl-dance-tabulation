@@ -5,8 +5,11 @@ class KCTEntry(models.Model):
     team_entry = models.OneToOneField(
         TeamEntry,
         on_delete=models.CASCADE,
-        related_name="kct_entry"
+        related_name="kct_entries"
     )
+
+    # Which KCT submitted this entry (1, 2, or more)
+    kct_number = models.PositiveSmallIntegerField()
 
     num_competitors = models.PositiveIntegerField(null=True, blank=True)
     
@@ -24,5 +27,10 @@ class KCTEntry(models.Model):
     falls_observed = models.BooleanField(default=False)
     dangerous_move_observed = models.BooleanField(default=False)
 
+    class Meta:
+        unique_together = ("team_entry", "kct_number")
+
     def __str__(self):
         return f"KCT Entry for {self.team_entry}"
+
+

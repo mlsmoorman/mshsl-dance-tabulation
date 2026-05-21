@@ -49,7 +49,7 @@ def meet_overview(request, meet_id):
         kcts = KCTEntry.objects.filter(team_entry__in=entries)
         kct_by_entry = defaultdict(dict)
         for k in kcts:
-            kct_by_entry[k.team_entry_id][k.kct_id] = k
+            kct_by_entry[k.team_entry_id][k.kct_number] = k
 
         missing_judges = 0
         missing_kcts = 0
@@ -68,8 +68,8 @@ def meet_overview(request, meet_id):
                     missing_kcts += 1
 
             if len(kct_assignments) >= 2:
-                k1 = entry_kcts.get(kct_assignments[0].kct_id)
-                k2 = entry_kcts.get(kct_assignments[1].kct_id)
+                k1 = entry_kcts.get(1)
+                k2 = entry_kcts.get(2)
                 if k1 and k2 and k1.illegal != k2.illegal:
                     conflicts += 1
 
@@ -80,8 +80,22 @@ def meet_overview(request, meet_id):
         total_judge_slots = entry_count * judge_assignments.count()
         total_kct_slots = entry_count * kct_assignments.count()
 
-        judge_progress = 100 - int((missing_judges / total_judge_slots) * 100) if total_judge_slots else 100
-        kct_progress = 100 - int((missing_kcts / total_kct_slots) * 100) if total_kct_slots else 100
+        # Judge progress
+        if total_judge_slots > 0:
+            judge_progress = round(100 - ((missing_judges / total_judge_slots) * 100))
+        else:
+            judge_progress = 100
+
+        # KCT progress
+        if total_kct_slots > 0:
+            kct_progress = round(100 - ((missing_kcts / total_kct_slots) * 100))
+        else:
+            kct_progress = 100
+
+        # Clamp values to 0–100
+        judge_progress = max(0, min(100, judge_progress))
+        kct_progress = max(0, min(100, kct_progress))
+
 
         if conflicts > 0:
             status = "danger"

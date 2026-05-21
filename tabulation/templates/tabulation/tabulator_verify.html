@@ -142,7 +142,7 @@
 
             {# ===================== KCT ENTRIES MISSING ===================== #}
             {% for k in kct_numbers %}
-              {% if row.kct_entries.k %}
+              {% if row.kct_entries.kct_number == k %}
                   <td class="ok">✓</td>
               {% else %}
                   <td class="missing" title="KCT {{ k }} has not submitted an entry">Missing</td>

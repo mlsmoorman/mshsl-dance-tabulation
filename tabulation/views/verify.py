@@ -67,7 +67,7 @@ def tabulator_verify(request, meet_id, division):
     kct_entries = (
         KCTEntry.objects
         .filter(team_entry__meet=meet, team_entry__division=division)
-        .select_related("kct", "team_entry")
+        .select_related("team_entry")
     )
 
     kct_by_entry = {}
