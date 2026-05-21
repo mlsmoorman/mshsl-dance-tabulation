@@ -1,67 +1,97 @@
-<h1>Tabulator Verification – {{ meet.name }}</h1>
+{% extends "base.html" %}
+{% load static %}
 
-<table class="table table-bordered">
-  <thead>
-    <tr>
-      <th>Order</th>
-      <th>Team</th>
-      <th>Judge Sheets</th>
-      <th>KCT Data</th>
-      <th>Issues</th>
-      <th>DQ</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in verification %}
-      <tr>
-        <td>{{ item.entry.performance_order }}</td>
-        <td>
-          {{ item.entry.team.school.name }} {{ item.entry.team.name }}<br>
-          <small>{{ item.entry.get_division_display }} – {{ item.entry.team.level }}</small>
-        </td>
-        <td>
-          {% if item.missing_judge_sheets %}
-            <span class="text-danger fw-bold">
-              {{ item.judges_submitted }}/{{ item.required_judges }} (Missing)
-            </span>
-          {% else %}
-            <span class="text-success fw-bold">
-              {{ item.judges_submitted }}/{{ item.required_judges }}
-            </span>
-          {% endif %}
-        </td>
-        <td>
-          {% if item.kct_missing %}
-            <span class="text-danger fw-bold">Missing</span>
-          {% else %}
-            <span class="text-success">OK</span>
-          {% endif %}
-        </td>
-        <td>
-          {% if item.unresolved_issues %}
-            <span class="text-danger fw-bold">
-              {{ item.unresolved_issues.count }} unresolved
-            </span>
-          {% else %}
-            <span class="text-success">None</span>
-          {% endif %}
-        </td>
-        <td>
-          {% if item.dq %}
-            <span class="badge bg-danger">DQ</span>
-          {% else %}
-            <span class="text-success">No</span>
-          {% endif %}
-        </td>
-        <td>
-          {% if item.missing_judge_sheets or item.kct_missing or item.unresolved_issues %}
-            <span class="text-danger fw-bold">Not Ready</span>
-          {% else %}
-            <span class="text-success fw-bold">Ready</span>
-          {% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-  </tbody>
+{% block content %}
+<h1>Verify – {{ meet.name }} ({{ division }})</h1>
+
+<style>
+    table.verify-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 15px;
+    }
+    table.verify-table th,
+    table.verify-table td {
+        border: 1px solid #ccc;
+        padding: 6px 8px;
+        text-align: center;
+    }
+    table.verify-table th {
+        background: #f0f0f0;
+        font-weight: bold;
+    }
+    .missing {
+        background: #ffcccc;
+        color: #900;
+        font-weight: bold;
+    }
+    .ok {
+        background: #ccffcc;
+        color: #060;
+    }
+    .conflict {
+        background: #ffe680;
+        color: #a60;
+        font-weight: bold;
+    }
+    .entry-name {
+        text-align: left;
+        font-weight: bold;
+    }
+</style>
+
+<table class="verify-table">
+    <thead>
+        <tr>
+            <th>Team</th>
+            <th>Routine</th>
+
+            {% for j in judge_numbers %}
+                <th>Judge {{ j }}</th>
+            {% endfor %}
+
+            {% for k in kct_numbers %}
+                <th>KCT {{ k }}</th>
+            {% endfor %}
+
+            <th>Conflicts</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td class="entry-name">{{ row.entry.team.name }}</td>
+            <td>{{ row.entry.routine_name }}</td>
+
+            {# --- Judge Sheets --- #}
+            {% for j in judge_numbers %}
+                {% if row.judge_sheets.j %}
+                    <td class="ok">✓</td>
+                {% else %}
+                    <td class="missing">Missing</td>
+                {% endif %}
+            {% endfor %}
+
+            {# --- KCT Entries --- #}
+            {% for k in kct_numbers %}
+                {% if row.kct_entries.k %}
+                    <td class="ok">✓</td>
+                {% else %}
+                    <td class="missing">Missing</td>
+                {% endif %}
+            {% endfor %}
+
+            {# --- Conflict Column --- #}
+            {% if row.kct_conflicts %}
+                <td class="conflict">KCT Mismatch</td>
+            {% else %}
+                <td class="ok">OK</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+{% endblock %}
