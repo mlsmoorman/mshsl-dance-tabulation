@@ -128,8 +128,11 @@
 
             <td class="entry-name">{{ row.entry.team.name }}</td>
             <td>{{ row.entry.routine_name }}</td>
-
+           
+            {# ===================== ISSUES W/ ADDED DESCRIPTION ON HOVER ===================== #}
             {% for j in judge_numbers %}
+
+              {# ===================== JUDGE ENTRIES MISSING ===================== #}
               {% if row.judge_sheets.j %}
                   <td class="ok">✓</td>
               {% else %}
@@ -137,6 +140,7 @@
               {% endif %}
             {% endfor %}
 
+            {# ===================== KCT ENTRIES MISSING ===================== #}
             {% for k in kct_numbers %}
               {% if row.kct_entries.k %}
                   <td class="ok">✓</td>
@@ -145,6 +149,7 @@
               {% endif %}
             {% endfor %}
 
+            {# ===================== KCT ISSUES MISMATCH ===================== #}
             {% if row.kct_conflicts %}
                 <td class="conflict" title="KCTs disagree on illegal skills">KCT Mismatch</td>
             {% else %}
@@ -201,6 +206,24 @@ function toggleIssues() {
 function openRoutine(entryId) {
     window.location.href = "/tabulation/entry/" + entryId + "/";
 }
+
+setInterval(() => {
+    location.reload();
+}, 10000);
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "j") {
+        jumpToFirstIssue();
+    }
+    if (e.key === "c") {
+        exportCSV();
+    }
+    if (e.key === "i") {
+        toggleIssues();
+    }
+});
+
+
 </script>
 
 {% endblock %}
