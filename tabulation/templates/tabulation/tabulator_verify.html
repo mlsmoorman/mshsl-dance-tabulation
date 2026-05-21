@@ -130,26 +130,27 @@
             <td>{{ row.entry.routine_name }}</td>
 
             {% for j in judge_numbers %}
-                {% if row.judge_sheets.j %}
-                    <td class="ok">✓</td>
-                {% else %}
-                    <td class="missing">Missing</td>
-                {% endif %}
+              {% if row.judge_sheets.j %}
+                  <td class="ok">✓</td>
+              {% else %}
+                  <td class="missing" title="Judge {{ j }} has not submitted a sheet">Missing</td>
+              {% endif %}
             {% endfor %}
 
             {% for k in kct_numbers %}
-                {% if row.kct_entries.k %}
-                    <td class="ok">✓</td>
-                {% else %}
-                    <td class="missing">Missing</td>
-                {% endif %}
+              {% if row.kct_entries.k %}
+                  <td class="ok">✓</td>
+              {% else %}
+                  <td class="missing" title="KCT {{ k }} has not submitted an entry">Missing</td>
+              {% endif %}
             {% endfor %}
 
             {% if row.kct_conflicts %}
-                <td class="conflict">KCT Mismatch</td>
+                <td class="conflict" title="KCTs disagree on illegal skills">KCT Mismatch</td>
             {% else %}
                 <td class="ok">OK</td>
             {% endif %}
+
         </tr>
         {% endfor %}
     </tbody>
