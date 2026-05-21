@@ -24,15 +24,16 @@
 
 <h2>Divisions</h2>
 
-<div class="division-list">
+<div class="division-grid">
 
     {% for d in division_data %}
     <div class="division-card"
          data-url="{% url 'tabulation:tabulator_verify' meet.id d.division %}"
          onclick="goToDivision(this)">
 
-        <h2>
-            {{ d.division }}
+        <div class="division-header">
+            <h3>{{ d.division }}</h3>
+
             {% if d.status == "success" %}
                 <span class="badge badge-success">OK</span>
             {% elif d.status == "warning" %}
@@ -40,47 +41,39 @@
             {% else %}
                 <span class="badge badge-danger">Issues</span>
             {% endif %}
-        </h2>
+        </div>
 
-        <p>{{ d.entries }} entries</p>
-
-        <!-- DEBUG judge_progress="{{ d.judge_progress }}" kct_progress="{{ d.kct_progress }}" division="{{ d.division }}" -->
+        <p class="entry-count">{{ d.entries }} entries</p>
 
         <div class="progress-section">
             <label>Judge Sheets</label>
             <div class="progress">
                 <div class="progress-bar bg-info"
-                     role="progressbar"
-                     style="width: {{ d.judge_progress }}%;"
-                     aria-valuenow="{{ d.judge_progress }}"
-                     aria-valuemin="0"
-                     aria-valuemax="100">
+                     style="width: {{ d.judge_progress }}%;">
                     {{ d.judge_progress }}%
                 </div>
             </div>
         </div>
 
-        <!-- DEBUG judge_progress="{{ d.judge_progress }}" kct_progress="{{ d.kct_progress }}" division="{{ d.division }}" -->
-
         <div class="progress-section">
             <label>KCT Entries</label>
             <div class="progress">
                 <div class="progress-bar bg-warning"
-                     role="progressbar"
-                     style="width: {{ d.kct_progress }}%;"
-                     aria-valuenow="{{ d.kct_progress }}"
-                     aria-valuemin="0"
-                     aria-valuemax="100">
+                     style="width: {{ d.kct_progress }}%;">
                     {{ d.kct_progress }}%
                 </div>
             </div>
         </div>
 
         {% if d.conflicts > 0 %}
-        <p class="text-danger">
+        <p class="conflict-text">
             {{ d.conflicts }} KCT conflicts detected
         </p>
         {% endif %}
+
+        <a class="verify-button">
+            Open Verification
+        </a>
 
     </div>
     {% endfor %}
@@ -90,49 +83,101 @@
 <script>
 function goToDivision(el) {
     const url = el.getAttribute("data-url").trim()
-    if (url) {
-        window.location.href = url
-    }
+    if (url) window.location.href = url
 }
 </script>
 
 <style>
-.division-list {
+/* ===== Grid Layout ===== */
+.division-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
 
+/* ===== Cards ===== */
 .division-card {
-    border: 1px solid #ccc;
-    padding: 20px;
-    border-radius: 8px;
-    cursor: pointer;
     background: #fafafa;
-    transition: box-shadow 0.2s ease;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: box-shadow .2s ease, transform .2s ease;
 }
-
 .division-card:hover {
-    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    box-shadow: 0 0 12px rgba(0,0,0,.15);
+    transform: translateY(-3px);
 }
 
+/* ===== Header ===== */
+.division-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.division-header h3 {
+    margin: 0;
+}
+
+/* ===== Entry Count ===== */
+.entry-count {
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+/* ===== Progress Sections ===== */
 .progress-section {
-    margin-top: 10px;
+    margin-top: 12px;
+}
+.progress {
+    height: 20px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.progress-bar {
+    height: 100%;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* ===== Conflict Text ===== */
+.conflict-text {
+    margin-top: 10px;
+    color: #b30000;
+    font-weight: bold;
+}
+
+/* ===== Verify Button ===== */
+.verify-button {
+    display: block;
+    margin-top: 15px;
+    padding: 10px;
+    text-align: center;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+}
+.verify-button:hover {
+    background: #0056b3;
+}
+
+/* ===== Summary Bar ===== */
 .summary-bar {
     padding: 15px;
     border-radius: 6px;
     margin-bottom: 20px;
     font-weight: bold;
 }
-
 .summary-danger {
     background: #f8d7da;
     color: #721c24;
 }
-
 .summary-success {
     background: #d4edda;
     color: #155724;
