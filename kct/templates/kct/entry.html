@@ -1,54 +1,146 @@
-<h2>KCT Entry — {{ entry.team.name }} ({{ entry.division }})</h2>
+{% extends "base.html" %}
+{% block content %}
 
-<form method="POST" action="{% url 'save_kct' entry.id %}">
-  {% csrf_token %}
+<h1>KCT Entry — {{ entry.team.name }}</h1>
+<h3 class="division-label">{{ entry.get_division_display }}</h3>
 
-  <h4>Competitors</h4>
-  <input type="number" name="num_competitors"
-         value="{{ kct.num_competitors }}"
-         class="form-control">
+<form method="POST" action="{% url 'save_kct' entry.id %}" class="kct-form">
+    {% csrf_token %}
 
-  <h4>Routine Time (seconds)</h4>
-  <input type="number" name="routine_time_seconds"
-         value="{{ kct.routine_time_seconds }}"
-         class="form-control">
+    <!-- ===================== COMPETITORS ===================== -->
+    <div class="section">
+        <h3>Competitors</h3>
+        <div class="input-card">
+            <label>Number of Competitors</label>
+            <input type="number" name="num_competitors"
+                   value="{{ kct.num_competitors }}"
+                   min="1" class="form-control">
+        </div>
+    </div>
 
-  {% if entry.division == "KICK" %}
-    <h4>Kick Count</h4>
-    <input type="number" name="kick_count"
-           value="{{ kct.kick_count }}"
-           class="form-control">
-  {% endif %}
+    <!-- ===================== ROUTINE TIME ===================== -->
+    <div class="section">
+        <h3>Routine Time</h3>
+        <div class="input-card">
+            <label>Time (seconds)</label>
+            <input type="number" name="routine_time_seconds"
+                   value="{{ kct.routine_time_seconds }}"
+                   min="1" class="form-control">
+        </div>
+    </div>
 
-  {% if entry.division == "JAZZ" %}
-    <h4>Jazz Skills</h4>
+    <!-- ===================== KICK DIVISION ===================== -->
+    {% if entry.division == "KICK" %}
+    <div class="section">
+        <h3>Kick Count</h3>
+        <div class="input-card">
+            <label>Total Kicks</label>
+            <input type="number" name="kick_count"
+                   value="{{ kct.kick_count }}"
+                   min="0" class="form-control">
+        </div>
+    </div>
+    {% endif %}
 
-    <label>
-      <input type="checkbox" name="jazz_team_turn_performed"
-             {% if kct.jazz_team_turn_performed %}checked{% endif %}>
-      Turn Performed
-    </label><br>
+    <!-- ===================== JAZZ DIVISION ===================== -->
+    {% if entry.division == "JAZZ" %}
+    <div class="section">
+        <h3>Jazz Skills</h3>
 
-    <label>
-      <input type="checkbox" name="jazz_leap_jump_performed"
-             {% if kct.jazz_leap_jump_performed %}checked{% endif %}>
-      Leap/Jump Performed
-    </label>
-  {% endif %}
+        <div class="checkbox-card">
+            <label>
+                <input type="checkbox" name="jazz_team_turn_performed"
+                       {% if kct.jazz_team_turn_performed %}checked{% endif %}>
+                Turn Performed
+            </label>
+        </div>
 
-  <h4>Observations</h4>
+        <div class="checkbox-card">
+            <label>
+                <input type="checkbox" name="jazz_leap_jump_performed"
+                       {% if kct.jazz_leap_jump_performed %}checked{% endif %}>
+                Leap / Jump Performed
+            </label>
+        </div>
+    </div>
+    {% endif %}
 
-  <label>Falls Observed</label>
-  <input type="number" name="falls_observed"
-         value="{{ kct.falls_observed }}"
-         class="form-control">
+    <!-- ===================== OBSERVATIONS ===================== -->
+    <div class="section">
+        <h3>Observations</h3>
 
-  <label>
-    <input type="checkbox" name="dangerous_move_observed"
-           {% if kct.dangerous_move_observed %}checked{% endif %}>
-    Dangerous Move Observed
-  </label>
+        <div class="input-card">
+            <label>Falls Observed</label>
+            <input type="number" name="falls_observed"
+                   value="{{ kct.falls_observed }}"
+                   min="0" class="form-control">
+        </div>
 
-  <br><br>
-  <button class="btn btn-success">Save KCT</button>
+        <div class="checkbox-card">
+            <label>
+                <input type="checkbox" name="dangerous_move_observed"
+                       {% if kct.dangerous_move_observed %}checked{% endif %}>
+                Dangerous Move Observed
+            </label>
+        </div>
+    </div>
+
+    <button class="save-button">Save KCT Entry</button>
 </form>
+
+<style>
+/* ===== Header ===== */
+.division-label {
+    color: #555;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+/* ===== Form Layout ===== */
+.kct-form {
+    max-width: 700px;
+}
+
+/* ===== Sections ===== */
+.section {
+    margin-bottom: 25px;
+}
+.section h3 {
+    margin-bottom: 10px;
+}
+
+/* ===== Cards ===== */
+.input-card,
+.checkbox-card {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 12px;
+}
+.input-card label,
+.checkbox-card label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+}
+.checkbox-card input {
+    margin-right: 8px;
+}
+
+/* ===== Save Button ===== */
+.save-button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: #28a745;
+    color: white;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+}
+.save-button:hover {
+    background: #218838;
+}
+</style>
+
+{% endblock %}
