@@ -1,12 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
 <h1>Judge Dashboard</h1>
 <h2>Select Your Meet</h2>
 
-<ul>
+<div class="card-list">
     {% for meet in meets %}
-        <li>
-            <a href="{% url 'judging:judge_dashboard' meet.id %}">
-                {{ meet.name }} — {{ meet.date }}
-            </a>
-        </li>
+    <a class="role-card" href="{% url 'judging:judge_dashboard' meet.id %}">
+        <h3>{{ meet.name }}</h3>
+        <p>{{ meet.date }}</p>
+    </a>
     {% endfor %}
-</ul>
+</div>
+
+<style>
+.card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+.role-card {
+    padding: 20px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #000;
+    transition: box-shadow .2s ease;
+}
+.role-card:hover {
+    box-shadow: 0 0 10px rgba(0,0,0,.15);
+}
+</style>
+{% endblock %}

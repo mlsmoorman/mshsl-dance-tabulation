@@ -1,7 +1,52 @@
-<h1>MSHSL Dance Scoring System</h1>
-<ul>
-  <li><a href="/admin/">Admin</a></li>
-  <li><a href="/tabulator/">Tabulator Dashboard</a></li>
-  <li><a href="/judge/">Judge UI</a></li>
-  <li><a href="/kct/">KCT UI</a></li>
-</ul>
+{% extends "base.html" %}
+
+{% block content %}
+<h1>MSHSL Dance System</h1>
+<h2>Select Your Role</h2>
+
+<div class="role-grid">
+
+    <a class="role-card" href="/admin/">
+        <h3>Admin</h3>
+        <p>Manage meets, teams, assignments</p>
+    </a>
+
+    <a class="role-card" href="/tabulator/">
+        <h3>Tabulator</h3>
+        <p>Verify sheets, resolve issues, finalize results</p>
+    </a>
+
+    <a class="role-card" href="/judging/">
+        <h3>Judge</h3>
+        <p>Enter scores for your assigned meet</p>
+    </a>
+
+    <a class="role-card" href="/kct/">
+        <h3>KCT</h3>
+        <p>Enter KCT evaluations for your meet</p>
+    </a>
+
+</div>
+
+<style>
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+.role-card {
+    padding: 25px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #000;
+    transition: box-shadow .2s ease, transform .2s ease;
+}
+.role-card:hover {
+    box-shadow: 0 0 12px rgba(0,0,0,.15);
+    transform: translateY(-3px);
+}
+</style>
+{% endblock %}

@@ -12,9 +12,8 @@ app_name = "kct"
 urlpatterns = [
     path("", kct_home, name="home"), 
     path("<int:meet_id>/", kct_division_selector, name="division_selector"), 
-    path("meet/<int:meet_id>/", kct_dashboard, name="kct_dashboard"),
+    path("<int:meet_id>/<str:division>/", kct_dashboard, name="kct_dashboard"), 
     path("entry/<int:entry_id>/", kct_entry, name="kct_entry"),
     path("entry/<int:entry_id>/save/", save_kct, name="save_kct"),
     path("entry/<int:entry_id>/dangerous/", report_dangerous_move, name="report_dangerous_move"),
 ]
-
