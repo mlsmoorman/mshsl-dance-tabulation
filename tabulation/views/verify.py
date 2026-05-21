@@ -114,10 +114,21 @@ def tabulator_verify(request, meet_id, division):
             "kct_conflicts": kct_conflicts,
         })
 
+    # --- Summary counts ---
+    total_missing_judges = sum(len(r["missing_judges"]) for r in rows)
+    total_missing_kcts = sum(len(r["missing_kcts"]) for r in rows)
+    total_conflicts = sum(1 for r in rows if r["kct_conflicts"])
+    all_clear = (total_missing_judges == 0 and total_missing_kcts == 0 and total_conflicts == 0)
+
+
     return render(request, "tabulation/verify.html", {
         "meet": meet,
         "division": division,
         "judge_numbers": judge_numbers,
         "kct_numbers": kct_numbers,
         "rows": rows,
+        "total_missing_judges": total_missing_judges,
+        "total_missing_kcts": total_missing_kcts,
+        "total_conflicts": total_conflicts,
+        "all_clear": all_clear
     })

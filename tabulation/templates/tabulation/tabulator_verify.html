@@ -4,6 +4,22 @@
 {% block content %}
 <h1>Verify – {{ meet.name }} ({{ division }})</h1>
 
+{% if all_clear %}
+<div style="background:#ccffcc; padding:15px; border:2px solid #060; margin-bottom:20px; font-size:18px; font-weight:bold; text-align:center;">
+    ✔ All Clear — All judges and KCTs have submitted their sheets
+</div>
+{% else %}
+<div style="background:#ffe6e6; padding:15px; border:2px solid #900; margin-bottom:20px; font-size:18px; font-weight:bold;">
+    <div>⚠ Verification Issues Detected</div>
+    <ul style="margin-top:10px; font-size:16px;">
+        <li>Missing Judge Sheets: <strong>{{ total_missing_judges }}</strong></li>
+        <li>Missing KCT Entries: <strong>{{ total_missing_kcts }}</strong></li>
+        <li>KCT Conflicts: <strong>{{ total_conflicts }}</strong></li>
+    </ul>
+</div>
+{% endif %}
+
+
 <style>
     table.verify-table {
         width: 100%;
