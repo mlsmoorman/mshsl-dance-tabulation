@@ -4,22 +4,6 @@
 {% block content %}
 <h1>Verify – {{ meet.name }} ({{ division }})</h1>
 
-{% if all_clear %}
-<div style="background:#ccffcc; padding:15px; border:2px solid #060; margin-bottom:20px; font-size:18px; font-weight:bold; text-align:center;">
-    ✔ All Clear — All judges and KCTs have submitted their sheets
-</div>
-{% else %}
-<div style="background:#ffe6e6; padding:15px; border:2px solid #900; margin-bottom:20px; font-size:18px; font-weight:bold;">
-    <div>⚠ Verification Issues Detected</div>
-    <ul style="margin-top:10px; font-size:16px;">
-        <li>Missing Judge Sheets: <strong>{{ total_missing_judges }}</strong></li>
-        <li>Missing KCT Entries: <strong>{{ total_missing_kcts }}</strong></li>
-        <li>KCT Conflicts: <strong>{{ total_conflicts }}</strong></li>
-    </ul>
-</div>
-{% endif %}
-
-
 <style>
     table.verify-table {
         width: 100%;
@@ -36,6 +20,12 @@
     table.verify-table th {
         background: #f0f0f0;
         font-weight: bold;
+    }
+    thead th {
+        position: sticky;
+        top: 0;
+        background: #f0f0f0;
+        z-index: 5;
     }
     .missing {
         background: #ffcccc;
@@ -57,6 +47,44 @@
     }
 </style>
 
+{# ===================== SUMMARY BAR ===================== #}
+{% if all_clear %}
+<div style="background:#ccffcc; padding:15px; border:2px solid #060; margin-bottom:20px; font-size:18px; font-weight:bold; text-align:center;">
+    ✔ All Clear — All judges and KCTs have submitted their sheets
+</div>
+{% else %}
+<div style="background:#ffe6e6; padding:15px; border:2px solid #900; margin-bottom:20px; font-size:18px; font-weight:bold;">
+    <div>⚠ Verification Issues Detected</div>
+    <ul style="margin-top:10px; font-size:16px;">
+        <li>Missing Judge Sheets: <strong>{{ total_missing_judges }}</strong></li>
+        <li>Missing KCT Entries: <strong>{{ total_missing_kcts }}</strong></li>
+        <li>KCT Conflicts: <strong>{{ total_conflicts }}</strong></li>
+    </ul>
+</div>
+{% endif %}
+
+{# ===================== LEGEND ===================== #}
+<div style="margin-bottom: 15px; font-size: 14px;">
+    <strong>Legend:</strong>
+    <span style="background:#ccffcc; padding:3px 6px; border:1px solid #060;">OK</span>
+    <span style="background:#ffcccc; padding:3px 6px; border:1px solid #900;">Missing</span>
+    <span style="background:#ffe680; padding:3px 6px; border:1px solid #a60;">KCT Conflict</span>
+</div>
+
+{# ===================== ACTION BUTTONS ===================== #}
+<div style="margin-bottom: 15px;">
+    <button onclick="jumpToFirstIssue()"
+            style="padding:8px 14px; background:#ffcc00; border:1px solid #aa8800; cursor:pointer; font-weight:bold;">
+        Jump to First Issue
+    </button>
+
+    <button onclick="exportCSV()"
+            style="padding:8px 14px; background:#0099ff; border:1px solid #0066aa; cursor:pointer; font-weight:bold; color:white;">
+        Export Issues CSV
+    </button>
+</div>
+
+{# ===================== MAIN TABLE ===================== #}
 <table class="verify-table">
     <thead>
         <tr>
@@ -77,7 +105,14 @@
 
     <tbody>
         {% for row in rows %}
-        <tr>
+        <tr data-entry-row="true"
+            data-has-issue="{% if row.missing_judges or row.missing_kcts or row.kct_conflicts %}true{% else %}false{% endif %}"
+            data-team="{{ row.entry.team.name }}"
+            data-routine="{{ row.entry.routine_name }}"
+            data-missing-judges="{{ row.missing_judges|join:', ' }}"
+            data-missing-kcts="{{ row.missing_kcts|join:', ' }}"
+            data-conflict="{{ row.kct_conflicts }}">
+
             <td class="entry-name">{{ row.entry.team.name }}</td>
             <td>{{ row.entry.routine_name }}</td>
 
@@ -109,5 +144,39 @@
         {% endfor %}
     </tbody>
 </table>
+
+{# ===================== JAVASCRIPT ===================== #}
+<script>
+function jumpToFirstIssue() {
+    const rows = document.querySelectorAll("tr[data-has-issue='true']");
+    if (rows.length > 0) {
+        rows[0].scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+        alert("No issues found");
+    }
+}
+
+function exportCSV() {
+    let csv = "Team,Routine,Missing Judges,Missing KCTs,KCT Conflict\n";
+
+    document.querySelectorAll("tr[data-entry-row='true']").forEach(row => {
+        const team = row.getAttribute("data-team");
+        const routine = row.getAttribute("data-routine");
+        const missingJudges = row.getAttribute("data-missing-judges");
+        const missingKcts = row.getAttribute("data-missing-kcts");
+        const conflict = row.getAttribute("data-conflict");
+
+        csv += `${team},${routine},${missingJudges},${missingKcts},${conflict}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "verify_report.csv";
+    a.click();
+}
+</script>
 
 {% endblock %}
