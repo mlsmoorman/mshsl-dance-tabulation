@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from core.models import Team
 from meets.models.meet import Meet
-from meets.models.entry import TeamEntry
 from meets.forms import TeamEntryForm
 
 def add_entry(request, meet_id, team_id):

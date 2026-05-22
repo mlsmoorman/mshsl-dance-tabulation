@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from .meet import Meet
+from .choices import Division
 
 
 # Judge Assignment
@@ -19,8 +20,10 @@ class JudgeAssignment(models.Model):
 # KCT Assignment
 class KCTAssignment(models.Model):
     meet = models.ForeignKey(Meet, on_delete=models.CASCADE)
+    division = models.CharField(max_length=10, choices=Division.choices)
     kct = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     kct_number = models.PositiveSmallIntegerField()
+
 
     class Meta:
         unique_together = ("meet", "kct_number")

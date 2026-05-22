@@ -1,71 +1,144 @@
 {% extends "base.html" %}
+{% load get_item %}
 
 {% block content %}
 
-<h1>KCT — {{ meet.name }}</h1>
-<h2>Select Division</h2>
-
 <div class="division-grid">
-
     {% for division in divisions %}
-    <a class="division-card"
-       href="{% url 'kct:kct_dashboard' meet.id division %}">
+        <div class="division-card">
 
-        <h3>{{ division }}</h3>
+            <div class="division-card-header">
+                <div class="division-icon">
+                    {% if division == "JAZZ" %}
+                        🎵
+                    {% elif division == "KICK" %}
+                        🦵
+                    {% else %}
+                        📁
+                    {% endif %}
+                </div>
 
-    </a>
+                <h2 class="division-title">{{ division }}</h2>
+            </div>
+
+            <div class="division-stats">
+                <span class="badge badge-count">
+                    {{ division_counts|get_item:division }} Teams
+                </span>
+
+                <span class="badge badge-kct">
+                    {{ kct_assigned_count }} KCTs Assigned
+                </span>
+
+                <span class="badge badge-pending">
+                    {{ pending_counts|get_item:division }} Pending
+                </span>
+            </div>
+
+            <div class="division-card-actions">
+                <a href="{% url 'kct:kct_dashboard' meet.id division %}" class="btn-primary">
+                    Open Division
+                </a>
+            </div>
+
+        </div>
     {% endfor %}
-
 </div>
 
+
 <style>
-/* ===== Grid Layout ===== */
+/* Grid layout */
 .division-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+    gap: 24px;
     margin-top: 20px;
 }
 
-/* ===== Cards ===== */
+/* Card container */
 .division-card {
-    display: block;
-    padding: 25px;
-    border-radius: 10px;
-    background: #fafafa;
-    border: 1px solid #ddd;
-    text-decoration: none;
-    color: #000;
-    transition: box-shadow .2s ease, transform .2s ease;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .division-card:hover {
-    box-shadow: 0 0 12px rgba(0,0,0,.15);
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
 }
 
-/* ===== Division Chip ===== */
-.division-chip {
-    display: inline-block;
-    margin-top: 10px;
-    background: #e3f2fd;
-    color: #0d47a1;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 13px;
+/* Header */
+.division-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 
-/* ===== Button ===== */
-.open-button {
+.division-icon {
+    font-size: 2rem;
+}
+
+.division-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0;
+    color: #333;
+}
+
+/* Stats badges */
+.division-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.badge {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
     display: inline-block;
-    margin-top: 15px;
-    padding: 8px 14px;
-    background: #007bff;
+}
+
+.badge-count {
+    background: #e8f0fe;
+    color: #1a73e8;
+}
+
+.badge-kct {
+    background: #e6f4ea;
+    color: #188038;
+}
+
+.badge-pending {
+    background: #fce8e6;
+    color: #d93025;
+}
+
+/* Button */
+.btn-primary {
+    background-color: #0057b8;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
     color: white;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 0.15s ease;
 }
+
+.btn-primary:hover {
+    background-color: #004a9c;
+}	
 </style>
 
 {% endblock %}

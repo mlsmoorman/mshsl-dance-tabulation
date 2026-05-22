@@ -1,26 +1,23 @@
+# kct_dashboard.py
+
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from meets.models.meet import Meet
-from meets.models.assignments import KCTAssignment
 from meets.models import TeamEntry
-from kct.models import KCTEntry
+from core.utils import get_kct_data
 
 
 @login_required
 def kct_dashboard(request, meet_id, division):
     meet = get_object_or_404(Meet, id=meet_id)
 
-    # Load KCT assignments in order
-    assignments = (
-        KCTAssignment.objects
-        .filter(meet=meet)
-        .select_related("kct")
-        .order_by("kct_number")
-    )
+    # Load shared KCT data
+    kct = get_kct_data(meet, division)
 
-    kct_map = {a.kct_id: a.kct_number for a in assignments}
-    kct_numbers = [a.kct_number for a in assignments]
+    assignments = kct["assignments"]
+    kct_numbers = kct["kct_numbers"]
+    kct_by_entry = kct["kct_by_entry"]
 
     # All entries in this division
     entries = (
@@ -29,25 +26,6 @@ def kct_dashboard(request, meet_id, division):
         .select_related("team")
         .order_by("performance_order")
     )
-
-    # All KCT entries
-    kct_entries = (
-        KCTEntry.objects
-        .filter(team_entry__meet=meet, team_entry__division=division)
-        .select_related("team_entry", "team_entry__team")
-    )
-
-    # Group by entry → kct_number → KCTEntry
-    kct_by_entry = {}
-
-    for ke in kct_entries:
-        entry_id = ke.team_entry_id
-        kct_number = kct_map.get(ke.kct_id)
-
-        if entry_id not in kct_by_entry:
-            kct_by_entry[entry_id] = {}
-
-        kct_by_entry[entry_id][kct_number] = ke
 
     # Build rows for template
     rows = []
