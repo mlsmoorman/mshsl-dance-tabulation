@@ -34,7 +34,7 @@ def kct_dashboard(request, meet_id, division):
     kct_entries = (
         KCTEntry.objects
         .filter(team_entry__meet=meet, team_entry__division=division)
-        .select_related("kct", "team_entry")
+        .select_related("team_entry", "team_entry__team")
     )
 
     # Group by entry → kct_number → KCTEntry

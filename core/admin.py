@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import School, Team, Role, User, RuleSet
+from meets.models.entry import TeamEntry
 
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~ RULES ADMIN ~.~.~.~.~.~.~.~.~.~.~.~.~#
@@ -39,5 +40,13 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ["username", "first_name", "last_name", "email"]
 
 
+#~.~.~.~.~.~.~.~.~.~.~.~.~ TEAM ENTRY ADMIN ~.~.~.~.~.~.~.~.~.~.~.~.~#
+@admin.register(TeamEntry)
+class TeamEntryAdmin(admin.ModelAdmin):
+    list_display = ("meet", "team", "division", "performance_order")
+    list_filter = ("meet", "division")
+    search_fields = ("team__name",)
+
 
 #~.~.~.~.~.~.~.~.~.~.~.~.~  ~.~.~.~.~.~.~.~.~.~.~.~.~#
+
